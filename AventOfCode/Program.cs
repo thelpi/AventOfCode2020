@@ -34,11 +34,11 @@ namespace AventOfCode
 
             if (partOne)
             {
-                var wind = Wind.east;
+                var wind = 0;
 
                 foreach (var k in datas)
                 {
-                    Wind nextWind = wind;
+                    var nextWind = wind;
                     switch (k.Item1)
                     {
                         case 'N':
@@ -59,17 +59,17 @@ namespace AventOfCode
                             {
                                 switch (wind)
                                 {
-                                    case Wind.east:
-                                        nextWind = Wind.north;
+                                    case 0:
+                                        nextWind = 3;
                                         break;
-                                    case Wind.north:
-                                        nextWind = Wind.west;
+                                    case 3:
+                                        nextWind = 2;
                                         break;
-                                    case Wind.south:
-                                        nextWind = Wind.east;
+                                    case 1:
+                                        nextWind = 0;
                                         break;
-                                    case Wind.west:
-                                        nextWind = Wind.south;
+                                    case 2:
+                                        nextWind = 1;
                                         break;
                                 }
                                 wind = nextWind;
@@ -81,17 +81,17 @@ namespace AventOfCode
                             {
                                 switch (wind)
                                 {
-                                    case Wind.east:
-                                        nextWind = Wind.south;
+                                    case 0:
+                                        nextWind = 1;
                                         break;
-                                    case Wind.north:
-                                        nextWind = Wind.east;
+                                    case 3:
+                                        nextWind = 0;
                                         break;
-                                    case Wind.south:
-                                        nextWind = Wind.west;
+                                    case 1:
+                                        nextWind = 2;
                                         break;
-                                    case Wind.west:
-                                        nextWind = Wind.north;
+                                    case 2:
+                                        nextWind = 3;
                                         break;
                                 }
                                 wind = nextWind;
@@ -100,16 +100,16 @@ namespace AventOfCode
                         case 'F':
                             switch (wind)
                             {
-                                case Wind.east:
+                                case 0:
                                     east += k.Item2;
                                     break;
-                                case Wind.north:
+                                case 3:
                                     north += k.Item2;
                                     break;
-                                case Wind.south:
+                                case 1:
                                     south += k.Item2;
                                     break;
-                                case Wind.west:
+                                case 2:
                                     west += k.Item2;
                                     break;
                             }
@@ -120,22 +120,22 @@ namespace AventOfCode
             else
             {
                 (int, int) currentPoint = (10, 1);
-                (Wind, Wind) currentPointWind = (Wind.east, Wind.north);
+                (int, int) currentPointWind = (0, 3);
 
                 foreach (var k in datas)
                 {
                     switch (k.Item1)
                     {
                         case 'N':
-                            if (currentPointWind.Item2 == Wind.north)
+                            if (currentPointWind.Item2 == 3)
                             {
                                 currentPoint = (currentPoint.Item1, currentPoint.Item2 + k.Item2);
                             }
-                            else if (currentPointWind.Item2 == Wind.south)
+                            else if (currentPointWind.Item2 == 1)
                             {
                                 currentPoint = (currentPoint.Item1, currentPoint.Item2 - k.Item2);
                             }
-                            else if (currentPointWind.Item1 == Wind.north)
+                            else if (currentPointWind.Item1 == 3)
                             {
                                 currentPoint = (currentPoint.Item1 + k.Item2, currentPoint.Item2);
                             }
@@ -145,15 +145,15 @@ namespace AventOfCode
                             }
                             break;
                         case 'S':
-                            if (currentPointWind.Item2 == Wind.south)
+                            if (currentPointWind.Item2 == 1)
                             {
                                 currentPoint = (currentPoint.Item1, currentPoint.Item2 + k.Item2);
                             }
-                            else if (currentPointWind.Item2 == Wind.north)
+                            else if (currentPointWind.Item2 == 3)
                             {
                                 currentPoint = (currentPoint.Item1, currentPoint.Item2 - k.Item2);
                             }
-                            else if (currentPointWind.Item1 == Wind.south)
+                            else if (currentPointWind.Item1 == 1)
                             {
                                 currentPoint = (currentPoint.Item1 + k.Item2, currentPoint.Item2);
                             }
@@ -163,15 +163,15 @@ namespace AventOfCode
                             }
                             break;
                         case 'E':
-                            if (currentPointWind.Item2 == Wind.east)
+                            if (currentPointWind.Item2 == 0)
                             {
                                 currentPoint = (currentPoint.Item1, currentPoint.Item2 + k.Item2);
                             }
-                            else if (currentPointWind.Item2 == Wind.west)
+                            else if (currentPointWind.Item2 == 2)
                             {
                                 currentPoint = (currentPoint.Item1, currentPoint.Item2 - k.Item2);
                             }
-                            else if (currentPointWind.Item1 == Wind.east)
+                            else if (currentPointWind.Item1 == 0)
                             {
                                 currentPoint = (currentPoint.Item1 + k.Item2, currentPoint.Item2);
                             }
@@ -181,15 +181,15 @@ namespace AventOfCode
                             }
                             break;
                         case 'W':
-                            if (currentPointWind.Item2 == Wind.west)
+                            if (currentPointWind.Item2 == 2)
                             {
                                 currentPoint = (currentPoint.Item1, currentPoint.Item2 + k.Item2);
                             }
-                            else if (currentPointWind.Item2 == Wind.east)
+                            else if (currentPointWind.Item2 == 0)
                             {
                                 currentPoint = (currentPoint.Item1, currentPoint.Item2 - k.Item2);
                             }
-                            else if (currentPointWind.Item1 == Wind.west)
+                            else if (currentPointWind.Item1 == 2)
                             {
                                 currentPoint = (currentPoint.Item1 + k.Item2, currentPoint.Item2);
                             }
@@ -202,38 +202,38 @@ namespace AventOfCode
                             var newV = k.Item2 / 90;
                             for (int i = 0; i < newV; i++)
                             {
-                                if (currentPointWind.Item1 == Wind.east)
+                                if (currentPointWind.Item1 == 0)
                                 {
-                                    currentPointWind = (Wind.north, currentPointWind.Item2);
+                                    currentPointWind = (3, currentPointWind.Item2);
                                 }
-                                else if (currentPointWind.Item1 == Wind.south)
+                                else if (currentPointWind.Item1 == 1)
                                 {
-                                    currentPointWind = (Wind.east, currentPointWind.Item2);
+                                    currentPointWind = (0, currentPointWind.Item2);
                                 }
-                                else if (currentPointWind.Item1 == Wind.north)
+                                else if (currentPointWind.Item1 == 3)
                                 {
-                                    currentPointWind = (Wind.west, currentPointWind.Item2);
+                                    currentPointWind = (2, currentPointWind.Item2);
                                 }
-                                else if (currentPointWind.Item1 == Wind.west)
+                                else if (currentPointWind.Item1 == 2)
                                 {
-                                    currentPointWind = (Wind.south, currentPointWind.Item2);
+                                    currentPointWind = (1, currentPointWind.Item2);
                                 }
 
-                                if (currentPointWind.Item2 == Wind.east)
+                                if (currentPointWind.Item2 == 0)
                                 {
-                                    currentPointWind = (currentPointWind.Item1, Wind.north);
+                                    currentPointWind = (currentPointWind.Item1, 3);
                                 }
-                                else if (currentPointWind.Item2 == Wind.south)
+                                else if (currentPointWind.Item2 == 1)
                                 {
-                                    currentPointWind = (currentPointWind.Item1, Wind.east);
+                                    currentPointWind = (currentPointWind.Item1, 0);
                                 }
-                                else if (currentPointWind.Item2 == Wind.north)
+                                else if (currentPointWind.Item2 == 3)
                                 {
-                                    currentPointWind = (currentPointWind.Item1, Wind.west);
+                                    currentPointWind = (currentPointWind.Item1, 2);
                                 }
-                                else if (currentPointWind.Item2 == Wind.west)
+                                else if (currentPointWind.Item2 == 2)
                                 {
-                                    currentPointWind = (currentPointWind.Item1, Wind.south);
+                                    currentPointWind = (currentPointWind.Item1, 1);
                                 }
                             }
                             break;
@@ -241,71 +241,71 @@ namespace AventOfCode
                             var newV2 = k.Item2 / 90;
                             for (int i = 0; i < newV2; i++)
                             {
-                                if (currentPointWind.Item1 == Wind.east)
+                                if (currentPointWind.Item1 == 0)
                                 {
-                                    currentPointWind = (Wind.south, currentPointWind.Item2);
+                                    currentPointWind = (1, currentPointWind.Item2);
                                 }
-                                else if (currentPointWind.Item1 == Wind.south)
+                                else if (currentPointWind.Item1 == 1)
                                 {
-                                    currentPointWind = (Wind.west, currentPointWind.Item2);
+                                    currentPointWind = (2, currentPointWind.Item2);
                                 }
-                                else if (currentPointWind.Item1 == Wind.north)
+                                else if (currentPointWind.Item1 == 3)
                                 {
-                                    currentPointWind = (Wind.east, currentPointWind.Item2);
+                                    currentPointWind = (0, currentPointWind.Item2);
                                 }
-                                else if (currentPointWind.Item1 == Wind.west)
+                                else if (currentPointWind.Item1 == 2)
                                 {
-                                    currentPointWind = (Wind.north, currentPointWind.Item2);
+                                    currentPointWind = (3, currentPointWind.Item2);
                                 }
 
-                                if (currentPointWind.Item2 == Wind.east)
+                                if (currentPointWind.Item2 == 0)
                                 {
-                                    currentPointWind = (currentPointWind.Item1, Wind.south);
+                                    currentPointWind = (currentPointWind.Item1, 1);
                                 }
-                                else if (currentPointWind.Item2 == Wind.south)
+                                else if (currentPointWind.Item2 == 1)
                                 {
-                                    currentPointWind = (currentPointWind.Item1, Wind.west);
+                                    currentPointWind = (currentPointWind.Item1, 2);
                                 }
-                                else if (currentPointWind.Item2 == Wind.north)
+                                else if (currentPointWind.Item2 == 3)
                                 {
-                                    currentPointWind = (currentPointWind.Item1, Wind.east);
+                                    currentPointWind = (currentPointWind.Item1, 0);
                                 }
-                                else if (currentPointWind.Item2 == Wind.west)
+                                else if (currentPointWind.Item2 == 2)
                                 {
-                                    currentPointWind = (currentPointWind.Item1, Wind.north);
+                                    currentPointWind = (currentPointWind.Item1, 3);
                                 }
                             }
                             break;
                         case 'F':
-                            if (currentPointWind.Item1 == Wind.east)
+                            if (currentPointWind.Item1 == 0)
                             {
                                 east += currentPoint.Item1 * k.Item2;
                             }
-                            else if (currentPointWind.Item1 == Wind.west)
+                            else if (currentPointWind.Item1 == 2)
                             {
                                 west += currentPoint.Item1 * k.Item2;
                             }
-                            else if (currentPointWind.Item1 == Wind.north)
+                            else if (currentPointWind.Item1 == 3)
                             {
                                 north += currentPoint.Item1 * k.Item2;
                             }
-                            else if (currentPointWind.Item1 == Wind.south)
+                            else if (currentPointWind.Item1 == 1)
                             {
                                 south += currentPoint.Item1 * k.Item2;
                             }
-                            if (currentPointWind.Item2 == Wind.east)
+                            if (currentPointWind.Item2 == 0)
                             {
                                 east += currentPoint.Item2 * k.Item2;
                             }
-                            else if (currentPointWind.Item2 == Wind.west)
+                            else if (currentPointWind.Item2 == 2)
                             {
                                 west += currentPoint.Item2 * k.Item2;
                             }
-                            else if (currentPointWind.Item2 == Wind.north)
+                            else if (currentPointWind.Item2 == 3)
                             {
                                 north += currentPoint.Item2 * k.Item2;
                             }
-                            else if (currentPointWind.Item2 == Wind.south)
+                            else if (currentPointWind.Item2 == 1)
                             {
                                 south += currentPoint.Item2 * k.Item2;
                             }
@@ -1296,13 +1296,5 @@ namespace AventOfCode
 
             return datas.Select(v => converter(v)).ToList();
         }
-    }
-
-    enum Wind
-    {
-        east = 0,
-        south,
-        west,
-        north
     }
 }
