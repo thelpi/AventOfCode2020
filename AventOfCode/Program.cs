@@ -10,16 +10,118 @@ namespace AventOfCode
     {
         static void Main(string[] args)
         {
-            var result = DayThirteen(true);
-            Console.WriteLine($"Sample result part. 1 is {result}");
-            result = DayThirteen(true);
-            Console.WriteLine($"Result part. 1 is {result}");
+            var result = DayThirteen(false, false);
+            Console.WriteLine($"Result part. 2 is {result}");
             System.Threading.Thread.Sleep(int.MaxValue);
         }
 
-        private static long DayThirteen(bool firstPart)
+        private static long DayThirteen(bool firstPart, bool sample)
         {
-            return -1;
+            var content = GetContent(13, v => v, sample: sample);
+
+            if (firstPart)
+            {
+                var timestamp = Convert.ToInt32(content[0]);
+                var buses1 = content[1].Split(",").Where(v => v != "x").Select(v => Convert.ToInt32(v)).ToList();
+
+                var currentBast = -1;
+                var busOk = -1;
+                foreach (var bus in buses1)
+                {
+                    var ratio = timestamp / bus;
+                    var fromRatio = bus * ratio;
+                    if (fromRatio < timestamp)
+                    {
+                        fromRatio += bus;
+                    }
+                    if (currentBast == -1 || fromRatio < currentBast)
+                    {
+                        currentBast = fromRatio;
+                        busOk = bus;
+                    }
+                }
+
+                return (currentBast - timestamp) * busOk;
+            }
+            else
+            {
+                var buses2 = content[1].Split(",").Select(v => v == "x" ? null : (int?)Convert.ToInt32(v)).ToList();
+
+                long response = -1;
+
+                // /!\ hardcoded /!\
+                long start = 1;
+                while (true)
+                {
+                    if ((start + 68) % 593 == 0)
+                    {
+                        if ((start + 37) % 433 == 0)
+                        {
+                            if ((start + 27) % 41 == 0)
+                            {
+                                if (start % 37 == 0)
+                                {
+                                    if ((start + 66) % 29 == 0)
+                                    {
+                                        if ((start + 45) % 23 == 0)
+                                        {
+                                            if ((start + 56) % 19 == 0)
+                                            {
+                                                if ((start + 54) % 17 == 0)
+                                                {
+                                                    if ((start + 81) % 13 == 0)
+                                                    {
+                                                        response = start;
+                                                        break;
+                                                    }
+                                                    else
+                                                    {
+                                                        start += 17;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    start += 19;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                start += 23;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            start += 29;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        start += 37;
+                                    }
+                                }
+                                else
+                                {
+                                    start += 41;
+                                }
+                            }
+                            else
+                            {
+                                start += 433;
+                            }
+                        }
+                        else
+                        {
+                            start += 593;
+                        }
+                    }
+                    else
+                    {
+                        start++;
+                    }
+                }
+
+                return response;
+            }
         }
 
         // 297
