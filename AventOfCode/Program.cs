@@ -15,6 +15,7 @@ namespace AventOfCode
             System.Threading.Thread.Sleep(int.MaxValue);
         }
 
+        // 79
         private static long DayThirteen(bool firstPart, bool sample)
         {
             var content = GetContent(13, v => v, sample: sample);
@@ -47,76 +48,47 @@ namespace AventOfCode
             {
                 var buses2 = content[1].Split(",").Select(v => v == "x" ? null : (int?)Convert.ToInt32(v)).ToList();
 
-                long response = -1;
-
-                // /!\ hardcoded /!\
-                long start = 1;
-                while (true)
+                var busDataList = new List<(int modulo, int delta)>();
+                var i = 0;
+                foreach (var bus in buses2)
                 {
-                    if ((start + 68) % 593 == 0)
+                    if (bus.HasValue)
                     {
-                        if ((start + 37) % 433 == 0)
+                        busDataList.Add((bus.Value, i));
+                    }
+                    i++;
+                }
+
+                var busDatas = busDataList.OrderByDescending(bd => bd.modulo).ToArray();
+
+                long response = -1;
+                
+                long j = 1;
+                while (response < 0)
+                {
+                    long addedToStart = 0;
+                    bool atLeastOneNoMatch = false;
+                    int iBus = 0;
+                    while (!atLeastOneNoMatch && iBus < busDatas.Length)
+                    {
+                        if ((j + busDatas[iBus].delta) % busDatas[iBus].modulo == 0)
                         {
-                            if ((start + 27) % 41 == 0)
-                            {
-                                if (start % 37 == 0)
-                                {
-                                    if ((start + 66) % 29 == 0)
-                                    {
-                                        if ((start + 45) % 23 == 0)
-                                        {
-                                            if ((start + 56) % 19 == 0)
-                                            {
-                                                if ((start + 54) % 17 == 0)
-                                                {
-                                                    if ((start + 81) % 13 == 0)
-                                                    {
-                                                        response = start;
-                                                        break;
-                                                    }
-                                                    else
-                                                    {
-                                                        start += 17;
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    start += 19;
-                                                }
-                                            }
-                                            else
-                                            {
-                                                start += 23;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            start += 29;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        start += 37;
-                                    }
-                                }
-                                else
-                                {
-                                    start += 41;
-                                }
-                            }
-                            else
-                            {
-                                start += 433;
-                            }
+                            addedToStart += busDatas[iBus].modulo;
                         }
                         else
                         {
-                            start += 593;
+                            atLeastOneNoMatch = true;
                         }
+                        iBus++;
+                    }
+
+                    if (atLeastOneNoMatch)
+                    {
+                        j += (addedToStart == 0 ? 1 : addedToStart);
                     }
                     else
                     {
-                        start++;
+                        response = j;
                     }
                 }
 
