@@ -266,6 +266,7 @@ namespace AventOfCode
             var instructions = GetContent(12, v => (v[0], Convert.ToInt32(v.Substring(1))));
 
             int[] coordinatesValues = new int[4];
+            string coordinates = "ESWN";
 
             if (partOne)
             {
@@ -274,81 +275,59 @@ namespace AventOfCode
                 foreach (var k in instructions)
                 {
                     var nextWind = wind;
-                    switch (k.Item1)
+                    if (coordinates.Contains(k.Item1))
                     {
-                        case 'N':
-                            coordinatesValues[3] += k.Item2;
-                            break;
-                        case 'S':
-                            coordinatesValues[1] += k.Item2;
-                            break;
-                        case 'E':
-                            coordinatesValues[0] += k.Item2;
-                            break;
-                        case 'W':
-                            coordinatesValues[2] += k.Item2;
-                            break;
-                        case 'L':
-                            var newV = k.Item2 / 90;
-                            for (int i = 0; i < newV; i++)
-                            {
-                                switch (wind)
-                                {
-                                    case 0:
-                                        nextWind = 3;
-                                        break;
-                                    case 3:
-                                        nextWind = 2;
-                                        break;
-                                    case 1:
-                                        nextWind = 0;
-                                        break;
-                                    case 2:
-                                        nextWind = 1;
-                                        break;
-                                }
-                                wind = nextWind;
-                            }
-                            break;
-                        case 'R':
-                            var newV2 = k.Item2 / 90;
-                            for (int i = 0; i < newV2; i++)
-                            {
-                                switch (wind)
-                                {
-                                    case 0:
-                                        nextWind = 1;
-                                        break;
-                                    case 3:
-                                        nextWind = 0;
-                                        break;
-                                    case 1:
-                                        nextWind = 2;
-                                        break;
-                                    case 2:
-                                        nextWind = 3;
-                                        break;
-                                }
-                                wind = nextWind;
-                            }
-                            break;
-                        case 'F':
+                        coordinatesValues[coordinates.IndexOf(k.Item1)] += k.Item2;
+                    }
+                    else if (k.Item1 == 'L')
+                    {
+                        var newV = k.Item2 / 90;
+                        for (int i = 0; i < newV; i++)
+                        {
                             switch (wind)
                             {
                                 case 0:
-                                    coordinatesValues[0] += k.Item2;
+                                    nextWind = 3;
                                     break;
                                 case 3:
-                                    coordinatesValues[3] += k.Item2;
+                                    nextWind = 2;
                                     break;
                                 case 1:
-                                    coordinatesValues[1] += k.Item2;
+                                    nextWind = 0;
                                     break;
                                 case 2:
-                                    coordinatesValues[2] += k.Item2;
+                                    nextWind = 1;
                                     break;
                             }
-                            break;
+                            wind = nextWind;
+                        }
+                    }
+                    else if (k.Item1 == 'R')
+                    {
+                        var newV2 = k.Item2 / 90;
+                        for (int i = 0; i < newV2; i++)
+                        {
+                            switch (wind)
+                            {
+                                case 0:
+                                    nextWind = 1;
+                                    break;
+                                case 3:
+                                    nextWind = 0;
+                                    break;
+                                case 1:
+                                    nextWind = 2;
+                                    break;
+                                case 2:
+                                    nextWind = 3;
+                                    break;
+                            }
+                            wind = nextWind;
+                        }
+                    }
+                    else if (k.Item1 == 'F')
+                    {
+                        coordinatesValues[wind] += k.Item2;
                     }
                 }
             }
