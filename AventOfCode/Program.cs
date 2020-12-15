@@ -11,7 +11,7 @@ namespace AventOfCode
     {
         static void Main(string[] args)
         {
-            var result = DayFifteen(false, false);
+            var result = DayTwelve(true);
             Console.WriteLine($"Result is {result}");
             System.Threading.Thread.Sleep(int.MaxValue);
         }
@@ -263,33 +263,30 @@ namespace AventOfCode
         // 297
         private static long DayTwelve(bool partOne)
         {
-            var datas = GetContent(12, v => (v[0], Convert.ToInt32(v.Substring(1))));
+            var instructions = GetContent(12, v => (v[0], Convert.ToInt32(v.Substring(1))));
 
-            var east = 0;
-            var north = 0;
-            var west = 0;
-            var south = 0;
+            int[] coordinatesValues = new int[4];
 
             if (partOne)
             {
                 var wind = 0;
 
-                foreach (var k in datas)
+                foreach (var k in instructions)
                 {
                     var nextWind = wind;
                     switch (k.Item1)
                     {
                         case 'N':
-                            north += k.Item2;
+                            coordinatesValues[3] += k.Item2;
                             break;
                         case 'S':
-                            south += k.Item2;
+                            coordinatesValues[1] += k.Item2;
                             break;
                         case 'E':
-                            east += k.Item2;
+                            coordinatesValues[0] += k.Item2;
                             break;
                         case 'W':
-                            west += k.Item2;
+                            coordinatesValues[2] += k.Item2;
                             break;
                         case 'L':
                             var newV = k.Item2 / 90;
@@ -339,16 +336,16 @@ namespace AventOfCode
                             switch (wind)
                             {
                                 case 0:
-                                    east += k.Item2;
+                                    coordinatesValues[0] += k.Item2;
                                     break;
                                 case 3:
-                                    north += k.Item2;
+                                    coordinatesValues[3] += k.Item2;
                                     break;
                                 case 1:
-                                    south += k.Item2;
+                                    coordinatesValues[1] += k.Item2;
                                     break;
                                 case 2:
-                                    west += k.Item2;
+                                    coordinatesValues[2] += k.Item2;
                                     break;
                             }
                             break;
@@ -360,7 +357,7 @@ namespace AventOfCode
                 (int, int) currentPoint = (10, 1);
                 (int, int) currentPointWind = (0, 3);
 
-                foreach (var k in datas)
+                foreach (var k in instructions)
                 {
                     switch (k.Item1)
                     {
@@ -517,46 +514,43 @@ namespace AventOfCode
                         case 'F':
                             if (currentPointWind.Item1 == 0)
                             {
-                                east += currentPoint.Item1 * k.Item2;
+                                coordinatesValues[0] += currentPoint.Item1 * k.Item2;
                             }
                             else if (currentPointWind.Item1 == 2)
                             {
-                                west += currentPoint.Item1 * k.Item2;
+                                coordinatesValues[2] += currentPoint.Item1 * k.Item2;
                             }
                             else if (currentPointWind.Item1 == 3)
                             {
-                                north += currentPoint.Item1 * k.Item2;
+                                coordinatesValues[3] += currentPoint.Item1 * k.Item2;
                             }
                             else if (currentPointWind.Item1 == 1)
                             {
-                                south += currentPoint.Item1 * k.Item2;
+                                coordinatesValues[1] += currentPoint.Item1 * k.Item2;
                             }
                             if (currentPointWind.Item2 == 0)
                             {
-                                east += currentPoint.Item2 * k.Item2;
+                                coordinatesValues[0] += currentPoint.Item2 * k.Item2;
                             }
                             else if (currentPointWind.Item2 == 2)
                             {
-                                west += currentPoint.Item2 * k.Item2;
+                                coordinatesValues[2] += currentPoint.Item2 * k.Item2;
                             }
                             else if (currentPointWind.Item2 == 3)
                             {
-                                north += currentPoint.Item2 * k.Item2;
+                                coordinatesValues[3] += currentPoint.Item2 * k.Item2;
                             }
                             else if (currentPointWind.Item2 == 1)
                             {
-                                south += currentPoint.Item2 * k.Item2;
+                                coordinatesValues[1] += currentPoint.Item2 * k.Item2;
                             }
                             break;
                     }
                 }
             }
 
-            var norhtMinusSouth = Math.Abs(south - north);
-            var eastLMinusWest = Math.Abs(east - west);
-            var total = norhtMinusSouth + eastLMinusWest;
-
-            return total;
+            return Math.Abs(coordinatesValues[1] - coordinatesValues[3])
+                + Math.Abs(coordinatesValues[0] - coordinatesValues[2]);
         }
 
         // 290
