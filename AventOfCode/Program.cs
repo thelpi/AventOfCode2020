@@ -265,69 +265,41 @@ namespace AventOfCode
         {
             var instructions = GetContent(12, v => (v[0], Convert.ToInt32(v.Substring(1))));
 
-            int[] coordinatesValues = new int[4];
-            string coordinates = "ESWN";
+            const char EAST = 'E';
+            const char SOUTH = 'S';
+            const char WEST = 'W';
+            const char NORTH = 'N';
+            const char LEFT = 'L';
+            const char RIGHT = 'R';
+            const char FORWARD = 'F';
+            string coordinates = $"{EAST}{SOUTH}{WEST}{NORTH}";
+            int[] coordinatesValues = new int[coordinates.Length];
+            int angleQuotient = 360 / coordinates.Length;
 
             if (partOne)
             {
-                var wind = 0;
-
-                foreach (var k in instructions)
+                var currentMoveType = coordinates.IndexOf(EAST);
+                foreach (var instruction in instructions)
                 {
-                    var nextWind = wind;
-                    if (coordinates.Contains(k.Item1))
+                    var iType = instruction.Item1;
+                    var iMove = instruction.Item2;
+                    if (coordinates.Contains(iType))
                     {
-                        coordinatesValues[coordinates.IndexOf(k.Item1)] += k.Item2;
+                        coordinatesValues[coordinates.IndexOf(iType)] += iMove;
                     }
-                    else if (k.Item1 == 'L')
+                    else if (iType == LEFT || iType == RIGHT)
                     {
-                        var newV = k.Item2 / 90;
-                        for (int i = 0; i < newV; i++)
+                        var newAngle = iMove / angleQuotient;
+                        for (int i = 0; i < newAngle; i++)
                         {
-                            switch (wind)
-                            {
-                                case 0:
-                                    nextWind = 3;
-                                    break;
-                                case 3:
-                                    nextWind = 2;
-                                    break;
-                                case 1:
-                                    nextWind = 0;
-                                    break;
-                                case 2:
-                                    nextWind = 1;
-                                    break;
-                            }
-                            wind = nextWind;
+                            currentMoveType = iType == LEFT
+                                ? (currentMoveType == 0 ? (coordinates.Length - 1) : currentMoveType - 1)
+                                : (currentMoveType == (coordinates.Length - 1) ? 0 : currentMoveType + 1);
                         }
                     }
-                    else if (k.Item1 == 'R')
+                    else if (iType == FORWARD)
                     {
-                        var newV2 = k.Item2 / 90;
-                        for (int i = 0; i < newV2; i++)
-                        {
-                            switch (wind)
-                            {
-                                case 0:
-                                    nextWind = 1;
-                                    break;
-                                case 3:
-                                    nextWind = 0;
-                                    break;
-                                case 1:
-                                    nextWind = 2;
-                                    break;
-                                case 2:
-                                    nextWind = 3;
-                                    break;
-                            }
-                            wind = nextWind;
-                        }
-                    }
-                    else if (k.Item1 == 'F')
-                    {
-                        coordinatesValues[wind] += k.Item2;
+                        coordinatesValues[currentMoveType] += iMove;
                     }
                 }
             }
