@@ -11,11 +11,12 @@ namespace AventOfCode
     {
         static void Main(string[] args)
         {
-            var result = DaySixteen(true);
+            var result = DayTwelve(false);
             Console.WriteLine($"Result is {result}");
             System.Threading.Thread.Sleep(int.MaxValue);
         }
 
+        // 116
         private static long DaySixteen(bool firstPart)
         {
             var datas = GetContent(16, v => v, "\r\n\r\n");
@@ -422,103 +423,77 @@ namespace AventOfCode
             }
             else
             {
-                (int, int) currentPoint = (10, 1);
-                (int, int) currentPointWind = (0, 3);
+                (int, int) point = (10, 1);
+                (int, int) move = (0, coordinates.Length - 1);
 
-                foreach (var k in instructions)
+                foreach (var instruction in instructions)
                 {
-                    switch (k.Item1)
+                    var iType = instruction.Item1;
+                    var iMove = instruction.Item2;
+
+                    if (iType == NORTH || iType == SOUTH)
                     {
-                        case 'N':
-                            if (currentPointWind.Item2 == 3)
+                        int newPoint1 = point.Item1, newPoint2 = point.Item2;
+                        if (move.Item2 == coordinates.IndexOf(NORTH))
+                        {
+                            newPoint2 = iType == NORTH ? point.Item2 + iMove : point.Item2 - iMove;
+                        }
+                        else if (move.Item2 == coordinates.IndexOf(SOUTH))
+                        {
+                            newPoint2 = iType == NORTH ? point.Item2 - iMove : point.Item2 + iMove;
+                        }
+                        else if (move.Item1 == coordinates.IndexOf(NORTH))
+                        {
+                            newPoint1 = iType == NORTH ? point.Item1 + iMove : point.Item1 - iMove;
+                        }
+                        else if (move.Item1 == coordinates.IndexOf(SOUTH))
+                        {
+                            newPoint1 = iType == NORTH ? point.Item1 - iMove : point.Item1 + iMove;
+                        }
+                        point = (newPoint1, newPoint2);
+                    }
+                    else if (iType == EAST || iType == WEST)
+                    {
+                        int newPoint1 = point.Item1, newPoint2 = point.Item2;
+                        if (move.Item2 == coordinates.IndexOf(EAST))
+                        {
+                            newPoint2 = iType == EAST ? point.Item2 + iMove : point.Item2 - iMove;
+                        }
+                        else if (move.Item2 == coordinates.IndexOf(WEST))
+                        {
+                            newPoint2 = iType == EAST ? point.Item2 - iMove : point.Item2 + iMove;
+                        }
+                        else if (move.Item1 == coordinates.IndexOf(EAST))
+                        {
+                            newPoint1 = iType == EAST ? point.Item1 + iMove : point.Item1 - iMove;
+                        }
+                        else if (move.Item1 == coordinates.IndexOf(WEST))
+                        {
+                            newPoint1 = iType == EAST ? point.Item1 - iMove : point.Item1 + iMove;
+                        }
+                        point = (newPoint1, newPoint2);
+                    }
+                    else if (iType == LEFT || iType == RIGHT)
+                    {
+                        var newAngle = iMove / angleQuotient;
+                        for (int i = 0; i < newAngle; i++)
+                        {
+                            if (iType == LEFT)
                             {
-                                currentPoint = (currentPoint.Item1, currentPoint.Item2 + k.Item2);
-                            }
-                            else if (currentPointWind.Item2 == 1)
-                            {
-                                currentPoint = (currentPoint.Item1, currentPoint.Item2 - k.Item2);
-                            }
-                            else if (currentPointWind.Item1 == 3)
-                            {
-                                currentPoint = (currentPoint.Item1 + k.Item2, currentPoint.Item2);
-                            }
-                            else
-                            {
-                                currentPoint = (currentPoint.Item1 - k.Item2, currentPoint.Item2);
-                            }
-                            break;
-                        case 'S':
-                            if (currentPointWind.Item2 == 1)
-                            {
-                                currentPoint = (currentPoint.Item1, currentPoint.Item2 + k.Item2);
-                            }
-                            else if (currentPointWind.Item2 == 3)
-                            {
-                                currentPoint = (currentPoint.Item1, currentPoint.Item2 - k.Item2);
-                            }
-                            else if (currentPointWind.Item1 == 1)
-                            {
-                                currentPoint = (currentPoint.Item1 + k.Item2, currentPoint.Item2);
-                            }
-                            else
-                            {
-                                currentPoint = (currentPoint.Item1 - k.Item2, currentPoint.Item2);
-                            }
-                            break;
-                        case 'E':
-                            if (currentPointWind.Item2 == 0)
-                            {
-                                currentPoint = (currentPoint.Item1, currentPoint.Item2 + k.Item2);
-                            }
-                            else if (currentPointWind.Item2 == 2)
-                            {
-                                currentPoint = (currentPoint.Item1, currentPoint.Item2 - k.Item2);
-                            }
-                            else if (currentPointWind.Item1 == 0)
-                            {
-                                currentPoint = (currentPoint.Item1 + k.Item2, currentPoint.Item2);
-                            }
-                            else
-                            {
-                                currentPoint = (currentPoint.Item1 - k.Item2, currentPoint.Item2);
-                            }
-                            break;
-                        case 'W':
-                            if (currentPointWind.Item2 == 2)
-                            {
-                                currentPoint = (currentPoint.Item1, currentPoint.Item2 + k.Item2);
-                            }
-                            else if (currentPointWind.Item2 == 0)
-                            {
-                                currentPoint = (currentPoint.Item1, currentPoint.Item2 - k.Item2);
-                            }
-                            else if (currentPointWind.Item1 == 2)
-                            {
-                                currentPoint = (currentPoint.Item1 + k.Item2, currentPoint.Item2);
+                                move = (move.Item1 == 0 ? (coordinates.Length - 1) : move.Item1 - 1,
+                                    move.Item2 == 0 ? (coordinates.Length - 1) : move.Item2 - 1);
                             }
                             else
                             {
-                                currentPoint = (currentPoint.Item1 - k.Item2, currentPoint.Item2);
+                                move = (move.Item1 == (coordinates.Length - 1) ? 0 : move.Item1 + 1,
+                                    move.Item2 == (coordinates.Length - 1) ? 0 : move.Item2 + 1);
                             }
-                            break;
-                        case 'L':
-                            var newV = k.Item2 / angleQuotient;
-                            for (int i = 0; i < newV; i++)
-                            {
-                                currentPointWind = (currentPointWind.Item1 == 0 ? 3 : currentPointWind.Item1 - 1, currentPointWind.Item2 == 0 ? 3 : currentPointWind.Item2 - 1);
-                            }
-                            break;
-                        case 'R':
-                            var newV2 = k.Item2 / angleQuotient;
-                            for (int i = 0; i < newV2; i++)
-                            {
-                                currentPointWind = (currentPointWind.Item1 == 3 ? 0 : currentPointWind.Item1 + 1, currentPointWind.Item2 == 3 ? 0 : currentPointWind.Item2 + 1);
-                            }
-                            break;
-                        case 'F':
-                            coordinatesValues[currentPointWind.Item1] += currentPoint.Item1 * k.Item2;
-                            coordinatesValues[currentPointWind.Item2] += currentPoint.Item2 * k.Item2;
-                            break;
+                        }
+                    }
+                    else if (iType == FORWARD)
+                    {
+                        coordinatesValues[move.Item1] += point.Item1 * iMove;
+                        coordinatesValues[move.Item2] += point.Item2 * iMove;
                     }
                 }
             }
