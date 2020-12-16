@@ -11,9 +11,126 @@ namespace AventOfCode
     {
         static void Main(string[] args)
         {
-            var result = DayTwelve(false);
+            var result = DaySixteen(true);
             Console.WriteLine($"Result is {result}");
             System.Threading.Thread.Sleep(int.MaxValue);
+        }
+
+        private static long DaySixteen(bool firstPart)
+        {
+            var datas = GetContent(16, v => v, "\r\n\r\n");
+            
+            var myTicket = datas[1].Split("\r\n")[1].Split(",").Select(v => Convert.ToInt32(v)).ToList();
+            var tickets = datas[2].Split("\r\n").Skip(1).Select(v => v.Split(",").Select(v2 => Convert.ToInt32(v2)).ToList()).ToList();
+            var ranges = datas[0].Split("\r\n").Select(v =>
+            {
+                var withName = v.Split(": ");
+                var name = withName[0];
+                var bornes = withName[1].Split(" or ");
+                var b1 = (Convert.ToInt32(bornes[0].Split("-")[0]), Convert.ToInt32(bornes[0].Split("-")[1]));
+                var b2 = (Convert.ToInt32(bornes[1].Split("-")[0]), Convert.ToInt32(bornes[1].Split("-")[1]));
+                return (name, b1, b2);
+            }).ToList();
+
+            long sum = 0;
+            int iTicket = 0;
+            var invalidTickets = new List<int>();
+            foreach (var ticket in tickets)
+            {
+                foreach (var vv in ticket)
+                {
+                    bool isValid = false;
+                    foreach (var (name, b1, b2) in ranges)
+                    {
+                        if ((vv >= b1.Item1 && vv <= b1.Item2)
+                            || (vv >= b2.Item1 && vv <= b2.Item2))
+                        {
+                            isValid = true;
+                        }
+                    }
+                    if (!isValid)
+                    {
+                        sum += vv;
+                        invalidTickets.Add(iTicket);
+                    }
+                }
+                iTicket++;
+            }
+
+            if (firstPart)
+            {
+                return sum;
+            }
+
+            invalidTickets.Sort();
+            invalidTickets.Reverse();
+
+            foreach (var it in invalidTickets)
+            {
+                tickets.RemoveAt(it);
+            }
+
+            tickets.Add(myTicket);
+            var rangedIndex = new List<List<int>>();
+            for (int i = 0; i < ranges.Count; i++)
+            {
+                var subList = new List<int>();
+                foreach (var tt in tickets)
+                {
+                    subList.Add(tt[i]);
+                }
+                rangedIndex.Add(subList);
+            }
+
+            Dictionary<string, List<int>> matches = new Dictionary<string, List<int>>();
+            foreach (var (name, b1, b2) in ranges)
+            {
+                List<int> iMatch = new List<int>();
+                int currentRi = 0;
+                foreach (var ri in rangedIndex)
+                {
+                    if (ri.All(vv => (vv >= b1.Item1 && vv <= b1.Item2)
+                            || (vv >= b2.Item1 && vv <= b2.Item2)))
+                    {
+                        iMatch.Add(currentRi);
+                    }
+                    currentRi++;
+                }
+                matches.Add(name, iMatch);
+            }
+
+            matches = matches.OrderBy(kvp => kvp.Value.Count).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            Dictionary<string, int> exhausted = new Dictionary<string, int>();
+            int countii = matches.Count;
+            for (int ii = 0; ii < countii; ii++)
+            {
+                var curKvp = matches.ElementAt(ii);
+                var picked = curKvp.Value.First();
+                exhausted.Add(curKvp.Key, picked);
+                matches.All(locKvp =>
+                {
+                    locKvp.Value.Remove(picked);
+                    return true;
+                });
+            }
+
+            var myTicketInfo = new Dictionary<string, int>();
+            foreach (var name in exhausted.Keys)
+            {
+                var index = exhausted[name];
+                myTicketInfo.Add(name, myTicket[index]);
+            }
+
+            long result = 1;
+            foreach (var key in myTicketInfo.Keys)
+            {
+                if (key.Contains("departure"))
+                {
+                    result *= myTicketInfo[key];
+                }
+            }
+
+            return result;
         }
 
         // 28
