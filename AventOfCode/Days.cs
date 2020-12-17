@@ -367,7 +367,7 @@ namespace AventOfCode
                     .ToList();
 
                 return (mask, bytes);
-            }, "\r\n\r\n", sample);
+            }, "\r\n\r\n", sample, sample ? (firstPart ? 1 : 2) : (int?)null);
 
             const int SIZE_MASK = 36;
 
@@ -1658,10 +1658,11 @@ namespace AventOfCode
         private static List<T> GetContent<T>(int day,
             Func<string, T> converter,
             string separator = "\r\n",
-            bool sample = false)
+            bool sample = false,
+            int? part = null)
         {
             var path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-                $"Datas\\{(sample ? "Samples\\" : string.Empty)}{day.ToString().PadLeft(2, '0')}.txt");
+                $"Datas\\{(sample ? "Samples\\" : string.Empty)}{day.ToString().PadLeft(2, '0')}{(part.HasValue ? $"_{part.Value}" : string.Empty)}.txt");
             string[] datas;
             using (var rd = new StreamReader(path))
             {
