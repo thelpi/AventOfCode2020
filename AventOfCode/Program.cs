@@ -11,13 +11,106 @@ namespace AventOfCode
     {
         static void Main(string[] args)
         {
-            var result = DayTwelve(false);
+            var result = Day17(false, false);
             Console.WriteLine($"Result is {result}");
             System.Threading.Thread.Sleep(int.MaxValue);
         }
 
+        // 91
+        private static long Day17(bool firstPart, bool sample)
+        {
+            const int CYCLES_COUNT = 6;
+            const int GRID_LENGTH = 25; // arbitrary; minimal for 8x8x8x8
+            const char ONE_VALUE = '#';
+
+            var content = GetContent(17, row => row.Select(v => v == ONE_VALUE ? 1 : 0).ToArray(), sample: sample).ToArray();
+            
+            // creates an empty grid
+            var grid = Enumerable.Range(0, GRID_LENGTH)
+                .Select(_0 => Enumerable.Range(0, GRID_LENGTH)
+                    .Select(_1 => Enumerable.Range(0, GRID_LENGTH)
+                        .Select(_2 => Enumerable.Range(0, GRID_LENGTH)
+                              .Select(_3 => 0)
+                .ToArray()).ToArray()).ToArray()).ToArray();
+
+            // fills with puzzle in the middle (barely) of the grid
+            var center = GRID_LENGTH / 2;
+            for (int i = center; i < center + content[0].Length; i++)
+            {
+                for (int j = center; j < center + content[0].Length; j++)
+                {
+                    grid[center][center][i][j] = content[i - center][j - center];
+                }
+            }
+            
+            // for each cycle
+            for (int cycle = 0; cycle < CYCLES_COUNT; cycle++)
+            {
+                var coordinatesToSwitch = new List<(int i, int j, int k, int l)>();
+                // loops on each point
+                for (int i = 0; i < grid.Length; i++)
+                {
+                    for (int j = 0; j < grid[i].Length; j++)
+                    {
+                        for (int k = 0; k < grid[i][j].Length; k++)
+                        {
+                            for (int l = 0; l < grid[i][j][k].Length; l++)
+                            {
+                                // loops on every point around the current point
+                                var count1 = 0;
+                                for (int iAr = i - 1; iAr <= i + 1; iAr++)
+                                {
+                                    for (int jAr = j - 1; jAr <= j + 1; jAr++)
+                                    {
+                                        for (int kAr = k - 1; kAr <= k + 1; kAr++)
+                                        {
+                                            for (int lAr = l - 1; lAr <= l + 1; lAr++)
+                                            {
+                                                if (jAr == j && iAr == i && k == kAr && lAr == l)
+                                                {
+                                                    // exclude current point
+                                                    continue;
+                                                }
+                                                else if (jAr < 0 || iAr < 0 || kAr < 0 || lAr < 0)
+                                                {
+                                                    // exclude min border
+                                                    continue;
+                                                }
+                                                else if (jAr >= grid[i].Length || iAr >= grid.Length || kAr >= grid[i][j].Length || lAr >= grid[i][j][k].Length)
+                                                {
+                                                    // exclude max border
+                                                    continue;
+                                                }
+                                                else if (grid[iAr][jAr][kAr][lAr] == 1)
+                                                {
+                                                    count1++;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                // Is "count1" apply to switch rules ?
+                                if ((grid[i][j][k][l] == 0 && count1 == 3) ||
+                                    (grid[i][j][k][l] == 1 && count1 != 3 && count1 != 2))
+                                {
+                                    coordinatesToSwitch.Add((i, j, k, l));
+                                }
+                            }
+                        }
+                    }
+                }
+                // reverse values
+                foreach (var (i, j, k, l) in coordinatesToSwitch)
+                {
+                    grid[i][j][k][l] = Math.Abs(grid[i][j][k][l] - 1);
+                }
+            }
+            // sums every "1"
+            return grid.Sum(_0 => _0.Sum(_1 => _1.Sum(_2 => _2.Sum())));
+        }
+
         // 116
-        private static long DaySixteen(bool firstPart)
+        private static long Day16(bool firstPart)
         {
             var datas = GetContent(16, v => v, "\r\n\r\n");
             
@@ -135,7 +228,7 @@ namespace AventOfCode
         }
 
         // 28
-        private static long DayFifteen(bool firstPart, bool sample)
+        private static long Day15(bool firstPart, bool sample)
         {
             var expectedQuotesCount = firstPart ? 2020 : 30000000;
 
@@ -165,7 +258,7 @@ namespace AventOfCode
         }
 
         // 131
-        private static long DayFourteen(bool firstPart, bool sample)
+        private static long Day14(bool firstPart, bool sample)
         {
             var datas = GetContent(14, v =>
             {
@@ -298,7 +391,7 @@ namespace AventOfCode
         }
 
         // 79
-        private static long DayThirteen(bool firstPart, bool sample)
+        private static long Day13(bool firstPart, bool sample)
         {
             var content = GetContent(13, v => v, sample: sample);
 
@@ -379,7 +472,7 @@ namespace AventOfCode
         }
 
         // 120
-        private static long DayTwelve(bool partOne)
+        private static long Day12(bool partOne)
         {
             var instructions = GetContent(12, v => (v[0], Convert.ToInt32(v.Substring(1))));
 
@@ -501,7 +594,7 @@ namespace AventOfCode
         }
 
         // 289
-        private static long DayEleven(bool partOne)
+        private static long Day11(bool partOne)
         {
             var datas = GetContent(11, v => v.ToArray()).ToArray();
 
@@ -792,7 +885,7 @@ namespace AventOfCode
         }
 
         // 117
-        private static long DayTen(bool partOne)
+        private static long Day10(bool partOne)
         {
             var datas = GetContent(10, v => Convert.ToInt32(v));
 
@@ -911,7 +1004,7 @@ namespace AventOfCode
         }
 
         // 68
-        private static long DayNine(long? badNumberFromFirstPart)
+        private static long Day09(long? badNumberFromFirstPart)
         {
             var datas = GetContent(9, v => Convert.ToInt64(v));
 
@@ -981,7 +1074,7 @@ namespace AventOfCode
         }
 
         // 73
-        private static long DayEight()
+        private static long Day08()
         {
             var instructions = GetContent(8, v =>
                 (v.Split(' ')[0], Convert.ToInt32(v.Split(' ')[1].Replace("+", ""))));
@@ -1056,7 +1149,7 @@ namespace AventOfCode
         }
 
         // 78
-        private static long DaySeven(bool partOne)
+        private static long Day07(bool partOne)
         {
             var datas = GetContent(7, v => v, ".\r\n");
 
@@ -1136,7 +1229,7 @@ namespace AventOfCode
         }
 
         // 17
-        private static long DaySix()
+        private static long Day06()
         {
             var byGroupByPeople = GetContent(6, v => v.Split("\r\n").ToList(), "\r\n\r\n");
 
@@ -1155,7 +1248,7 @@ namespace AventOfCode
         }
 
         // 67
-        private static long DayFive()
+        private static long Day05()
         {
             var list = GetContent(5, v => v);
 
@@ -1224,7 +1317,7 @@ namespace AventOfCode
         }
 
         // 136
-        private static long DayFour()
+        private static long Day04()
         {
             var codes = new string[]
             {
@@ -1362,7 +1455,7 @@ namespace AventOfCode
         }
 
         // 38
-        private static long DayThree()
+        private static long Day03()
         {
             var fullList = GetContent(3, v => v.ToArray().Select(subV => subV == '#' ? 1 : 0).ToList());
 
@@ -1402,7 +1495,7 @@ namespace AventOfCode
         }
 
         // 33
-        private static long DayTwo()
+        private static long Day02()
         {
             var baseList = GetContent(2, v => v);
 
@@ -1437,7 +1530,7 @@ namespace AventOfCode
         }
 
         // 22
-        private static long DayOne()
+        private static long Day01()
         {
             var values = GetContent(1, v => Convert.ToInt32(v));
 
