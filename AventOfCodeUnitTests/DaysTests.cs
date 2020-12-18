@@ -17,6 +17,39 @@ namespace AventOfCodeUnitTests
         }
 
         [Theory]
+        [InlineData(true, true, 2)]
+        [InlineData(true, false, 625)]
+        [InlineData(false, true, 1)]
+        [InlineData(false, false, 391)]
+        public void Day02Test(bool firstPart, bool sample, long expected)
+        {
+            var result = Days.Day02(firstPart, sample);
+            Assert.Equal(expected, result);
+        }
+
+        [Theory]
+        [InlineData(true, true, 7)]
+        [InlineData(true, false, 244)]
+        [InlineData(false, true, 336)]
+        [InlineData(false, false, 9406609920)]
+        public void Day03Test(bool firstPart, bool sample, long expected)
+        {
+            var result = Days.Day03(firstPart, sample);
+            Assert.Equal(expected, result);
+        }
+
+        [Theory]
+        [InlineData(true, true, 2)]
+        [InlineData(true, false, 260)]
+        [InlineData(false, true, 2)]
+        [InlineData(false, false, 153)]
+        public void Day04Test(bool firstPart, bool sample, long expected)
+        {
+            var result = Days.Day04(firstPart, sample);
+            Assert.Equal(expected, result);
+        }
+
+        [Theory]
         [InlineData(true, true, 165)]
         [InlineData(true, false, 12408060320841)]
         [InlineData(false, true, 208)]

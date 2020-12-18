@@ -1506,7 +1506,7 @@ namespace AventOfCode
         }
 
         // 136
-        public static long Day04()
+        public static long Day04(bool firstPart, bool sample)
         {
             var codes = new string[]
             {
@@ -1514,7 +1514,7 @@ namespace AventOfCode
                 "hcl", "ecl", "pid"
             };
 
-            var passports = GetContent(4, v => v.Replace("\r\n", " "), "\r\n\r\n");
+            var passports = GetContent(4, v => v.Replace("\r\n", " "), "\r\n\r\n", sample: sample);
 
             int passportsValid = 0;
             foreach (var passport in passports)
@@ -1525,7 +1525,8 @@ namespace AventOfCode
                     var split = p.Split(':');
                     kpvList.Add(split[0].ToLowerInvariant(), split[1].ToLowerInvariant());
                 }
-                if (codes.All(c => kpvList.ContainsKey(c)))
+                bool allCodesContained = codes.All(c => kpvList.ContainsKey(c));
+                if (!firstPart && allCodesContained)
                 {
                     bool invalid = false;
                     foreach (var c in codes)
@@ -1638,24 +1639,31 @@ namespace AventOfCode
                         passportsValid++;
                     }
                 }
+                else if (firstPart && allCodesContained)
+                {
+                    passportsValid++;
+                }
             }
 
             return passportsValid;
         }
 
         // 38
-        public static long Day03()
+        public static long Day03(bool firstPart, bool sample)
         {
-            var fullList = GetContent(3, v => v.ToArray().Select(subV => subV == '#' ? 1 : 0).ToList());
+            var fullList = GetContent(3, v => v.ToArray().Select(subV => subV == '#' ? 1 : 0).ToList(), sample: sample);
 
             var combos = new List<(int right, int down)>
             {
-                (1, 1),
-                (3, 1),
-                (5, 1),
-                (7, 1),
-                (1, 2),
+                (3, 1)
             };
+            if (!firstPart)
+            {
+                combos.Add((1, 1));
+                combos.Add((5, 1));
+                combos.Add((7, 1));
+                combos.Add((1, 2));
+            }
             long treeMultiply = 1;
 
             foreach (var (right, down) in combos)
@@ -1683,10 +1691,10 @@ namespace AventOfCode
             return treeMultiply;
         }
 
-        // 33
-        public static long Day02()
+        // 39
+        public static long Day02(bool firstPart, bool sample)
         {
-            var baseList = GetContent(2, v => v);
+            var baseList = GetContent(2, v => v, sample: sample);
 
             var tuples = new List<(int min, int max, char car, string val)>();
             foreach (var l in baseList)
@@ -1702,17 +1710,23 @@ namespace AventOfCode
             int countValid = 0;
             foreach (var (min, max, car, val) in tuples)
             {
-                if (
+                if (firstPart)
+                {
+                    var countChar = val.Count(c => c == car);
+                    if (countChar >= min && countChar <= max)
+                    {
+                        countValid++;
+                    }
+                }
+                else
+                {
+                    if (
                     (val[min - 1] == car && val[max - 1] != car)
                     || (val[min - 1] != car && val[max - 1] == car))
-                {
-                    countValid++;
+                    {
+                        countValid++;
+                    }
                 }
-                /*var countChar = val.Count(c => c == car);
-                if (countChar >= min && countChar <= max)
-                {
-                    countValid++;
-                }*/
             }
 
             return countValid;
