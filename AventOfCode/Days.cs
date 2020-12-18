@@ -1200,22 +1200,24 @@ namespace AventOfCode
         {
             var datas = GetContent(9, v => Convert.ToInt64(v), sample: sample);
 
+            int baseP = sample ? 5 : 25;
+
             bool ok = true;
-            int p = 25;
+            int p = baseP;
             int skip = 0;
             long mark = -1;
             while (ok)
             {
-                var last25 = datas.Skip(skip).Take(25).ToList();
+                var lastPCount = datas.Skip(skip).Take(baseP).ToList();
 
                 bool found = false;
-                for (int j = 0; j < 25; j++)
+                for (int j = 0; j < baseP; j++)
                 {
-                    for (int k = 0; k < 25; k++)
+                    for (int k = 0; k < baseP; k++)
                     {
-                        if (last25[j] != last25[k])
+                        if (lastPCount[j] != lastPCount[k])
                         {
-                            if (last25[j] + last25[k] == datas[p])
+                            if (lastPCount[j] + lastPCount[k] == datas[p])
                             {
                                 found = true;
                             }
@@ -1234,35 +1236,32 @@ namespace AventOfCode
                 return mark;
             }
 
-            // second part
-            // I DONT REMEMBER THE POINT OF THIS LOOP
+            int okFirstIndex = -1;
+            int okLastIndex = -1;
             for (int i = 0; i < datas.Count; i++)
             {
-                if (datas[i] == mark)
+                int localOkIndex = -1;
+                long currentSum = datas[i];
+                for (int j = i - 1; j >= 0; j--)
                 {
-                    continue;
+                    if (currentSum >= mark)
+                    {
+                        break;
+                    }
+                    localOkIndex = j;
+                    currentSum += datas[j];
                 }
-
-                long currentMax = 0;
-                int j = i;
-                while (currentMax < mark)
+                if (currentSum == mark)
                 {
-                    currentMax += datas[j];
-                    j++;
-                }
-                if (currentMax == mark)
-                {
-
+                    okLastIndex = i;
+                    okFirstIndex = localOkIndex;
+                    break;
                 }
             }
 
-            // I DONT REMEMBER WHERE 400 AND 17 COMES FROM
-            var ranged = datas.Skip(400).Take(17).ToList();
-            var sum = ranged.Sum();
-            var min = ranged.Min();
-            var max = ranged.Max();
+            var ranged = datas.Skip(okFirstIndex).Take(okLastIndex - okFirstIndex).ToList();
 
-            return min + max;
+            return ranged.Min() + ranged.Max();
         }
 
         // 73
