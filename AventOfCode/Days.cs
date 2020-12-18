@@ -1341,13 +1341,19 @@ namespace AventOfCode
         // 78
         public static long Day07(bool firstPart, bool sample)
         {
-            var datas = GetContent(7, v => v, ".\r\n", sample: sample);
+            var datas = GetContent(7, v => v, "\r\n", sample: sample);
 
             var finalList = new Dictionary<string, List<(int, string)>>();
 
             foreach (var d in datas)
             {
-                var sub = d.Split(" bags contain ");
+                var realD = d;
+                if (realD.EndsWith("."))
+                {
+                    realD = realD.Substring(0, realD.Length - 1);
+                }
+
+                var sub = realD.Split(" bags contain ");
 
                 List<(int, string)> subBags = new List<(int qty, string val)>();
                 finalList.Add(sub[0], subBags);
@@ -1375,7 +1381,7 @@ namespace AventOfCode
                 }
             }
 
-            if (sample)
+            if (firstPart)
             {
                 // part one
                 void RecursiveSearchUp(Dictionary<string, List<(int, string)>> baseList,
