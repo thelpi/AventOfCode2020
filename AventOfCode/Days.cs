@@ -1418,9 +1418,9 @@ namespace AventOfCode
         }
 
         // 17
-        public static long Day06()
+        public static long Day06(bool firstPart, bool sample)
         {
-            var byGroupByPeople = GetContent(6, v => v.Split("\r\n").ToList(), "\r\n\r\n");
+            var byGroupByPeople = GetContent(6, v => v.Split("\r\n").ToList(), "\r\n\r\n", sample: sample);
 
             var yesCount = 0;
 
@@ -1428,7 +1428,9 @@ namespace AventOfCode
             {
                 var datasGroup = group.SelectMany(g => g).ToList();
 
-                var result = datasGroup.GroupBy(k => k).Where(k => k.Count() == group.Count);
+                var result = datasGroup
+                    .GroupBy(k => k)
+                    .Where(k => firstPart ? (k.Count() > 0) : (k.Count() == group.Count));
 
                 yesCount += result.Count();
             }

@@ -60,6 +60,17 @@ namespace AventOfCodeUnitTests
         }
 
         [Theory]
+        [InlineData(true, true, 11)]
+        [InlineData(true, false, 6714)]
+        [InlineData(false, true, 6)]
+        [InlineData(false, false, 3435)]
+        public void Day06Test(bool firstPart, bool sample, long expected)
+        {
+            var result = Days.Day06(firstPart, sample);
+            Assert.Equal(expected, result);
+        }
+
+        [Theory]
         [InlineData(true, true, 165)]
         [InlineData(true, false, 12408060320841)]
         [InlineData(false, true, 208)]
