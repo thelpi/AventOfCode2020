@@ -104,9 +104,9 @@ namespace AventOfCodeUnitTests
         }
 
         [Theory]
-        [InlineData(true, true, 220)]
+        [InlineData(true, true, 35)]
         [InlineData(true, false, 2244)]
-        [InlineData(false, true, 19208)]
+        [InlineData(false, true, 8)]
         [InlineData(false, false, 3947645370368)]
         public void Day10Test(bool firstPart, bool sample, long expected)
         {

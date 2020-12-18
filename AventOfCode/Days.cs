@@ -1079,7 +1079,10 @@ namespace AventOfCode
             var datas = GetContent(10, v => Convert.ToInt32(v), sample: sample);
 
             datas.Add(0);
-            datas.Add(datas.Max() + 3);
+            if (!firstPart)
+            {
+                datas.Add(datas.Max() + 3);
+            }
 
             datas.Sort();
 
