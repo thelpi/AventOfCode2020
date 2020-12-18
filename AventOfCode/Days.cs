@@ -1437,9 +1437,14 @@ namespace AventOfCode
         }
 
         // 67
-        public static long Day05()
+        public static long Day05(bool firstPart, bool sample)
         {
-            var list = GetContent(5, v => v);
+            if (!firstPart && sample)
+            {
+                throw new ArgumentException("No part. 2 sample for this day.");
+            }
+
+            var list = GetContent(5, v => v, sample: sample);
 
             var ids = new List<int>();
 
@@ -1489,6 +1494,11 @@ namespace AventOfCode
             }
 
             var max = ids.Max();
+
+            if (firstPart)
+            {
+                return max;
+            }
 
             var match = -1;
             for (int i = 0; i < max; i++)
