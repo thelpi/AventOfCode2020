@@ -661,9 +661,9 @@ namespace AventOfCode
         }
 
         // 120
-        public static long Day12(bool partOne)
+        public static long Day12(bool firstPart, bool sample)
         {
-            var instructions = GetContent(12, v => (v[0], Convert.ToInt32(v.Substring(1))));
+            var instructions = GetContent(12, v => (v[0], Convert.ToInt32(v.Substring(1))), sample: sample);
 
             const char EAST = 'E';
             const char SOUTH = 'S';
@@ -688,7 +688,7 @@ namespace AventOfCode
                 var iMove = instruction.Item2;
                 if (coordinates.Contains(iType))
                 {
-                    if (partOne)
+                    if (firstPart)
                     {
                         coordinatesValues[coordinates.IndexOf(iType)] += iMove;
                     }
@@ -743,7 +743,7 @@ namespace AventOfCode
                     var newAngle = iMove / angleQuotient;
                     for (int i = 0; i < newAngle; i++)
                     {
-                        if (partOne)
+                        if (firstPart)
                         {
                             currentMoveType = iType == LEFT
                                 ? (currentMoveType == 0 ? (coordinates.Length - 1) : currentMoveType - 1)
@@ -766,7 +766,7 @@ namespace AventOfCode
                 }
                 else if (iType == FORWARD)
                 {
-                    if (partOne)
+                    if (firstPart)
                     {
                         coordinatesValues[currentMoveType] += iMove;
                     }
@@ -783,11 +783,11 @@ namespace AventOfCode
         }
 
         // 289
-        public static long Day11(bool partOne)
+        public static long Day11(bool firstPart, bool sample)
         {
-            var datas = GetContent(11, v => v.ToArray()).ToArray();
+            var datas = GetContent(11, v => v.ToArray(), sample: sample).ToArray();
 
-            if (partOne)
+            if (firstPart)
             {
                 char[][] good1 = null;
                 while (good1 == null)
@@ -1074,9 +1074,9 @@ namespace AventOfCode
         }
 
         // 117
-        public static long Day10(bool partOne)
+        public static long Day10(bool firstPart, bool sample)
         {
-            var datas = GetContent(10, v => Convert.ToInt32(v));
+            var datas = GetContent(10, v => Convert.ToInt32(v), sample: sample);
 
             datas.Add(0);
             datas.Add(datas.Max() + 3);
@@ -1084,7 +1084,7 @@ namespace AventOfCode
             datas.Sort();
 
             // exercice 1
-            if (partOne)
+            if (firstPart)
             {
                 int voltage = 0;
                 bool found = true;
@@ -1193,41 +1193,41 @@ namespace AventOfCode
         }
 
         // 68
-        public static long Day09(long? badNumberFromFirstPart)
+        public static long Day09(bool firstPart, bool sample)
         {
-            var datas = GetContent(9, v => Convert.ToInt64(v));
+            var datas = GetContent(9, v => Convert.ToInt64(v), sample: sample);
 
-            if (!badNumberFromFirstPart.HasValue)
+            bool ok = true;
+            int p = 25;
+            int skip = 0;
+            long mark = -1;
+            while (ok)
             {
-                bool ok = true;
-                int i = 25;
-                int skip = 0;
-                long mark = -1;
-                while (ok)
-                {
-                    var last25 = datas.Skip(skip).Take(25).ToList();
+                var last25 = datas.Skip(skip).Take(25).ToList();
 
-                    bool found = false;
-                    for (int j = 0; j < 25; j++)
+                bool found = false;
+                for (int j = 0; j < 25; j++)
+                {
+                    for (int k = 0; k < 25; k++)
                     {
-                        for (int k = 0; k < 25; k++)
+                        if (last25[j] != last25[k])
                         {
-                            if (last25[j] != last25[k])
+                            if (last25[j] + last25[k] == datas[p])
                             {
-                                if (last25[j] + last25[k] == datas[i])
-                                {
-                                    found = true;
-                                }
+                                found = true;
                             }
                         }
                     }
-
-                    ok = found;
-                    mark = datas[i];
-                    i++;
-                    skip++;
                 }
 
+                ok = found;
+                mark = datas[p];
+                p++;
+                skip++;
+            }
+
+            if (firstPart)
+            {
                 return mark;
             }
 
@@ -1235,19 +1235,19 @@ namespace AventOfCode
             // I DONT REMEMBER THE POINT OF THIS LOOP
             for (int i = 0; i < datas.Count; i++)
             {
-                if (datas[i] == badNumberFromFirstPart.Value)
+                if (datas[i] == mark)
                 {
                     continue;
                 }
 
                 long currentMax = 0;
                 int j = i;
-                while (currentMax < badNumberFromFirstPart.Value)
+                while (currentMax < mark)
                 {
                     currentMax += datas[j];
                     j++;
                 }
-                if (currentMax == badNumberFromFirstPart.Value)
+                if (currentMax == mark)
                 {
 
                 }
@@ -1263,10 +1263,11 @@ namespace AventOfCode
         }
 
         // 73
-        public static long Day08()
+        public static long Day08(bool firstPart, bool sample)
         {
             var instructions = GetContent(8, v =>
-                (v.Split(' ')[0], Convert.ToInt32(v.Split(' ')[1].Replace("+", ""))));
+                (v.Split(' ')[0], Convert.ToInt32(v.Split(' ')[1].Replace("+", ""))),
+                sample: sample);
 
             var realAccumulateur = -1;
 
@@ -1338,9 +1339,9 @@ namespace AventOfCode
         }
 
         // 78
-        public static long Day07(bool partOne)
+        public static long Day07(bool firstPart, bool sample)
         {
-            var datas = GetContent(7, v => v, ".\r\n");
+            var datas = GetContent(7, v => v, ".\r\n", sample: sample);
 
             var finalList = new Dictionary<string, List<(int, string)>>();
 
@@ -1374,7 +1375,7 @@ namespace AventOfCode
                 }
             }
 
-            if (partOne)
+            if (sample)
             {
                 // part one
                 void RecursiveSearchUp(Dictionary<string, List<(int, string)>> baseList,

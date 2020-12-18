@@ -71,6 +71,83 @@ namespace AventOfCodeUnitTests
         }
 
         [Theory]
+        [InlineData(true, true, 4)]
+        [InlineData(true, false, 142)]
+        [InlineData(false, true, 32)]
+        [InlineData(false, false, 10219)]
+        public void Day07Test(bool firstPart, bool sample, long expected)
+        {
+            var result = Days.Day07(firstPart, sample);
+            Assert.Equal(expected, result);
+        }
+
+        [Theory]
+        [InlineData(true, true, 5)]
+        [InlineData(true, false, 1553)]
+        [InlineData(false, true, 8)]
+        [InlineData(false, false, 1877)]
+        public void Day08Test(bool firstPart, bool sample, long expected)
+        {
+            var result = Days.Day08(firstPart, sample);
+            Assert.Equal(expected, result);
+        }
+
+        [Theory]
+        [InlineData(true, true, 127)]
+        [InlineData(true, false, 23278925)]
+        [InlineData(false, true, 62)]
+        [InlineData(false, false, 4011064)]
+        public void Day09Test(bool firstPart, bool sample, long expected)
+        {
+            var result = Days.Day09(firstPart, sample);
+            Assert.Equal(expected, result);
+        }
+
+        [Theory]
+        [InlineData(true, true, 220)]
+        [InlineData(true, false, 2244)]
+        [InlineData(false, true, 19208)]
+        [InlineData(false, false, 3947645370368)]
+        public void Day10Test(bool firstPart, bool sample, long expected)
+        {
+            var result = Days.Day10(firstPart, sample);
+            Assert.Equal(expected, result);
+        }
+
+        [Theory]
+        [InlineData(true, true, 37)]
+        [InlineData(true, false, 2166)]
+        [InlineData(false, true, 26)]
+        [InlineData(false, false, 1955)]
+        public void Day11Test(bool firstPart, bool sample, long expected)
+        {
+            var result = Days.Day11(firstPart, sample);
+            Assert.Equal(expected, result);
+        }
+
+        [Theory]
+        [InlineData(true, true, 25)]
+        [InlineData(true, false, 1319)]
+        [InlineData(false, true, 286)]
+        [InlineData(false, false, 62434)]
+        public void Day12Test(bool firstPart, bool sample, long expected)
+        {
+            var result = Days.Day12(firstPart, sample);
+            Assert.Equal(expected, result);
+        }
+
+        [Theory]
+        [InlineData(true, true, 295)]
+        [InlineData(true, false, 410)]
+        [InlineData(false, true, 1068781)]
+        [InlineData(false, false, 600691418730595)]
+        public void Day13Test(bool firstPart, bool sample, long expected)
+        {
+            var result = Days.Day13(firstPart, sample);
+            Assert.Equal(expected, result);
+        }
+
+        [Theory]
         [InlineData(true, true, 165)]
         [InlineData(true, false, 12408060320841)]
         [InlineData(false, true, 208)]
