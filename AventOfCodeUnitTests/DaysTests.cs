@@ -203,8 +203,9 @@ namespace AventOfCodeUnitTests
         }
 
         [Theory]
-        [InlineData(true, true, 2)]
-        [InlineData(true, false, 210)]
+        //[InlineData(true, true, 2)]
+        //[InlineData(true, false, 210)]
+        [InlineData(false, true, 12)]
         public void Day19Test(bool firstPart, bool sample, long expected)
         {
             var result = Days.Day19(firstPart, sample);

@@ -11,7 +11,7 @@ namespace AventOfCode
     {
         public static long Day19(bool firstPart, bool sample)
         {
-            var content = GetContent(19, v => v, "\r\n\r\n", sample: sample);
+            var content = GetContent(19, v => v, "\r\n\r\n", sample: sample, part: firstPart ? 1 : 2);
 
             var rules = content[0].Split("\r\n").ToDictionary(v =>
                 Convert.ToInt32(v.Split(":")[0]),
