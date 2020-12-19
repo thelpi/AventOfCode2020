@@ -17,7 +17,7 @@ namespace AventOfCode
                 Convert.ToInt32(v.Split(":")[0]),
                 v => v.Split(":")[1]);
             var messages = content[1].Split("\r\n");
-
+            
             bool IsFinalRule(int ruleId)
             {
                 return rules[ruleId].Contains("\"");
@@ -97,11 +97,60 @@ namespace AventOfCode
                 return oks;
             }
 
-            const int BASE_RULE_ID = 0;
+            var patterns = new List<string>();
 
-            var ruleZeroPattern = MatchRuleId(BASE_RULE_ID);
+            if (firstPart)
+            {
+                patterns = MatchRuleId(0);
+                return messages.Count(msg => patterns.Contains(msg));
+            }
+            else
+            {
+                var patterns42 = MatchRuleId(42);
+                var patterns31 = MatchRuleId(31);
+                //var msgFilterd = messages.Where(msg => patterns42.Any(p42 => msg.StartsWith(p42))).ToList();
 
-            return messages.Count(msg => ruleZeroPattern.Contains(msg));
+                List<string> valids = new List<string>();
+                foreach (var msg in messages)
+                {
+                    var locMsg = msg;
+                    foreach (var p42 in patterns42)
+                    {
+                        locMsg = locMsg.Replace(p42, "");
+                    }
+                    if (locMsg == "")
+                    {
+                        valids.Add(msg);
+                    }
+                    else
+                    {
+                        locMsg = msg;
+                        foreach (var p42 in patterns42)
+                        {
+                            if (locMsg.StartsWith(p42))
+                            {
+                                locMsg = locMsg.Replace(p42, "");
+                            }
+                        }
+                        foreach (var p31 in patterns31)
+                        {
+                            if (locMsg.EndsWith(p31))
+                            {
+                                locMsg = string.Concat(locMsg.Substring(locMsg.Length - p31.Length, p31.Length), locMsg.Substring(0, locMsg.Length - p31.Length));
+                                locMsg = locMsg.Replace(p31, "");
+                            }
+                        }
+                        if (locMsg == "")
+                        {
+                            valids.Add(msg);
+                        }
+                    }
+                }
+
+               // var invalid = messages.Except(valids);
+
+                return valids.Count;
+            }
         }
 
         public static long Day18(bool firstPart, bool sample)
