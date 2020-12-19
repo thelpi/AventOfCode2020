@@ -9,6 +9,101 @@ namespace AventOfCode
 {
     public static class Days
     {
+        public static long Day19(bool firstPart, bool sample)
+        {
+            var content = GetContent(19, v => v, "\r\n\r\n", sample: sample);
+
+            var rules = content[0].Split("\r\n").ToDictionary(v =>
+                Convert.ToInt32(v.Split(":")[0]),
+                v => v.Split(":")[1]);
+            var messages = content[1].Split("\r\n");
+
+            bool IsFinalRule(int ruleId)
+            {
+                return rules[ruleId].Contains("\"");
+            }
+
+            char MatchFinalRule(int ruleId)
+            {
+                return rules[ruleId].Trim().Replace("\"", string.Empty)[0];
+            }
+
+            List<string> GroupRulePoss(List< List<int>> rulesGroupIds)
+            {
+                List<string> oks = new List<string>();
+                foreach (var rulesGroupId in rulesGroupIds)
+                {
+                    var loc = GroupPos(rulesGroupId);
+                    oks.AddRange(loc);
+                }
+                return oks;
+            }
+
+            List<string> GroupPos(List<int> ruleIds)
+            {
+                var possS = new List<string>();
+                bool firstRule = true;
+                foreach (int ruleId in ruleIds)
+                {
+                    var strCurr = MatchRuleId(ruleId);
+                    if (strCurr.Count == 0)
+                    {
+                        return new List<string>();
+                    }
+
+                    if (firstRule)
+                    {
+                        possS.AddRange(strCurr);
+                    }
+                    else
+                    {
+                        var newPossS = new List<string>();
+                        foreach (var p in possS)
+                        {
+                            foreach (var k in strCurr)
+                            {
+                                newPossS.Add(string.Concat(p, k));
+                            }
+                        }
+                        possS = newPossS;
+                    }
+
+                    firstRule = false;
+                }
+
+                return possS;
+            }
+
+            List<string> MatchRuleId(int ruleId)
+            {
+                List<string> oks = new List<string>();
+                if (IsFinalRule(ruleId))
+                {
+                    oks.Add(MatchFinalRule(ruleId).ToString());
+                }
+                else
+                {
+                    var ruleTxt = rules[ruleId].Trim();
+                    var ruleTxtSplit = ruleTxt.Split("|");
+                    var rule = ruleTxtSplit.Select(vBis =>
+                    {
+                        var ttt = vBis.Trim().Split(" ").Select(vTer =>
+                            Convert.ToInt32(vTer)).ToList();
+                        return ttt;
+                    }).ToList();
+
+                    oks.AddRange(GroupRulePoss(rule));
+                }
+                return oks;
+            }
+
+            const int BASE_RULE_ID = 0;
+
+            var ruleZeroPattern = MatchRuleId(BASE_RULE_ID);
+
+            return messages.Count(msg => ruleZeroPattern.Contains(msg));
+        }
+
         public static long Day18(bool firstPart, bool sample)
         {
             var expressions = GetContent(18, v =>  v, sample: sample, part: (sample ? (firstPart ? 1 : 2) : (int?)null));
