@@ -111,43 +111,75 @@ namespace AventOfCode
                 //var msgFilterd = messages.Where(msg => patterns42.Any(p42 => msg.StartsWith(p42))).ToList();
 
                 List<string> valids = new List<string>();
+                List<string> valids2 = new List<string>();
                 foreach (var msg in messages)
                 {
-                    var locMsg = msg;
-                    foreach (var p42 in patterns42)
+                    var localMsg = msg;
+                    int subCount = 0;
+                    bool found = true;
+                    while (found && localMsg != "")
                     {
-                        locMsg = locMsg.Replace(p42, "");
-                    }
-                    if (locMsg == "")
-                    {
-                        valids.Add(msg);
-                    }
-                    else
-                    {
-                        locMsg = msg;
+                        bool locFound = false;
                         foreach (var p42 in patterns42)
                         {
-                            if (locMsg.StartsWith(p42))
+                            if (localMsg.StartsWith(p42))
                             {
-                                locMsg = locMsg.Replace(p42, "");
+                                localMsg = localMsg.Substring(p42.Length);
+                                subCount++;
+                                locFound = true;
+                                break;
                             }
                         }
-                        foreach (var p31 in patterns31)
+                        found = locFound;
+                    }
+                    if (localMsg != "" && subCount > 0)
+                    {
+                        int subCount2 = 0;
+                        found = true;
+                        while (found && localMsg != "")
                         {
-                            if (locMsg.EndsWith(p31))
+                            bool locFound = false;
+                            foreach (var p31 in patterns31)
                             {
-                                locMsg = string.Concat(locMsg.Substring(locMsg.Length - p31.Length, p31.Length), locMsg.Substring(0, locMsg.Length - p31.Length));
-                                locMsg = locMsg.Replace(p31, "");
+                                if (localMsg.StartsWith(p31))
+                                {
+                                    localMsg = localMsg.Substring(p31.Length);
+                                    subCount2++;
+                                    locFound = true;
+                                    break;
+                                }
                             }
+                            found = locFound;
                         }
-                        if (locMsg == "")
+                        if (localMsg == "" && subCount > subCount2)
                         {
                             valids.Add(msg);
                         }
                     }
                 }
 
-               // var invalid = messages.Except(valids);
+                var expected = new List<string>
+                {
+                    "bbabbbbaabaabba",
+"babbbbaabbbbbabbbbbbaabaaabaaa",
+"aaabbbbbbaaaabaababaabababbabaaabbababababaaa",
+"bbbbbbbaaaabbbbaaabbabaaa",
+"bbbababbbbaaaaaaaabbababaaababaabab",
+"ababaaaaaabaaab",
+"ababaaaaabbbaba",
+"baabbaaaabbaaaababbaababb",
+"abbbbabbbbaaaababbbbbbaaaababb",
+"aaaaabbaabaaaaababaa",
+"aaaabbaabbaaaaaaabbbabbbaaabbaabaaa",
+"aabbbbbaabbbaaaaaabbbbbababaaaaabbaaabba"
+
+                };
+
+                var rest = expected.Except(valids).ToList();
+                var rest2 = valids.Except(expected).ToList();
+                var rest3 = valids2.Except(expected).ToList();
+
+                // var invalid = messages.Except(valids);
 
                 return valids.Count;
             }
