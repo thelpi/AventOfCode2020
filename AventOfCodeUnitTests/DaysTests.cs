@@ -222,5 +222,16 @@ namespace AventOfCodeUnitTests
             Assert.Equal(expectedCount, result.Item1);
             Assert.Equal(expectedCanonical, result.Item2);
         }
+
+        [Theory]
+        /*[InlineData(true, true, 306)]
+        [InlineData(true, false, 33925)]
+        [InlineData(false, true, 291)]*/
+        [InlineData(false, false, 291)]
+        public void Day22Test(bool firstPart, bool sample, long expected)
+        {
+            var result = Days.Day22(firstPart, sample);
+            Assert.Equal(expected, result);
+        }
     }
 }
