@@ -61,7 +61,7 @@ namespace AventOfCode
                         var p2Card = p2Bis[0];
                         if (p1Card <= p1Bis.Count - 1 && p2Card <= p2Bis.Count - 1)
                         {
-                            isP1Win = Round(p1Bis.Skip(1).Take(p1Card).ToList(), p2Bis.Skip(1).Take(p2Card).ToList(), p1Decks, p2Decks);
+                            isP1Win = Round(p1Bis.Skip(1).Take(p1Card).ToList(), p2Bis.Skip(1).Take(p2Card).ToList(), new List<List<int>>(), new List<List<int>>());
                         }
                         else
                         {
