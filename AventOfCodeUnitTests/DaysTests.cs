@@ -212,5 +212,15 @@ namespace AventOfCodeUnitTests
             var result = Days.Day19(firstPart, sample);
             Assert.Equal(expected, result);
         }
+
+        [Theory]
+        [InlineData(true, 5, "mxmxvkd,sqjhc,fvjkl")]
+        [InlineData(false, 2584, "fqhpsl,zxncg,clzpsl,zbbnj,jkgbvlxh,dzqc,ppj,glzb")]
+        public void Day21Test(bool sample, long expectedCount, string expectedCanonical)
+        {
+            var result = Days.Day21(sample);
+            Assert.Equal(expectedCount, result.Item1);
+            Assert.Equal(expectedCanonical, result.Item2);
+        }
     }
 }
