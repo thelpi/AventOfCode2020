@@ -9,18 +9,7 @@ namespace AventOfCode
 {
     public static class Days
     {
-        public static T[] RemoveAt<T>(this T[] source, int index)
-        {
-            T[] dest = new T[source.Length - 1];
-            if (index > 0)
-                Array.Copy(source, 0, dest, 0, index);
-
-            if (index < source.Length - 1)
-                Array.Copy(source, index + 1, dest, index, source.Length - index - 1);
-
-            return dest;
-        }
-
+        // 120 (part one only)
         public static string Day23(bool firstPart, bool sample)
         {
             var cups2 = GetContent(23, v => Convert.ToInt32(v), sample: sample).ToList();
@@ -38,6 +27,22 @@ namespace AventOfCode
 
             int LOOP = firstPart ? 100 : 10000000;
 
+            void RemoveAt(ref int[] source, int index)
+            {
+                var dest = new int[source.Length - 1];
+                if (index > 0)
+                {
+                    Array.Copy(source, 0, dest, 0, index);
+                }
+
+                if (index < source.Length - 1)
+                {
+                    Array.Copy(source, index + 1, dest, index, source.Length - index - 1);
+                }
+
+                source = dest;
+            }
+
             for (int i = 0; i < LOOP; i++)
             {
                 var currentCup = cupsArray[0];
@@ -47,7 +52,7 @@ namespace AventOfCode
                 for (int k = 3; k >= 1; k--)
                 {
                     removed[j] = cupsArray[k];
-                    cupsArray = cupsArray.RemoveAt(k);
+                    RemoveAt(ref cupsArray, k);
                     j--;
                 }
 
@@ -351,6 +356,11 @@ namespace AventOfCode
             }
 
             return (notUsed, canonical);
+        }
+
+        public static long Day20(bool firstPart, bool sample)
+        {
+            return 0;
         }
 
         // 175

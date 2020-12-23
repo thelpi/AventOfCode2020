@@ -214,6 +214,14 @@ namespace AventOfCodeUnitTests
         }
 
         [Theory]
+        [InlineData(true, true, 20899048083289)]
+        public void Day20Test(bool firstPart, bool sample, long expected)
+        {
+            var result = Days.Day20(firstPart, sample);
+            Assert.Equal(expected, result);
+        }
+
+        [Theory]
         [InlineData(true, 5, "mxmxvkd,sqjhc,fvjkl")]
         [InlineData(false, 2584, "fqhpsl,zxncg,clzpsl,zbbnj,jkgbvlxh,dzqc,ppj,glzb")]
         public void Day21Test(bool sample, long expectedCount, string expectedCanonical)
