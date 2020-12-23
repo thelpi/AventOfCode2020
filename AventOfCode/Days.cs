@@ -360,7 +360,179 @@ namespace AventOfCode
 
         public static long Day20(bool firstPart, bool sample)
         {
-            return 0;
+            var content = GetContent(20, v =>
+            {
+                var rows = v.Split("\r\n");
+                return (Convert.ToInt32(rows[0].Replace(":", "").Replace("Tile ", "")), rows.Skip(1)
+                    .Select(_ => _.
+                        Select(__ =>
+                            Convert.ToInt32(__ == '.' ? 1 : 0))
+                        .ToArray())
+                    .ToArray());
+            }, "\r\n\r\n", sample:sample).ToDictionary(kvp => kvp.Item1, kvp => kvp.Item2);
+
+            var cubes = new List<Cube>();
+            foreach (var k in content.Keys)
+            {
+                cubes.Add(new Cube(k, content[k]));
+            }
+
+            var cubeLinks = new List<CubeLink>();
+
+            int dim = cubes.Count / 3;
+
+            var grid = new int[dim, dim];
+
+            foreach (var cube in cubes)
+            {
+                foreach (var cubeOther in cubes)
+                {
+                    if (cube != cubeOther)
+                    {
+                        cubeLinks.AddRange(cube.CheckLinks(cubeOther));
+                    }
+                }
+            }
+
+            bool IsDone(int[,] localGrid)
+            {
+                for (int i = 0; i < localGrid.GetLength(0); i++)
+                {
+                    for (int j = 0; j < localGrid.GetLength(1); j++)
+                    {
+                        if (localGrid[i, j] == 0)
+                        {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+
+            var invalidCubeLinks = new List<CubeLink>();
+            while (!IsDone(grid))
+            {
+                grid = new int[1000, 1000];
+                var hypothesysLink = cubeLinks.First(cl => !invalidCubeLinks.Contains(cl));
+                cubeLinks.RemoveAll(cl =>
+                    cl.Id1 == hypothesysLink.Id1
+                    && (cl.Id1Flip != hypothesysLink.Id1Flip || cl.Id1Index == hypothesysLink.Id1Index));
+                cubeLinks.RemoveAll(cl =>
+                    cl.Id2 == hypothesysLink.Id2
+                    && (cl.Id2Flip != hypothesysLink.Id2Flip || cl.Id2Index == hypothesysLink.Id2Index));
+
+            }
+
+            return grid[0, 0] * grid[0, dim - 1] * grid[dim - 1, 0] * grid[dim - 1, dim - 1];
+        }
+
+        public class Cube
+        {
+            private readonly List<int[][]> _datas;
+
+            public int Id { get; }
+
+            public Cube(int id, int[][] originalDatas)
+            {
+                Id = id;
+                _datas = new List<int[][]>();
+
+                var size = originalDatas[0].Length;
+
+                for (int i = 0; i < 4; i++)
+                {
+                    var top = new int[size];
+                    var right = new int[size];
+                    var bottom = new int[size];
+                    var left = new int[size];
+                    switch (i)
+                    {
+                        case 0: // original
+                            top = originalDatas.First();
+                            bottom = originalDatas.Last();
+                            int k0 = 0;
+                            foreach (var row in originalDatas)
+                            {
+                                left[k0] = row.First();
+                                right[k0] = row.Last();
+                                k0++;
+                            }
+                            break;
+                        case 1: // left/right flip
+                            top = originalDatas.First().Reverse().ToArray();
+                            bottom = originalDatas.Last().Reverse().ToArray();
+                            int k1 = 0;
+                            foreach (var row in originalDatas)
+                            {
+                                left[k1] = row.Last();
+                                right[k1] = row.First();
+                                k1++;
+                            }
+                            break;
+                        case 2: // top/back flip
+                            top = originalDatas.Last();
+                            bottom = originalDatas.First();
+                            int k2 = originalDatas.Length - 1;
+                            foreach (var row in originalDatas)
+                            {
+                                left[k2] = row.First();
+                                right[k2] = row.Last();
+                                k2--;
+                            }
+                            break;
+                        case 3: // both flip
+                            top = originalDatas.Last().Reverse().ToArray();
+                            bottom = originalDatas.First().Reverse().ToArray();
+                            int k3 = originalDatas.Length - 1;
+                            foreach (var row in originalDatas)
+                            {
+                                left[k3] = row.Last();
+                                right[k3] = row.First();
+                                k3--;
+                            }
+                            break;
+                    }
+                    _datas.Add(new int[4][] { top, right, bottom, left });
+                }
+            }
+
+            public IEnumerable<CubeLink> CheckLinks(Cube other)
+            {
+                for (int i = 0; i < _datas.Count; i++)
+                {
+                    for (int j = 0; j < _datas[i].Length; j++)
+                    {
+                        for (int k = 0; k < other._datas.Count; k++)
+                        {
+                            for (int l = 0; l < other._datas[k].Length; l++)
+                            {
+                                if (_datas[i][j].SequenceEqual(other._datas[k][l]))
+                                {
+                                    yield return new CubeLink
+                                    {
+                                        Id1 = Id,
+                                        Id1Flip = i,
+                                        Id1Index = j,
+                                        Id2 = other.Id,
+                                        Id2Flip = k,
+                                        Id2Index = l
+                                    };
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public class CubeLink
+        {
+            public int Id1 { get; set; }
+            public int Id2 { get; set; }
+            public int Id1Flip { get; set; }
+            public int Id2Flip { get; set; }
+            public int Id1Index { get; set; }
+            public int Id2Index { get; set; }
         }
 
         // 175
