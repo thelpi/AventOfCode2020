@@ -9,87 +9,118 @@ namespace AventOfCode
 {
     public static class Days
     {
+        public static T[] RemoveAt<T>(this T[] source, int index)
+        {
+            T[] dest = new T[source.Length - 1];
+            if (index > 0)
+                Array.Copy(source, 0, dest, 0, index);
+
+            if (index < source.Length - 1)
+                Array.Copy(source, index + 1, dest, index, source.Length - index - 1);
+
+            return dest;
+        }
+
         public static string Day23(bool firstPart, bool sample)
         {
-            var cups = GetContent(23, v => Convert.ToInt32(v), sample: sample).ToList();
+            var cups2 = GetContent(23, v => Convert.ToInt32(v), sample: sample).ToList();
 
             if (!firstPart)
             {
-                var max = cups.Max() + 1;
+                var max = cups2.Max() + 1;
                 for (int i = max; i <= 1000000; i++)
                 {
-                    cups.Add(i);
+                    cups2.Add(i);
                 }
             }
+
+            var cupsArray = cups2.ToArray();
 
             int LOOP = firstPart ? 100 : 10000000;
 
             for (int i = 0; i < LOOP; i++)
             {
-                var currentCup = cups[0];
+                var currentCup = cupsArray[0];
 
-                var removed = new List<int>();
+                var removed = new int[3];
+                int j = 2;
                 for (int k = 3; k >= 1; k--)
                 {
-                    removed.Add(cups[k]);
-                    cups.RemoveAt(k);
+                    removed[j] = cupsArray[k];
+                    cupsArray = cupsArray.RemoveAt(k);
+                    j--;
+                }
+
+                bool Contains(int[] values, int value)
+                {
+                    for (int k = 0; k < values.Length; k++)
+                    {
+                        if (values[k] == value)
+                        {
+                            return true;
+                        }
+                    }
+                    return false;
                 }
 
                 var minusOne = currentCup - 1;
-                while (removed.Contains(minusOne))
+                while (Contains(removed, minusOne))
                 {
                     minusOne -= 1;
                 }
-                if (!cups.Contains(minusOne))
+                if (!Contains(cupsArray, minusOne))
                 {
-                    minusOne = cups.Max();
+                    minusOne = cupsArray.Max();
                 }
 
-                var indexofminus = cups.IndexOf(minusOne);
+                var indexofminus = Array.IndexOf(cupsArray, minusOne);
 
-                var atLast = cups.Skip(indexofminus + 1).ToList();
-                cups = cups.Take(indexofminus + 1).ToList();
-                removed.Reverse();
-                cups.AddRange(removed);
-                cups.AddRange(atLast);
-
-                for (int k = 0; k < cups.Count; k++)
+                var cupsArrayCopy = new int[cupsArray.Length + removed.Length];
+                for (int k = 0; k <= indexofminus; k++)
                 {
-                    if (k + 1 == cups.Count)
-                    {
-                        cups[k] = currentCup;
-                    }
-                    else
-                    {
-                        cups[k] = cups[k + 1];
-                    }
+                    cupsArrayCopy[k] = cupsArray[k];
+                }
+                for (int k = 0; k < 3; k++)
+                {
+                    cupsArrayCopy[k + indexofminus + 1] = removed[k];
+                }
+                for (int k = indexofminus + 1; k < cupsArray.Length; k++)
+                {
+                    cupsArrayCopy[k + 3] = cupsArray[k];
+                }
+                cupsArray = cupsArrayCopy;
+
+                for (int k = 0; k < cupsArray.Length; k++)
+                {
+                    cupsArray[k] = k == cupsArray.Length - 1
+                        ? currentCup
+                        : cupsArray[k + 1];
                 }
             }
 
+            var indexOfOne = Array.IndexOf(cupsArray, 1);
             if (firstPart)
             {
                 List<char> values = new List<char>();
-                var indexofOne = cups.IndexOf(1);
-                for (int k = indexofOne + 1; k < cups.Count; k++)
+                for (int k = indexOfOne + 1; k < cupsArray.Length; k++)
                 {
-                    values.Add(cups[k].ToString().First());
+                    values.Add(cupsArray[k].ToString().First());
                 }
-                for (int k = 0; k < indexofOne; k++)
+                for (int k = 0; k < indexOfOne; k++)
                 {
-                    values.Add(cups[k].ToString().First());
+                    values.Add(cupsArray[k].ToString().First());
                 }
 
                 return new string(values.ToArray());
             }
             else
             {
-                var indexOfOne = cups.IndexOf(1);
-                if (indexOfOne >= cups.Count - 1)
+                if (indexOfOne >= cupsArray.Length - 1)
                 {
 
                 }
-                var nb1 = cups[indexOfOne + 1];
-                var nb2 = cups[indexOfOne + 2];
+                var nb1 = cupsArray[indexOfOne + 1];
+                var nb2 = cupsArray[indexOfOne + 2];
 
                 return (nb1 * (long)nb2).ToString();
             }
