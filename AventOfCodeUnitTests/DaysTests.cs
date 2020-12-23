@@ -224,13 +224,24 @@ namespace AventOfCodeUnitTests
         }
 
         [Theory]
-        /*[InlineData(true, true, 306)]
+        [InlineData(true, true, 306)]
         [InlineData(true, false, 33925)]
-        [InlineData(false, true, 291)]*/
-        [InlineData(false, false, 291)]
+        [InlineData(false, true, 291)]
+        [InlineData(false, false, 33441)]
         public void Day22Test(bool firstPart, bool sample, long expected)
         {
             var result = Days.Day22(firstPart, sample);
+            Assert.Equal(expected, result);
+        }
+
+        [Theory]
+        [InlineData(true, true, "67384529")]
+        [InlineData(true, false, "27865934")]
+        //[InlineData(false, true, "149245887792")]
+        //[InlineData(false, false, "unknown")]
+        public void Day23Test(bool firstPart, bool sample, string expected)
+        {
+            var result = Days.Day23(firstPart, sample);
             Assert.Equal(expected, result);
         }
     }

@@ -9,6 +9,93 @@ namespace AventOfCode
 {
     public static class Days
     {
+        public static string Day23(bool firstPart, bool sample)
+        {
+            var cups = GetContent(23, v => Convert.ToInt32(v), sample: sample).ToList();
+
+            if (!firstPart)
+            {
+                var max = cups.Max() + 1;
+                for (int i = max; i <= 1000000; i++)
+                {
+                    cups.Add(i);
+                }
+            }
+
+            int LOOP = firstPart ? 100 : 10000000;
+
+            for (int i = 0; i < LOOP; i++)
+            {
+                var currentCup = cups[0];
+
+                var removed = new List<int>();
+                for (int k = 3; k >= 1; k--)
+                {
+                    removed.Add(cups[k]);
+                    cups.RemoveAt(k);
+                }
+
+                var minusOne = currentCup - 1;
+                while (removed.Contains(minusOne))
+                {
+                    minusOne -= 1;
+                }
+                if (!cups.Contains(minusOne))
+                {
+                    minusOne = cups.Max();
+                }
+
+                var indexofminus = cups.IndexOf(minusOne);
+
+                var atLast = cups.Skip(indexofminus + 1).ToList();
+                cups = cups.Take(indexofminus + 1).ToList();
+                removed.Reverse();
+                cups.AddRange(removed);
+                cups.AddRange(atLast);
+
+                for (int k = 0; k < cups.Count; k++)
+                {
+                    if (k + 1 == cups.Count)
+                    {
+                        cups[k] = currentCup;
+                    }
+                    else
+                    {
+                        cups[k] = cups[k + 1];
+                    }
+                }
+            }
+
+            if (firstPart)
+            {
+                List<char> values = new List<char>();
+                var indexofOne = cups.IndexOf(1);
+                for (int k = indexofOne + 1; k < cups.Count; k++)
+                {
+                    values.Add(cups[k].ToString().First());
+                }
+                for (int k = 0; k < indexofOne; k++)
+                {
+                    values.Add(cups[k].ToString().First());
+                }
+
+                return new string(values.ToArray());
+            }
+            else
+            {
+                var indexOfOne = cups.IndexOf(1);
+                if (indexOfOne >= cups.Count - 1)
+                {
+
+                }
+                var nb1 = cups[indexOfOne + 1];
+                var nb2 = cups[indexOfOne + 2];
+
+                return (nb1 * (long)nb2).ToString();
+            }
+        }
+
+        // 92
         public static long Day22(bool firstPart, bool sample)
         {
             var datas = GetContent(22, v => v, "\r\n\r\n", sample: sample);
@@ -102,6 +189,7 @@ namespace AventOfCode
             return Score(winner);
         }
 
+        // 131
         public static (long, string) Day21(bool sample)
         {
             var datas = GetContent(21, v => v, sample: sample);
@@ -234,6 +322,7 @@ namespace AventOfCode
             return (notUsed, canonical);
         }
 
+        // 175
         public static long Day19(bool firstPart, bool sample)
         {
             var content = GetContent(19, v => v, "\r\n\r\n", sample: sample, part: firstPart ? 1 : 2);
@@ -410,6 +499,7 @@ namespace AventOfCode
             }
         }
 
+        // 96
         public static long Day18(bool firstPart, bool sample)
         {
             var expressions = GetContent(18, v =>  v, sample: sample, part: (sample ? (firstPart ? 1 : 2) : (int?)null));
