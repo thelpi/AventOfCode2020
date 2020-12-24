@@ -9,6 +9,191 @@ namespace AventOfCode
 {
     public static class Days
     {
+        public static long Day24(bool firstPart, bool sample)
+        {
+            var datas = GetContent(24, v => v, sample: sample);
+
+            var instructions = new List<List<string>>();
+            foreach (var data in datas)
+            {
+                var instructionsLine = new List<string>();
+                var k = 0;
+                while (k < data.Length)
+                {
+                    if (data[k] == 's' || data[k] == 'n')
+                    {
+                        instructionsLine.Add(new string(data.Skip(k).Take(2).ToArray()));
+                        k++;
+                    }
+                    else
+                    {
+                        instructionsLine.Add(data[k].ToString());
+                    }
+                    k++;
+                }
+                instructions.Add(instructionsLine);
+            }
+
+            const int middle = 20000;
+
+            var tiles = new bool[middle * 2][];
+            for (var i = 0; i < tiles.Length; i++)
+            {
+                tiles[i] = new bool[middle * 2];
+            }
+
+            var iMin = middle;
+            var iMax = middle;
+            var jMin = middle;
+            var jMax = middle;
+
+            var iCurrent = middle;
+            var jCurrent = middle;
+            foreach (var instructionsLine in instructions)
+            {
+                foreach (var instruction in instructionsLine)
+                {
+                    switch (instruction)
+                    {
+                        case "sw":
+                            iCurrent++;
+                            break;
+                        case "se":
+                            jCurrent++;
+                            iCurrent++;
+                            break;
+                        case "nw":
+                            jCurrent--;
+                            iCurrent--;
+                            break;
+                        case "ne":
+                            iCurrent--;
+                            break;
+                        case "e":
+                            jCurrent++;
+                            break;
+                        case "w":
+                            jCurrent--;
+                            break;
+                    }
+                }
+                tiles[iCurrent][jCurrent] = !tiles[iCurrent][jCurrent];
+                if (tiles[iCurrent][jCurrent])
+                {
+                    if (iCurrent< iMin)
+                    {
+                        iMin = iCurrent;
+                    }
+                    else if (iCurrent > iMax)
+                    {
+                        iMax = iCurrent;
+                    }
+                    if (jCurrent < jMin)
+                    {
+                        jMin = jCurrent;
+                    }
+                    else if (jCurrent > jMax)
+                    {
+                        jMax = jCurrent;
+                    }
+                }
+                iCurrent = middle;
+                jCurrent = middle;
+            }
+
+            if (firstPart)
+            {
+                return tiles.SelectMany(t => t).Count(t => t);
+            }
+
+            var toSwitch = new List<(int, int)>(middle * middle);
+            for (int k = 1; k <= 100; k++)
+            {
+                toSwitch.Clear();
+                iMin -= 1;
+                jMin -= 1;
+                iMax += 1;
+                jMax += 1;
+                int nextIMin = iMin;
+                int nextJMin = jMin;
+                int nextIMax = iMax;
+                int nextJMax = jMax;
+                for (int i = iMin; i <= iMax; i++)
+                {
+                    for (int j = jMin; j <= jMax; j++)
+                    {
+                        int count = 0;
+                        if (tiles[i][j - 1])
+                        {
+                            count++;
+                        }
+                        if (tiles[i - 1][j - 1])
+                        {
+                            count++;
+                        }
+                        if (tiles[i - 1][j])
+                        {
+                            count++;
+                        }
+                        if (tiles[i + 1][j])
+                        {
+                            count++;
+                        }
+                        if (tiles[i + 1][j + 1])
+                        {
+                            count++;
+                        }
+                        if (tiles[i][j + 1])
+                        {
+                            count++;
+                        }
+
+                        if (tiles[i][j])
+                        {
+                            if (count == 0 || count > 2)
+                            {
+                                toSwitch.Add((i, j));
+                            }
+                        }
+                        else
+                        {
+                            if (count == 2)
+                            {
+                                toSwitch.Add((i, j));
+                                if (i < nextIMin)
+                                {
+                                    nextIMin = i;
+                                }
+                                else if (i > nextIMax)
+                                {
+                                    nextIMax = i;
+                                }
+                                if (j < nextJMin)
+                                {
+                                    nextJMin = j;
+                                }
+                                else if (j > nextJMax)
+                                {
+                                    nextJMax = j;
+                                }
+                            }
+                        }
+                    }
+                }
+                iMin = nextIMin - 1;
+                jMin = nextJMin - 1;
+                iMax = nextIMax + 1;
+                jMax = nextJMax + 1;
+                foreach (var (a, b) in toSwitch)
+                {
+                    tiles[a][b] = !tiles[a][b];
+                }
+                //System.Diagnostics.Debug.WriteLine($"day {k} - {tiles.SelectMany(t => t).Count(t => t)}");
+            }
+
+            return tiles.SelectMany(t => t).Count(t => t);
+        }
+
         // 120 (part one only)
         public static string Day23(bool firstPart, bool sample)
         {
