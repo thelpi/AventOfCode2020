@@ -371,168 +371,269 @@ namespace AventOfCode
                     .ToArray());
             }, "\r\n\r\n", sample:sample).ToDictionary(kvp => kvp.Item1, kvp => kvp.Item2);
 
+            var dim = content.Keys.Count / 3;
+
+            bool Sequencial(int i, int j, ref CubePos[,] localGrid, List<CubePos> localCubes)
+            {
+                if (i == dim)
+                {
+                    return true;
+                }
+
+                var rightPossibilities = new List<CubePos>();
+                var bottomPossibilities = new List<CubePos>();
+
+                if (i > 0)
+                {
+                    var topper = localGrid[i - 1, j];
+                    bottomPossibilities.AddRange(localCubes.Where(lc => topper.Match(lc, false)));
+                    if (bottomPossibilities.Count == 0)
+                    {
+                        return false;
+                    }
+                }
+
+                if (j > 0)
+                {
+                    var lefter = localGrid[i, j - 1];
+                    rightPossibilities.AddRange(localCubes.Where(lc => lefter.Match(lc, true)));
+                    if (rightPossibilities.Count == 0)
+                    {
+                        return false;
+                    }
+                }
+
+                var possibilities = new List<CubePos>();
+                if (rightPossibilities.Count > 0 && bottomPossibilities.Count > 0)
+                {
+                    var intersect = rightPossibilities.Intersect(bottomPossibilities);
+                    if (!intersect.Any())
+                    {
+                        return false;
+                    }
+                    possibilities.AddRange(intersect);
+                }
+                else if (rightPossibilities.Count > 0)
+                {
+                    possibilities.AddRange(rightPossibilities);
+                }
+                else if (bottomPossibilities.Count > 0)
+                {
+                    possibilities.AddRange(bottomPossibilities);
+                }
+                else
+                {
+                    possibilities.AddRange(localCubes);
+                }
+
+                foreach (var poss in possibilities)
+                {
+                    var localCubesCopy = new List<CubePos>(localCubes.Where(lcc => lcc.Parent != poss.Parent));
+
+                    var localGridCopy = new CubePos[dim, dim];
+                    for (int k = 0; k < localGrid.GetLength(0); k++)
+                    {
+                        for (int l = 0; l < localGrid.GetLength(1); l++)
+                        {
+                            localGridCopy[k, l] = localGrid[k, l];
+                        }
+                    }
+                    localGridCopy[i, j] = poss;
+
+                    int newJ = j + 1;
+                    int newI = i;
+                    if (newJ == dim)
+                    {
+                        newJ = 0;
+                        newI += 1;
+                    }
+
+                    if (Sequencial(newI, newJ, ref localGridCopy, localCubesCopy))
+                    {
+                        localGrid = localGridCopy;
+                        localCubes.RemoveAll(lcc => lcc.Parent != poss.Parent);
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
             var cubes = new List<Cube>();
             foreach (var k in content.Keys)
             {
                 cubes.Add(new Cube(k, content[k]));
             }
 
-            var cubeLinks = new List<CubeLink>();
+            var grid = new CubePos[dim, dim];
 
-            int dim = cubes.Count / 3;
+            Sequencial(0, 0, ref grid, cubes.SelectMany(c => c.Cubes).ToList());
 
-            var grid = new int[dim, dim];
-
-            foreach (var cube in cubes)
-            {
-                foreach (var cubeOther in cubes)
-                {
-                    if (cube != cubeOther)
-                    {
-                        cubeLinks.AddRange(cube.CheckLinks(cubeOther));
-                    }
-                }
-            }
-
-            bool IsDone(int[,] localGrid)
-            {
-                for (int i = 0; i < localGrid.GetLength(0); i++)
-                {
-                    for (int j = 0; j < localGrid.GetLength(1); j++)
-                    {
-                        if (localGrid[i, j] == 0)
-                        {
-                            return false;
-                        }
-                    }
-                }
-                return true;
-            }
-
-            var invalidCubeLinks = new List<CubeLink>();
-            while (!IsDone(grid))
-            {
-                grid = new int[1000, 1000];
-                var hypothesysLink = cubeLinks.First(cl => !invalidCubeLinks.Contains(cl));
-                cubeLinks.RemoveAll(cl =>
-                    cl.Id1 == hypothesysLink.Id1
-                    && (cl.Id1Flip != hypothesysLink.Id1Flip || cl.Id1Index == hypothesysLink.Id1Index));
-                cubeLinks.RemoveAll(cl =>
-                    cl.Id2 == hypothesysLink.Id2
-                    && (cl.Id2Flip != hypothesysLink.Id2Flip || cl.Id2Index == hypothesysLink.Id2Index));
-
-            }
-
-            return grid[0, 0] * grid[0, dim - 1] * grid[dim - 1, 0] * grid[dim - 1, dim - 1];
+            return (long)grid[0, 0].ParentId * grid[0, dim - 1].ParentId * grid[dim - 1, 0].ParentId * grid[dim - 1, dim - 1].ParentId;
         }
 
         public class Cube
         {
-            private readonly List<int[][]> _datas;
+            private readonly List<CubePos> _cubes;
 
             public int Id { get; }
+            public IReadOnlyCollection<CubePos> Cubes { get { return _cubes; } }
 
             public Cube(int id, int[][] originalDatas)
             {
                 Id = id;
-                _datas = new List<int[][]>();
+                _cubes = new List<CubePos>();
 
                 var size = originalDatas[0].Length;
 
-                for (int i = 0; i < 4; i++)
+                for (int i = 0; i < 6; i++)
                 {
-                    var top = new int[size];
-                    var right = new int[size];
-                    var bottom = new int[size];
-                    var left = new int[size];
-                    switch (i)
+                    for (int l = 0; l < 4; l++)
                     {
-                        case 0: // original
-                            top = originalDatas.First();
-                            bottom = originalDatas.Last();
-                            int k0 = 0;
-                            foreach (var row in originalDatas)
-                            {
-                                left[k0] = row.First();
-                                right[k0] = row.Last();
-                                k0++;
-                            }
-                            break;
-                        case 1: // left/right flip
-                            top = originalDatas.First().Reverse().ToArray();
-                            bottom = originalDatas.Last().Reverse().ToArray();
-                            int k1 = 0;
-                            foreach (var row in originalDatas)
-                            {
-                                left[k1] = row.Last();
-                                right[k1] = row.First();
-                                k1++;
-                            }
-                            break;
-                        case 2: // top/back flip
-                            top = originalDatas.Last();
-                            bottom = originalDatas.First();
-                            int k2 = originalDatas.Length - 1;
-                            foreach (var row in originalDatas)
-                            {
-                                left[k2] = row.First();
-                                right[k2] = row.Last();
-                                k2--;
-                            }
-                            break;
-                        case 3: // both flip
-                            top = originalDatas.Last().Reverse().ToArray();
-                            bottom = originalDatas.First().Reverse().ToArray();
-                            int k3 = originalDatas.Length - 1;
-                            foreach (var row in originalDatas)
-                            {
-                                left[k3] = row.Last();
-                                right[k3] = row.First();
-                                k3--;
-                            }
-                            break;
-                    }
-                    _datas.Add(new int[4][] { top, right, bottom, left });
-                }
-            }
-
-            public IEnumerable<CubeLink> CheckLinks(Cube other)
-            {
-                for (int i = 0; i < _datas.Count; i++)
-                {
-                    for (int j = 0; j < _datas[i].Length; j++)
-                    {
-                        for (int k = 0; k < other._datas.Count; k++)
+                        var top = new int[size];
+                        var right = new int[size];
+                        var bottom = new int[size];
+                        var left = new int[size];
+                        switch (i)
                         {
-                            for (int l = 0; l < other._datas[k].Length; l++)
-                            {
-                                if (_datas[i][j].SequenceEqual(other._datas[k][l]))
+                            case 0: // original
+                                top = originalDatas.First();
+                                bottom = originalDatas.Last();
+                                int k0 = 0;
+                                foreach (var row in originalDatas)
                                 {
-                                    yield return new CubeLink
-                                    {
-                                        Id1 = Id,
-                                        Id1Flip = i,
-                                        Id1Index = j,
-                                        Id2 = other.Id,
-                                        Id2Flip = k,
-                                        Id2Index = l
-                                    };
+                                    left[k0] = row.First();
+                                    right[k0] = row.Last();
+                                    k0++;
                                 }
-                            }
+                                break;
+                            case 1: // left/right flip
+                                top = originalDatas.First().Reverse().ToArray();
+                                bottom = originalDatas.Last().Reverse().ToArray();
+                                int k1 = 0;
+                                foreach (var row in originalDatas)
+                                {
+                                    left[k1] = row.Last();
+                                    right[k1] = row.First();
+                                    k1++;
+                                }
+                                break;
+                            case 2: // top/back flip
+                                top = originalDatas.Last();
+                                bottom = originalDatas.First();
+                                int k2 = originalDatas.Length - 1;
+                                foreach (var row in originalDatas)
+                                {
+                                    left[k2] = row.First();
+                                    right[k2] = row.Last();
+                                    k2--;
+                                }
+                                break;
+                            case 3: // both flip
+                                top = originalDatas.Last().Reverse().ToArray();
+                                bottom = originalDatas.First().Reverse().ToArray();
+                                int k3 = originalDatas.Length - 1;
+                                foreach (var row in originalDatas)
+                                {
+                                    left[k3] = row.Last();
+                                    right[k3] = row.First();
+                                    k3--;
+                                }
+                                break;
+                            case 4: // rotate flip
+                                left = originalDatas.Last().Reverse().ToArray();
+                                right = originalDatas.First().Reverse().ToArray();
+                                int m = 0;
+                                var formerCol1 = new int[left.Length];
+                                var formerCol2 = new int[left.Length];
+                                foreach (var row in originalDatas)
+                                {
+                                    formerCol1[m] = row[0];
+                                    formerCol2[m] = row[left.Length - 1];
+                                    m++;
+                                }
+                                bottom = formerCol1.Reverse().ToArray();
+                                top = formerCol2.Reverse().ToArray();
+                                break;
+                            case 5: // rotate flip
+                                left = originalDatas.First().ToArray();
+                                right = originalDatas.Last().ToArray();
+                                int n = 0;
+                                var formerCol3 = new int[left.Length];
+                                var formerCol4 = new int[left.Length];
+                                foreach (var row in originalDatas)
+                                {
+                                    formerCol3[n] = row[0];
+                                    formerCol4[n] = row[left.Length - 1];
+                                    n++;
+                                }
+                                top = formerCol3.ToArray();
+                                bottom = formerCol4.ToArray();
+                                break;
                         }
+                        if (l > 0 && i > 3)
+                        {
+                            continue;
+                        }
+                        int[] tmp;
+                        switch (l)
+                        {
+                            case 1:
+                                tmp = right;
+                                right = top;
+                                top = left;
+                                left = bottom;
+                                bottom = tmp;
+                                break;
+                            case 2:
+                                tmp = right;
+                                right = left;
+                                left = tmp;
+                                tmp = bottom;
+                                bottom = top;
+                                top = tmp;
+                                break;
+                            case 3:
+                                tmp = left;
+                                left = top;
+                                top = right;
+                                right = bottom;
+                                bottom = tmp;
+                                break;
+                        }
+                        _cubes.Add(new CubePos
+                        {
+                            Bottom = bottom,
+                            Left = left,
+                            Parent = this,
+                            Right = right,
+                            Top = top
+                        });
                     }
                 }
             }
         }
 
-        public class CubeLink
+        public class CubePos
         {
-            public int Id1 { get; set; }
-            public int Id2 { get; set; }
-            public int Id1Flip { get; set; }
-            public int Id2Flip { get; set; }
-            public int Id1Index { get; set; }
-            public int Id2Index { get; set; }
+            public int[] Top { get; set; }
+            public int[] Left { get; set; }
+            public int[] Right { get; set; }
+            public int[] Bottom { get; set; }
+            public int ParentId { get { return Parent.Id; } }
+            public Cube Parent { get; set; }
+
+            public bool Match(CubePos other, bool leftToRight)
+            {
+                if (leftToRight)
+                {
+                    return Right.SequenceEqual(other.Left);
+                }
+                else
+                {
+                    return Bottom.SequenceEqual(other.Top);
+                }
+            }
         }
 
         // 175
