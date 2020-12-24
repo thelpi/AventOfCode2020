@@ -373,6 +373,14 @@ namespace AventOfCode
 
             var dim = content.Keys.Count / 3;
 
+            int CountNeighbours(CubePos cp, List<CubePos> localCubes)
+            {
+                var lcc = localCubes.Where(_ => _.ParentId != cp.ParentId
+                    && (cp.MatchLeft(_, false) || cp.MatchLeft(_, true) || cp.MatchTop(_, false) || cp.MatchTop(_, true)));
+
+                return lcc.GroupBy(_ => _.ParentId).Count();
+            }
+
             bool Sequencial(int i, int j, ref CubePos[,] localGrid, List<CubePos> localCubes)
             {
                 if (i == dim)
@@ -386,7 +394,7 @@ namespace AventOfCode
                 if (i > 0)
                 {
                     var topper = localGrid[i - 1, j];
-                    bottomPossibilities.AddRange(localCubes.Where(lc => topper.Match(lc, false)));
+                    bottomPossibilities.AddRange(localCubes.Where(lc => topper.MatchTop(lc)));
                     if (bottomPossibilities.Count == 0)
                     {
                         return false;
@@ -396,7 +404,7 @@ namespace AventOfCode
                 if (j > 0)
                 {
                     var lefter = localGrid[i, j - 1];
-                    rightPossibilities.AddRange(localCubes.Where(lc => lefter.Match(lc, true)));
+                    rightPossibilities.AddRange(localCubes.Where(lc => lefter.MatchLeft(lc)));
                     if (rightPossibilities.Count == 0)
                     {
                         return false;
@@ -428,6 +436,21 @@ namespace AventOfCode
 
                 foreach (var poss in possibilities)
                 {
+                    /*var count = CountNeighbours(poss, localCubes);
+                    if (i > 0 && j > 0 && i < dim - 1 && j < dim - 1 && count < 4)
+                    {
+                        continue;
+                    }
+                    else if ((
+                        (i > 0 && j == 0)
+                        || (i < dim - 1 && j == dim - 1)
+                        || (i == 0 && j > 0)
+                        || (i == dim - 1 && j < dim - 1)
+                     ) && count < 3)
+                    {
+                        continue;
+                    }*/
+
                     var localCubesCopy = new List<CubePos>(localCubes.Where(lcc => lcc.Parent != poss.Parent));
 
                     var localGridCopy = new CubePos[dim, dim];
@@ -623,16 +646,22 @@ namespace AventOfCode
             public int ParentId { get { return Parent.Id; } }
             public Cube Parent { get; set; }
 
-            public bool Match(CubePos other, bool leftToRight)
+            public bool MatchTop(CubePos other, bool reverse = false)
             {
-                if (leftToRight)
+                if (reverse)
                 {
-                    return Right.SequenceEqual(other.Left);
+                    return Top.SequenceEqual(other.Bottom);
                 }
-                else
+                return Bottom.SequenceEqual(other.Top);
+            }
+
+            public bool MatchLeft(CubePos other, bool reverse = false)
+            {
+                if (reverse)
                 {
-                    return Bottom.SequenceEqual(other.Top);
+                    return Left.SequenceEqual(other.Right);
                 }
+                return Right.SequenceEqual(other.Left);
             }
         }
 
