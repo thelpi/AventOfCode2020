@@ -558,13 +558,8 @@ namespace AventOfCode
 
             var dim = content.Keys.Count / 3;
 
-            int CountNeighbours(CubePos cp, List<CubePos> localCubes)
-            {
-                var lcc = localCubes.Where(_ => _.ParentId != cp.ParentId
-                    && (cp.MatchLeft(_, false) || cp.MatchLeft(_, true) || cp.MatchTop(_, false) || cp.MatchTop(_, true)));
-
-                return lcc.GroupBy(_ => _.ParentId).Count();
-            }
+            var rightPossibilities = new List<CubePos>();
+            var bottomPossibilities = new List<CubePos>();
 
             bool Sequencial(int i, int j, ref CubePos[,] localGrid, List<CubePos> localCubes)
             {
@@ -573,8 +568,8 @@ namespace AventOfCode
                     return true;
                 }
 
-                var rightPossibilities = new List<CubePos>();
-                var bottomPossibilities = new List<CubePos>();
+                rightPossibilities.Clear();
+                bottomPossibilities.Clear();
 
                 if (i > 0)
                 {
@@ -621,21 +616,6 @@ namespace AventOfCode
 
                 foreach (var poss in possibilities)
                 {
-                    /*var count = CountNeighbours(poss, localCubes);
-                    if (i > 0 && j > 0 && i < dim - 1 && j < dim - 1 && count < 4)
-                    {
-                        continue;
-                    }
-                    else if ((
-                        (i > 0 && j == 0)
-                        || (i < dim - 1 && j == dim - 1)
-                        || (i == 0 && j > 0)
-                        || (i == dim - 1 && j < dim - 1)
-                     ) && count < 3)
-                    {
-                        continue;
-                    }*/
-
                     var localCubesCopy = new List<CubePos>(localCubes.Where(lcc => lcc.Parent != poss.Parent));
 
                     var localGridCopy = new CubePos[dim, dim];
@@ -659,7 +639,7 @@ namespace AventOfCode
                     if (Sequencial(newI, newJ, ref localGridCopy, localCubesCopy))
                     {
                         localGrid = localGridCopy;
-                        localCubes.RemoveAll(lcc => lcc.Parent != poss.Parent);
+                        //localCubes.RemoveAll(lcc => lcc.Parent != poss.Parent);
                         return true;
                     }
                 }
@@ -675,7 +655,36 @@ namespace AventOfCode
 
             var grid = new CubePos[dim, dim];
 
-            Sequencial(0, 0, ref grid, cubes.SelectMany(c => c.Cubes).ToList());
+            var cubPoses = cubes.SelectMany(c => c.Cubes).ToList();
+            cubPoses = cubPoses.OrderBy(_ =>
+            {
+                int count = 0;
+                foreach (var cp in cubPoses)
+                {
+                    if (cp.ParentId != _.ParentId)
+                    {
+                        if (_.MatchLeft(cp))
+                        {
+                            count++;
+                        }
+                        if (_.MatchTop(cp))
+                        {
+                            count++;
+                        }
+                        if (_.MatchLeft(cp, true))
+                        {
+                            count++;
+                        }
+                        if (_.MatchTop(cp, true))
+                        {
+                            count++;
+                        }
+                    }
+                }
+                return count;
+            }).ToList();
+
+            Sequencial(0, 0, ref grid, cubPoses);
 
             return (long)grid[0, 0].ParentId * grid[0, dim - 1].ParentId * grid[dim - 1, 0].ParentId * grid[dim - 1, dim - 1].ParentId;
         }
@@ -779,10 +788,10 @@ namespace AventOfCode
                                 bottom = formerCol4.ToArray();
                                 break;
                         }
-                        if (l > 0 && i > 3)
+                        /*if (l > 0 && i > 3)
                         {
                             continue;
-                        }
+                        }*/
                         int[] tmp;
                         switch (l)
                         {
