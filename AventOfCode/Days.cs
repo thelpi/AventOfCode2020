@@ -628,16 +628,16 @@ namespace AventOfCode
                     .ToArray());
             }, "\r\n\r\n", sample:sample).ToDictionary(kvp => kvp.Item1, kvp => kvp.Item2);
 
-            var dim = content.Keys.Count / 3;
+            var dim = (int)Math.Sqrt(content.Keys.Count);
 
             var rightPossibilities = new List<CubePos>();
             var bottomPossibilities = new List<CubePos>();
 
-            bool Sequencial(int i, int j, ref CubePos[,] localGrid, List<CubePos> localCubes)
+            CubePos[,] Sequencial(int i, int j, CubePos[,] localGrid, List<CubePos> localCubes)
             {
                 if (i == dim)
                 {
-                    return true;
+                    return localGrid;
                 }
 
                 rightPossibilities.Clear();
@@ -649,7 +649,7 @@ namespace AventOfCode
                     bottomPossibilities.AddRange(localCubes.Where(lc => topper.MatchTop(lc)));
                     if (bottomPossibilities.Count == 0)
                     {
-                        return false;
+                        return null;
                     }
                 }
 
@@ -659,7 +659,7 @@ namespace AventOfCode
                     rightPossibilities.AddRange(localCubes.Where(lc => lefter.MatchLeft(lc)));
                     if (rightPossibilities.Count == 0)
                     {
-                        return false;
+                        return null;
                     }
                 }
 
@@ -669,7 +669,7 @@ namespace AventOfCode
                     var intersect = rightPossibilities.Intersect(bottomPossibilities);
                     if (!intersect.Any())
                     {
-                        return false;
+                        return null;
                     }
                     possibilities.AddRange(intersect);
                 }
@@ -708,15 +708,14 @@ namespace AventOfCode
                         newI += 1;
                     }
 
-                    if (Sequencial(newI, newJ, ref localGridCopy, localCubesCopy))
+                    localGridCopy = Sequencial(newI, newJ, localGridCopy, localCubesCopy);
+                    if (localGridCopy != null)
                     {
-                        localGrid = localGridCopy;
-                        //localCubes.RemoveAll(lcc => lcc.Parent != poss.Parent);
-                        return true;
+                        return localGridCopy;
                     }
                 }
 
-                return false;
+                return null;
             }
 
             var cubes = new List<Cube>();
@@ -728,35 +727,13 @@ namespace AventOfCode
             var grid = new CubePos[dim, dim];
 
             var cubPoses = cubes.SelectMany(c => c.Cubes).ToList();
-            cubPoses = cubPoses.OrderBy(_ =>
-            {
-                int count = 0;
-                foreach (var cp in cubPoses)
-                {
-                    if (cp.ParentId != _.ParentId)
-                    {
-                        if (_.MatchLeft(cp))
-                        {
-                            count++;
-                        }
-                        if (_.MatchTop(cp))
-                        {
-                            count++;
-                        }
-                        if (_.MatchLeft(cp, true))
-                        {
-                            count++;
-                        }
-                        if (_.MatchTop(cp, true))
-                        {
-                            count++;
-                        }
-                    }
-                }
-                return count;
-            }).ToList();
 
-            Sequencial(0, 0, ref grid, cubPoses);
+            grid = Sequencial(0, 0, grid, cubPoses);
+
+            if (grid == null)
+            {
+                throw new InvalidOperationException();
+            }
 
             return (long)grid[0, 0].ParentId * grid[0, dim - 1].ParentId * grid[dim - 1, 0].ParentId * grid[dim - 1, dim - 1].ParentId;
         }
