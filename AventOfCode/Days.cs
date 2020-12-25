@@ -9,6 +9,78 @@ namespace AventOfCode
 {
     public static class Days
     {
+        public static long Day25(bool sample)
+        {
+            var content = GetContent(25, v => Convert.ToInt64(v), sample: sample);
+
+            long publicKeyCard = content[0];
+            long publicKeyDoor = content[1];
+
+            long FindLoop(long publicKey, out bool hardStop)
+            {
+                const long modulo = 20201227;
+                long value = 1;
+                long loopSize = 0;
+                hardStop = true;
+
+                while (loopSize < 10000000000)
+                {
+                    value = 7 * value;
+                    value = value % modulo;
+                    loopSize++;
+                    if (value == publicKey)
+                    {
+                        hardStop = false;
+                        break;
+                    }
+                }
+
+                return loopSize;
+            }
+
+            long ApplyLoop(long loopSizeExpected, long subject)
+            {
+                const long modulo = 20201227;
+                long value = 1;
+                long loopSize = 0;
+
+                while (loopSize < loopSizeExpected)
+                {
+                    value = subject * value;
+                    value = value % modulo;
+                    loopSize++;
+                }
+
+                return value;
+            }
+
+            long r1 = -1;
+            long r2 = -2;
+            while (r1 != r2)
+            {
+                bool hardStop = false;
+                var loopCard = FindLoop(publicKeyCard, out hardStop);
+                if (hardStop)
+                {
+                    continue;
+                }
+                var loopDoor = FindLoop(publicKeyDoor, out hardStop);
+                if (hardStop)
+                {
+                    continue;
+                }
+                if (loopDoor == loopCard)
+                {
+                    continue;
+                }
+
+                r1 = ApplyLoop(loopCard, publicKeyDoor);
+                r2 = ApplyLoop(loopDoor, publicKeyCard);
+            }
+
+            return r1;
+        }
+
         public static long Day24(bool firstPart, bool sample)
         {
             var datas = GetContent(24, v => v, sample: sample);

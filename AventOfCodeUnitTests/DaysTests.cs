@@ -264,5 +264,14 @@ namespace AventOfCodeUnitTests
             var result = Days.Day24(firstPart, sample);
             Assert.Equal(expected, result);
         }
+
+        [Theory]
+        [InlineData(true, 14897079)]
+        [InlineData(false, 18862163)]
+        public void Day25Test(bool sample, long expected)
+        {
+            var result = Days.Day25(sample);
+            Assert.Equal(expected, result);
+        }
     }
 }
