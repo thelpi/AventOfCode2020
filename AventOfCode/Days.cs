@@ -655,7 +655,10 @@ namespace AventOfCode
                         var right = new int[size];
                         var bottom = new int[size];
                         var left = new int[size];
+                        var cbContent = new int[size - 2, size - 2];
                         int l = 0;
+                        int c;
+                        int d;
                         switch (i)
                         {
                             case 0:
@@ -665,6 +668,17 @@ namespace AventOfCode
                                 {
                                     right[k] = originalDatas[k].Last();
                                     left[k] = originalDatas[k].First();
+                                }
+                                c = 0;
+                                for (int a = 1; a < originalDatas.Length - 1; a++)
+                                {
+                                    d = 0;
+                                    for (int b = 1; b < originalDatas.Length - 1; b++)
+                                    {
+                                        cbContent[c, d] = originalDatas[a][b];
+                                        d++;
+                                    }
+                                    c++;
                                 }
                                 break;
                             case 1:
@@ -676,6 +690,17 @@ namespace AventOfCode
                                 }
                                 right = originalDatas.First();
                                 left = originalDatas.Last();
+                                c = 0;
+                                for (int a = originalDatas.Length - 2; a >= 1; a--)
+                                {
+                                    d = 0;
+                                    for (int b = 1; b < originalDatas.Length - 1; b++)
+                                    {
+                                        cbContent[c, d] = originalDatas[a][b];
+                                        d++;
+                                    }
+                                    c++;
+                                }
                                 break;
                             case 2:
                                 top = originalDatas.Last().Reverse().ToArray();
@@ -686,6 +711,17 @@ namespace AventOfCode
                                     left[l] = originalDatas[k].Last();
                                     l++;
                                 }
+                                c = 0;
+                                for (int a = originalDatas.Length - 2; a >= 1; a--)
+                                {
+                                    d = 0;
+                                    for (int b = originalDatas.Length - 2; b >= 1; b--)
+                                    {
+                                        cbContent[c, d] = originalDatas[a][b];
+                                        d++;
+                                    }
+                                    c++;
+                                }
                                 break;
                             case 3:
                                 for (int k = 0; k < originalDatas.Length; k++)
@@ -695,6 +731,17 @@ namespace AventOfCode
                                 }
                                 right = originalDatas.First().Reverse().ToArray();
                                 left = originalDatas.Last().Reverse().ToArray();
+                                c = 0;
+                                for (int a = 1; a < originalDatas.Length - 1; a++)
+                                {
+                                    d = 0;
+                                    for (int b = originalDatas.Length - 2; b >= 1; b--)
+                                    {
+                                        cbContent[c, d] = originalDatas[a][b];
+                                        d++;
+                                    }
+                                    c++;
+                                }
                                 break;
                         }
                         _cubes.Add(new CubePos
@@ -703,6 +750,7 @@ namespace AventOfCode
                             Right = string.Join("", right),
                             Bottom = string.Join("", bottom),
                             Left = string.Join("", left),
+                            Content = cbContent,
                             ParentId = id
                         });
                     }
@@ -823,6 +871,24 @@ namespace AventOfCode
                 return (long)grid[0, 0].ParentId * grid[0, dim - 1].ParentId * grid[dim - 1, 0].ParentId * grid[dim - 1, dim - 1].ParentId;
             }
 
+            var pixelSizeNoBorder = grid[0, 0].Bottom.Length - 2;
+            var image = new int[dim * pixelSizeNoBorder, dim * pixelSizeNoBorder];
+            for (int i = 0; i < grid.GetLength(0); i++)
+            {
+                for (int j = 0; j < grid.GetLength(1); j++)
+                {
+                    for (int k = 0; k < grid[i, j].Content.GetLength(0); k++)
+                    {
+                        for (int l = 0; l < grid[i, j].Content.GetLength(1); l++)
+                        {
+                            image[(i * pixelSizeNoBorder) + k, (j * pixelSizeNoBorder) + l] = grid[i, j].Content[k, l];
+                        }
+                    }
+                }
+            }
+
+
+
             return 0;
         }
 
@@ -833,6 +899,7 @@ namespace AventOfCode
             public string Right { get; set; }
             public string Bottom { get; set; }
             public int ParentId { get; set; }
+            public int[,] Content { get; set; }
 
             public bool MatchTop(CubePos other)
             {
