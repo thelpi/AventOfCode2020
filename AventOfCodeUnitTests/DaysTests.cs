@@ -215,7 +215,7 @@ namespace AventOfCodeUnitTests
 
         [Theory]
         [InlineData(true, true, 20899048083289)]
-        //[InlineData(true, false, 28057939502729)]
+        [InlineData(true, false, 28057939502729)]
         //[InlineData(false, true, 273)]
         //[InlineData(false, false, 0)]
         public void Day20Test(bool firstPart, bool sample, long expected)
