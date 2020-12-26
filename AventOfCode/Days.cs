@@ -632,16 +632,9 @@ namespace AventOfCode
 
             var rightPossibilities = new List<CubePos>();
             var bottomPossibilities = new List<CubePos>();
-            int maxDepth = 0;
 
-            CubePos[,] Sequencial(int i, int j, CubePos[,] localGrid, List<CubePos> localCubes, int depth)
+            CubePos[,] Sequencial(int i, int j, CubePos[,] localGrid, List<CubePos> localCubes)
             {
-                if (maxDepth < depth)
-                {
-                    maxDepth = depth;
-                }
-                System.Diagnostics.Debug.WriteLine($"Current = {depth}, Max = {maxDepth}");
-
                 if (i == dim)
                 {
                     return localGrid;
@@ -695,7 +688,7 @@ namespace AventOfCode
 
                 foreach (var poss in possibilities)
                 {
-                    var localCubesCopy = new List<CubePos>(localCubes.Where(lcc => lcc.Parent != poss.Parent));
+                    var localCubesCopy = new List<CubePos>(localCubes.Where(lcc => lcc.ParentId != poss.ParentId));
 
                     var localGridCopy = new CubePos[dim, dim];
                     for (int k = 0; k < localGrid.GetLength(0); k++)
@@ -715,7 +708,7 @@ namespace AventOfCode
                         newI += 1;
                     }
 
-                    localGridCopy = Sequencial(newI, newJ, localGridCopy, localCubesCopy, depth + 1);
+                    localGridCopy = Sequencial(newI, newJ, localGridCopy, localCubesCopy);
                     if (localGridCopy != null)
                     {
                         return localGridCopy;
@@ -735,12 +728,7 @@ namespace AventOfCode
 
             var cubPoses = cubes.SelectMany(c => c.Cubes).ToList();
 
-            grid = Sequencial(0, 0, grid, cubPoses, 0);
-
-            if (grid == null)
-            {
-                throw new InvalidOperationException();
-            }
+            grid = Sequencial(0, 0, grid, cubPoses);
 
             return (long)grid[0, 0].ParentId * grid[0, dim - 1].ParentId * grid[dim - 1, 0].ParentId * grid[dim - 1, dim - 1].ParentId;
         }
@@ -824,11 +812,11 @@ namespace AventOfCode
                         }
                         _cubes.Add(new CubePos
                         {
-                            Top = top,
-                            Right = right,
-                            Bottom = bottom,
-                            Left = left,
-                            Parent = this
+                            Top = string.Join("", top),
+                            Right = string.Join("", right),
+                            Bottom = string.Join("", bottom),
+                            Left = string.Join("", left),
+                            ParentId = Id
                         });
                     }
                 }
@@ -848,37 +836,28 @@ namespace AventOfCode
 
         public class CubePos
         {
-            public int[] Top { get; set; }
-            public int[] Left { get; set; }
-            public int[] Right { get; set; }
-            public int[] Bottom { get; set; }
-            public int ParentId { get { return Parent.Id; } }
-            public Cube Parent { get; set; }
+            public string Top { get; set; }
+            public string Left { get; set; }
+            public string Right { get; set; }
+            public string Bottom { get; set; }
+            public int ParentId { get; set; }
 
-            public bool MatchTop(CubePos other, bool reverse = false)
+            public bool MatchTop(CubePos other)
             {
-                if (reverse)
-                {
-                    return Top.SequenceEqual(other.Bottom);
-                }
-                return Bottom.SequenceEqual(other.Top);
+                return Bottom == other.Top;
             }
 
-            public bool MatchLeft(CubePos other, bool reverse = false)
+            public bool MatchLeft(CubePos other)
             {
-                if (reverse)
-                {
-                    return Left.SequenceEqual(other.Right);
-                }
-                return Right.SequenceEqual(other.Left);
+                return Right == other.Left;
             }
 
             public bool IsEqualTo(CubePos other)
             {
-                return other != this && other.Top.SequenceEqual(this.Top)
-                     && other.Bottom.SequenceEqual(this.Bottom)
-                      && other.Left.SequenceEqual(this.Left)
-                       && other.Right.SequenceEqual(this.Right);
+                return other.Top == Top
+                    && other.Bottom == Bottom
+                    && other.Left == Left
+                    && other.Right == Right;
             }
         }
 
