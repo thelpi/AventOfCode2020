@@ -628,6 +628,100 @@ namespace AventOfCode
                     .ToArray());
             }, "\r\n\r\n", sample:sample).ToDictionary(kvp => kvp.Item1, kvp => kvp.Item2);
 
+            List<CubePos> ToCubePosList(int id, int[][] originalDatas)
+            {
+                var _cubes = new List<CubePos>();
+
+                var od = originalDatas;
+
+                var size = originalDatas[0].Length;
+                for (int j = 0; j < 4; j++)
+                {
+                    if (j == 1)
+                    {
+                        originalDatas = od.Reverse().ToArray();
+                    }
+                    else if (j == 2)
+                    {
+                        originalDatas = od.Select(v => v.Reverse().ToArray()).ToArray();
+                    }
+                    else if (j == 3)
+                    {
+                        originalDatas = od.Reverse().Select(v => v.Reverse().ToArray()).ToArray();
+                    }
+                    for (int i = 0; i < 4; i++)
+                    {
+                        var top = new int[size];
+                        var right = new int[size];
+                        var bottom = new int[size];
+                        var left = new int[size];
+                        int l = 0;
+                        switch (i)
+                        {
+                            case 0:
+                                top = originalDatas.First();
+                                bottom = originalDatas.Last();
+                                for (int k = 0; k < originalDatas.Length; k++)
+                                {
+                                    right[k] = originalDatas[k].Last();
+                                    left[k] = originalDatas[k].First();
+                                }
+                                break;
+                            case 1:
+                                for (int k = originalDatas.Length - 1; k >= 0; k--)
+                                {
+                                    top[l] = originalDatas[k].First();
+                                    bottom[l] = originalDatas[k].Last();
+                                    l++;
+                                }
+                                right = originalDatas.First();
+                                left = originalDatas.Last();
+                                break;
+                            case 2:
+                                top = originalDatas.Last().Reverse().ToArray();
+                                bottom = originalDatas.First().Reverse().ToArray();
+                                for (int k = originalDatas.Length - 1; k >= 0; k--)
+                                {
+                                    right[l] = originalDatas[k].First();
+                                    left[l] = originalDatas[k].Last();
+                                    l++;
+                                }
+                                break;
+                            case 3:
+                                for (int k = 0; k < originalDatas.Length; k++)
+                                {
+                                    top[k] = originalDatas[k].Last();
+                                    bottom[k] = originalDatas[k].First();
+                                }
+                                right = originalDatas.First().Reverse().ToArray();
+                                left = originalDatas.Last().Reverse().ToArray();
+                                break;
+                        }
+                        _cubes.Add(new CubePos
+                        {
+                            Top = string.Join("", top),
+                            Right = string.Join("", right),
+                            Bottom = string.Join("", bottom),
+                            Left = string.Join("", left),
+                            ParentId = id
+                        });
+                    }
+                }
+
+                var duplicates = new List<int>();
+                for (int k = 0; k < _cubes.Count; k++)
+                {
+                    if (_cubes.Any(c => _cubes.IndexOf(c) < k && _cubes[k].IsEqualTo(c)))
+                    {
+                        duplicates.Add(k);
+                    }
+                }
+                duplicates.Reverse();
+                duplicates.ForEach(ii => _cubes.RemoveAt(ii));
+
+                return _cubes;
+            }
+
             var dim = (int)Math.Sqrt(content.Keys.Count);
 
             var rightPossibilities = new List<CubePos>();
@@ -718,120 +812,18 @@ namespace AventOfCode
                 return null;
             }
 
-            var cubes = new List<Cube>();
-            foreach (var k in content.Keys)
-            {
-                cubes.Add(new Cube(k, content[k]));
-            }
-
             var grid = new CubePos[dim, dim];
 
-            var cubPoses = cubes.SelectMany(c => c.Cubes).ToList();
+            var cubPoses = content.Keys.SelectMany(k => ToCubePosList(k, content[k])).ToList();
 
             grid = Sequencial(0, 0, grid, cubPoses);
 
-            return (long)grid[0, 0].ParentId * grid[0, dim - 1].ParentId * grid[dim - 1, 0].ParentId * grid[dim - 1, dim - 1].ParentId;
-        }
-
-        public class Cube
-        {
-            private readonly List<CubePos> _cubes;
-
-            public int Id { get; }
-            public IReadOnlyCollection<CubePos> Cubes { get { return _cubes; } }
-
-            public Cube(int id, int[][] originalDatas)
+            if (firstPart)
             {
-                Id = id;
-                _cubes = new List<CubePos>();
-
-                var od = originalDatas;
-
-                var size = originalDatas[0].Length;
-                for (int j = 0; j < 4; j++)
-                {
-                    if (j == 1)
-                    {
-                        originalDatas = od.Reverse().ToArray();
-                    }
-                    else if (j == 2)
-                    {
-                        originalDatas = od.Select(v => v.Reverse().ToArray()).ToArray();
-                    }
-                    else if (j == 3)
-                    {
-                        originalDatas = od.Reverse().Select(v => v.Reverse().ToArray()).ToArray();
-                    }
-                    for (int i = 0; i < 4; i++)
-                    {
-                        var top = new int[size];
-                        var right = new int[size];
-                        var bottom = new int[size];
-                        var left = new int[size];
-                        int l = 0;
-                        switch (i)
-                        {
-                            case 0:
-                                top = originalDatas.First();
-                                bottom = originalDatas.Last();
-                                for (int k = 0; k < originalDatas.Length; k++)
-                                {
-                                    right[k] = originalDatas[k].Last();
-                                    left[k] = originalDatas[k].First();
-                                }
-                                break;
-                            case 1:
-                                for (int k = originalDatas.Length - 1; k >= 0; k--)
-                                {
-                                    top[l] = originalDatas[k].First();
-                                    bottom[l] = originalDatas[k].Last();
-                                    l++;
-                                }
-                                right = originalDatas.First();
-                                left = originalDatas.Last();
-                                break;
-                            case 2:
-                                top = originalDatas.Last().Reverse().ToArray();
-                                bottom = originalDatas.First().Reverse().ToArray();
-                                for (int k = originalDatas.Length - 1; k >= 0; k--)
-                                {
-                                    right[l] = originalDatas[k].First();
-                                    left[l] = originalDatas[k].Last();
-                                    l++;
-                                }
-                                break;
-                            case 3:
-                                for (int k = 0; k < originalDatas.Length; k++)
-                                {
-                                    top[k] = originalDatas[k].Last();
-                                    bottom[k] = originalDatas[k].First();
-                                }
-                                right = originalDatas.First().Reverse().ToArray();
-                                left = originalDatas.Last().Reverse().ToArray();
-                                break;
-                        }
-                        _cubes.Add(new CubePos
-                        {
-                            Top = string.Join("", top),
-                            Right = string.Join("", right),
-                            Bottom = string.Join("", bottom),
-                            Left = string.Join("", left),
-                            ParentId = Id
-                        });
-                    }
-                }
-
-                var duplicates = new List<int>();
-                for (int k = 0; k < _cubes.Count; k++)
-                {
-                    if (_cubes.Any(c => _cubes.IndexOf(c) < k && _cubes[k].IsEqualTo(c)))
-                    {
-                        duplicates.Add(k);
-                    }
-                }
-                duplicates.Reverse();
-                duplicates.ForEach(ii => _cubes.RemoveAt(ii));
+                return (long)grid[0, 0].ParentId * grid[0, dim - 1].ParentId * grid[dim - 1, 0].ParentId * grid[dim - 1, dim - 1].ParentId;
             }
+
+            return 0;
         }
 
         public class CubePos
