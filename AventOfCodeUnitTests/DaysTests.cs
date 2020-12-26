@@ -49,6 +49,7 @@ namespace AventOfCodeUnitTests
             Assert.Equal(expected, result);
         }
 
+        // Part. 2 can't be tested with sample datas
         [Theory]
         [InlineData(true, true, 820)]
         [InlineData(true, false, 908)]
@@ -140,7 +141,7 @@ namespace AventOfCodeUnitTests
         [InlineData(true, true, 295)]
         [InlineData(true, false, 410)]
         [InlineData(false, true, 1068781)]
-        //[InlineData(false, false, 600691418730595)]
+        [InlineData(false, false, 600691418730595)]
         public void Day13Test(bool firstPart, bool sample, long expected)
         {
             var result = Days.Day13(firstPart, sample);
@@ -224,6 +225,7 @@ namespace AventOfCodeUnitTests
             Assert.Equal(expected, result);
         }
 
+        // Both part. in the same test
         [Theory]
         [InlineData(true, 5, "mxmxvkd,sqjhc,fvjkl")]
         [InlineData(false, 2584, "fqhpsl,zxncg,clzpsl,zbbnj,jkgbvlxh,dzqc,ppj,glzb")]
@@ -245,6 +247,7 @@ namespace AventOfCodeUnitTests
             Assert.Equal(expected, result);
         }
 
+        // Part. 2 solution not found
         [Theory]
         [InlineData(true, true, "67384529")]
         [InlineData(true, false, "27865934")]
@@ -267,6 +270,7 @@ namespace AventOfCodeUnitTests
             Assert.Equal(expected, result);
         }
 
+        // No "real" part. 2
         [Theory]
         [InlineData(true, 14897079)]
         [InlineData(false, 18862163)]

@@ -1750,12 +1750,14 @@ namespace AventOfCode
                     int iBus = 0;
                     while (!atLeastOneNoMatch && iBus < busDatas.Length)
                     {
-                        if ((j + busDatas[iBus].delta) % busDatas[iBus].modulo == 0)
+                        if ((j + busDatas[iBus].delta) % busDatas[iBus].modulo != 0)
                         {
-                            addedToStart += busDatas[iBus].modulo;
-                        }
-                        else
-                        {
+                            long modulator = 1;
+                            for (int kk = 0; kk < iBus; kk++)
+                            {
+                                modulator *= busDatas[kk].modulo;
+                            }
+                            addedToStart += modulator;
                             atLeastOneNoMatch = true;
                         }
                         iBus++;
@@ -1763,7 +1765,7 @@ namespace AventOfCode
 
                     if (atLeastOneNoMatch)
                     {
-                        j += (addedToStart == 0 ? 1 : addedToStart);
+                        j += addedToStart;
                     }
                     else
                     {
@@ -2395,25 +2397,28 @@ namespace AventOfCode
 
                 var ij = instructions[j];
 
-                (string, int) newInstruction = ("", 0);
-                if (ij.Item1 == "acc")
+                if (!firstPart)
                 {
-                    continue;
-                }
-                else if (ij.Item1 == "nop")
-                {
-                    if (j + ij.Item2 < 0)
+                    (string, int) newInstruction = ("", 0);
+                    if (ij.Item1 == "acc")
                     {
                         continue;
                     }
-                    newInstruction = ("jmp", ij.Item2);
-                }
-                else if (instructions[j].Item1 == "jmp")
-                {
-                    newInstruction = ("nop", ij.Item2);
-                }
+                    else if (ij.Item1 == "nop")
+                    {
+                        if (j + ij.Item2 < 0)
+                        {
+                            continue;
+                        }
+                        newInstruction = ("jmp", ij.Item2);
+                    }
+                    else if (instructions[j].Item1 == "jmp")
+                    {
+                        newInstruction = ("nop", ij.Item2);
+                    }
 
-                localInstructions[j] = newInstruction;
+                    localInstructions[j] = newInstruction;
+                }
 
                 int previousI = 0;
                 int i = 0;
@@ -2445,7 +2450,7 @@ namespace AventOfCode
                     stop = passed.Contains(i) || realEnding;
                 }
 
-                if (realEnding)
+                if (realEnding || firstPart)
                 {
                     realAccumulateur = accumulateur;
                     break;
@@ -2565,11 +2570,6 @@ namespace AventOfCode
         // 67
         public static long Day05(bool firstPart, bool sample)
         {
-            if (!firstPart && sample)
-            {
-                throw new ArgumentException("No part. 2 sample for this day.");
-            }
-
             var list = GetContent(5, v => v, sample: sample);
 
             var ids = new List<int>();
