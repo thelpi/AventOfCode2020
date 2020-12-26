@@ -632,9 +632,16 @@ namespace AventOfCode
 
             var rightPossibilities = new List<CubePos>();
             var bottomPossibilities = new List<CubePos>();
+            int maxDepth = 0;
 
-            CubePos[,] Sequencial(int i, int j, CubePos[,] localGrid, List<CubePos> localCubes)
+            CubePos[,] Sequencial(int i, int j, CubePos[,] localGrid, List<CubePos> localCubes, int depth)
             {
+                if (maxDepth < depth)
+                {
+                    maxDepth = depth;
+                }
+                System.Diagnostics.Debug.WriteLine($"Current = {depth}, Max = {maxDepth}");
+
                 if (i == dim)
                 {
                     return localGrid;
@@ -708,7 +715,7 @@ namespace AventOfCode
                         newI += 1;
                     }
 
-                    localGridCopy = Sequencial(newI, newJ, localGridCopy, localCubesCopy);
+                    localGridCopy = Sequencial(newI, newJ, localGridCopy, localCubesCopy, depth + 1);
                     if (localGridCopy != null)
                     {
                         return localGridCopy;
@@ -728,7 +735,7 @@ namespace AventOfCode
 
             var cubPoses = cubes.SelectMany(c => c.Cubes).ToList();
 
-            grid = Sequencial(0, 0, grid, cubPoses);
+            grid = Sequencial(0, 0, grid, cubPoses, 0);
 
             if (grid == null)
             {
@@ -750,133 +757,92 @@ namespace AventOfCode
                 Id = id;
                 _cubes = new List<CubePos>();
 
-                var size = originalDatas[0].Length;
+                var od = originalDatas;
 
-                for (int i = 0; i < 6; i++)
+                var size = originalDatas[0].Length;
+                for (int j = 0; j < 4; j++)
                 {
-                    for (int l = 0; l < 4; l++)
+                    if (j == 1)
+                    {
+                        originalDatas = od.Reverse().ToArray();
+                    }
+                    else if (j == 2)
+                    {
+                        originalDatas = od.Select(v => v.Reverse().ToArray()).ToArray();
+                    }
+                    else if (j == 3)
+                    {
+                        originalDatas = od.Reverse().Select(v => v.Reverse().ToArray()).ToArray();
+                    }
+                    for (int i = 0; i < 4; i++)
                     {
                         var top = new int[size];
                         var right = new int[size];
                         var bottom = new int[size];
                         var left = new int[size];
+                        int l = 0;
                         switch (i)
                         {
-                            case 0: // original
+                            case 0:
                                 top = originalDatas.First();
                                 bottom = originalDatas.Last();
-                                int k0 = 0;
-                                foreach (var row in originalDatas)
+                                for (int k = 0; k < originalDatas.Length; k++)
                                 {
-                                    left[k0] = row.First();
-                                    right[k0] = row.Last();
-                                    k0++;
+                                    right[k] = originalDatas[k].Last();
+                                    left[k] = originalDatas[k].First();
                                 }
                                 break;
-                            case 1: // left/right flip
-                                top = originalDatas.First().Reverse().ToArray();
-                                bottom = originalDatas.Last().Reverse().ToArray();
-                                int k1 = 0;
-                                foreach (var row in originalDatas)
-                                {
-                                    left[k1] = row.Last();
-                                    right[k1] = row.First();
-                                    k1++;
-                                }
-                                break;
-                            case 2: // top/back flip
-                                top = originalDatas.Last();
-                                bottom = originalDatas.First();
-                                int k2 = originalDatas.Length - 1;
-                                foreach (var row in originalDatas)
-                                {
-                                    left[k2] = row.First();
-                                    right[k2] = row.Last();
-                                    k2--;
-                                }
-                                break;
-                            case 3: // both flip
-                                top = originalDatas.Last().Reverse().ToArray();
-                                bottom = originalDatas.First().Reverse().ToArray();
-                                int k3 = originalDatas.Length - 1;
-                                foreach (var row in originalDatas)
-                                {
-                                    left[k3] = row.Last();
-                                    right[k3] = row.First();
-                                    k3--;
-                                }
-                                break;
-                            case 4: // rotate flip
-                                left = originalDatas.Last().Reverse().ToArray();
-                                right = originalDatas.First().Reverse().ToArray();
-                                int m = 0;
-                                var formerCol1 = new int[left.Length];
-                                var formerCol2 = new int[left.Length];
-                                foreach (var row in originalDatas)
-                                {
-                                    formerCol1[m] = row[0];
-                                    formerCol2[m] = row[left.Length - 1];
-                                    m++;
-                                }
-                                bottom = formerCol1.Reverse().ToArray();
-                                top = formerCol2.Reverse().ToArray();
-                                break;
-                            case 5: // rotate flip
-                                left = originalDatas.First().ToArray();
-                                right = originalDatas.Last().ToArray();
-                                int n = 0;
-                                var formerCol3 = new int[left.Length];
-                                var formerCol4 = new int[left.Length];
-                                foreach (var row in originalDatas)
-                                {
-                                    formerCol3[n] = row[0];
-                                    formerCol4[n] = row[left.Length - 1];
-                                    n++;
-                                }
-                                top = formerCol3.ToArray();
-                                bottom = formerCol4.ToArray();
-                                break;
-                        }
-                        /*if (l > 0 && i > 3)
-                        {
-                            continue;
-                        }*/
-                        int[] tmp;
-                        switch (l)
-                        {
                             case 1:
-                                tmp = right;
-                                right = top;
-                                top = left;
-                                left = bottom;
-                                bottom = tmp;
+                                for (int k = originalDatas.Length - 1; k >= 0; k--)
+                                {
+                                    top[l] = originalDatas[k].First();
+                                    bottom[l] = originalDatas[k].Last();
+                                    l++;
+                                }
+                                right = originalDatas.First();
+                                left = originalDatas.Last();
                                 break;
                             case 2:
-                                tmp = right;
-                                right = left;
-                                left = tmp;
-                                tmp = bottom;
-                                bottom = top;
-                                top = tmp;
+                                top = originalDatas.Last().Reverse().ToArray();
+                                bottom = originalDatas.First().Reverse().ToArray();
+                                for (int k = originalDatas.Length - 1; k >= 0; k--)
+                                {
+                                    right[l] = originalDatas[k].First();
+                                    left[l] = originalDatas[k].Last();
+                                    l++;
+                                }
                                 break;
                             case 3:
-                                tmp = left;
-                                left = top;
-                                top = right;
-                                right = bottom;
-                                bottom = tmp;
+                                for (int k = 0; k < originalDatas.Length; k++)
+                                {
+                                    top[k] = originalDatas[k].Last();
+                                    bottom[k] = originalDatas[k].First();
+                                }
+                                right = originalDatas.First().Reverse().ToArray();
+                                left = originalDatas.Last().Reverse().ToArray();
                                 break;
                         }
                         _cubes.Add(new CubePos
                         {
+                            Top = top,
+                            Right = right,
                             Bottom = bottom,
                             Left = left,
-                            Parent = this,
-                            Right = right,
-                            Top = top
+                            Parent = this
                         });
                     }
                 }
+
+                var duplicates = new List<int>();
+                for (int k = 0; k < _cubes.Count; k++)
+                {
+                    if (_cubes.Any(c => _cubes.IndexOf(c) < k && _cubes[k].IsEqualTo(c)))
+                    {
+                        duplicates.Add(k);
+                    }
+                }
+                duplicates.Reverse();
+                duplicates.ForEach(ii => _cubes.RemoveAt(ii));
             }
         }
 
@@ -905,6 +871,14 @@ namespace AventOfCode
                     return Left.SequenceEqual(other.Right);
                 }
                 return Right.SequenceEqual(other.Left);
+            }
+
+            public bool IsEqualTo(CubePos other)
+            {
+                return other != this && other.Top.SequenceEqual(this.Top)
+                     && other.Bottom.SequenceEqual(this.Bottom)
+                      && other.Left.SequenceEqual(this.Left)
+                       && other.Right.SequenceEqual(this.Right);
             }
         }
 
