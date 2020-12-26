@@ -276,7 +276,7 @@ namespace AventOfCodeUnitTests
         [InlineData(false, 18862163)]
         public void Day25Test(bool sample, long expected)
         {
-            var result = Days.Day25(sample);
+            var result = new Day25().GetFirstPartResult(sample);
             Assert.Equal(expected, result);
         }
     }
