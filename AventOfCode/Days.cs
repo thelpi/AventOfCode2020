@@ -656,6 +656,7 @@ namespace AventOfCode
                         var bottom = new int[size];
                         var left = new int[size];
                         var cbContent = new int[size - 2, size - 2];
+                        var cbContentFull = new int[size, size];
                         int l = 0;
                         int c;
                         int d;
@@ -676,6 +677,17 @@ namespace AventOfCode
                                     for (int b = 1; b < originalDatas.Length - 1; b++)
                                     {
                                         cbContent[c, d] = originalDatas[a][b];
+                                        d++;
+                                    }
+                                    c++;
+                                }
+                                c = 0;
+                                for (int a = 0; a < originalDatas.Length; a++)
+                                {
+                                    d = 0;
+                                    for (int b = 0; b < originalDatas.Length; b++)
+                                    {
+                                        cbContentFull[c, d] = originalDatas[a][b];
                                         d++;
                                     }
                                     c++;
@@ -701,6 +713,17 @@ namespace AventOfCode
                                     }
                                     c++;
                                 }
+                                c = 0;
+                                for (int a = originalDatas.Length - 1; a >= 0; a--)
+                                {
+                                    d = 0;
+                                    for (int b = 0; b < originalDatas.Length; b++)
+                                    {
+                                        cbContentFull[c, d] = originalDatas[a][b];
+                                        d++;
+                                    }
+                                    c++;
+                                }
                                 break;
                             case 2:
                                 top = originalDatas.Last().Reverse().ToArray();
@@ -718,6 +741,17 @@ namespace AventOfCode
                                     for (int b = originalDatas.Length - 2; b >= 1; b--)
                                     {
                                         cbContent[c, d] = originalDatas[a][b];
+                                        d++;
+                                    }
+                                    c++;
+                                }
+                                c = 0;
+                                for (int a = originalDatas.Length - 1; a >= 0; a--)
+                                {
+                                    d = 0;
+                                    for (int b = originalDatas.Length - 1; b >= 0; b--)
+                                    {
+                                        cbContentFull[c, d] = originalDatas[a][b];
                                         d++;
                                     }
                                     c++;
@@ -742,6 +776,17 @@ namespace AventOfCode
                                     }
                                     c++;
                                 }
+                                c = 0;
+                                for (int a = 0; a < originalDatas.Length; a++)
+                                {
+                                    d = 0;
+                                    for (int b = originalDatas.Length - 1; b >= 0; b--)
+                                    {
+                                        cbContentFull[c, d] = originalDatas[a][b];
+                                        d++;
+                                    }
+                                    c++;
+                                }
                                 break;
                         }
                         _cubes.Add(new CubePos
@@ -751,6 +796,7 @@ namespace AventOfCode
                             Bottom = string.Join("", bottom),
                             Left = string.Join("", left),
                             Content = cbContent,
+                            FullContent = cbContentFull,
                             ParentId = id
                         });
                     }
@@ -887,9 +933,73 @@ namespace AventOfCode
                 }
             }
 
+            var img2D = new int[dim * pixelSizeNoBorder][];
+            for (int i = 0; i < image.GetLength(0); i++)
+            {
+                img2D[i] = new int[dim * pixelSizeNoBorder];
+                for (int j = 0; j < image.GetLength(1); j++)
+                {
+                    img2D[i][j] = image[i, j];
+                }
+            }
 
+            var imgVersions = ToCubePosList(1, img2D).Select(_ => _.FullContent).ToList();
 
-            return 0;
+            int resultCount = 0;
+            foreach (var imgVersion in imgVersions)
+            {
+                // xxxxxxxxxxxxxxxxxx#x
+                // #xxxx##xxxx##xxxx###
+                // x#xx#xx#xx#xx#xx#xxx
+                int countUsedAsMonster = 0;
+                for (int i = 0; i < imgVersion.GetLength(0); i++)
+                {
+                    for (int j = 0; j < imgVersion.GetLength(1); j++)
+                    {
+                        if (imgVersion[i, j] == 0)
+                        {
+                            if (j > 17 && i < imgVersion.GetLength(0) - 2 && j < imgVersion.GetLength(1) - 1) // monster head
+                            {
+                                if (imgVersion[i + 1, j - 18] == 0
+                                    && imgVersion[i + 1, j - 13] == 0
+                                    && imgVersion[i + 1, j - 12] == 0
+                                    && imgVersion[i + 1, j - 7] == 0
+                                    && imgVersion[i + 1, j - 6] == 0
+                                    && imgVersion[i + 1, j - 1] == 0
+                                    && imgVersion[i + 1, j - 0] == 0
+                                    && imgVersion[i + 1, j + 1] == 0) // monster body 1
+                                {
+                                    if (imgVersion[i + 2, j - 17] == 0
+                                        && imgVersion[i + 2, j - 14] == 0
+                                        && imgVersion[i + 2, j - 11] == 0
+                                        && imgVersion[i + 2, j - 8] == 0
+                                        && imgVersion[i + 2, j - 5] == 0
+                                        && imgVersion[i + 2, j - 2] == 0) // monster body 2
+                                    {
+                                        countUsedAsMonster += 15;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (countUsedAsMonster > 0)
+                {
+                    for (int i = 0; i < imgVersion.GetLength(0); i++)
+                    {
+                        for (int j = 0; j < imgVersion.GetLength(1); j++)
+                        {
+                            if (imgVersion[i, j] == 0)
+                            {
+                                resultCount++;
+                            }
+                        }
+                    }
+                    resultCount -= countUsedAsMonster;
+                }
+            }
+
+            return resultCount;
         }
 
         public class CubePos
@@ -900,6 +1010,7 @@ namespace AventOfCode
             public string Bottom { get; set; }
             public int ParentId { get; set; }
             public int[,] Content { get; set; }
+            public int[,] FullContent { get; set; }
 
             public bool MatchTop(CubePos other)
             {
