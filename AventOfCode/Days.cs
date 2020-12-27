@@ -2610,40 +2610,6 @@ namespace AventOfCode
             return countValid;
         }
 
-        // 32
-        public static long Day01(bool firstPart, bool sample)
-        {
-            const int SUM_EXPECT = 2020;
-
-            var values = GetContent(1, v => Convert.ToInt32(v), sample: sample);
-
-            for (int i = 0; i < values.Count - (firstPart ? 2 : 3); i++)
-            {
-                for (int j = i + 1; j < values.Count - (firstPart ? 1 : 2); j++)
-                {
-                    if (firstPart)
-                    {
-                        if (values[i] + values[j] == SUM_EXPECT)
-                        {
-                            return values[i] * values[j];
-                        }
-                    }
-                    else
-                    {
-                        for (int k = j + 1; k < values.Count - 1; k++)
-                        {
-                            if (values[i] + values[j] + values[k] == SUM_EXPECT)
-                            {
-                                return values[i] * values[j] * values[k];
-                            }
-                        }
-                    }
-                }
-            }
-
-            return -1;
-        }
-
         private static List<T> GetContent<T>(int day,
             Func<string, T> converter,
             string separator = "\r\n",
