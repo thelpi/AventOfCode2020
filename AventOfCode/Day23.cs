@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace AventOfCode
 {
+    /// <summary>
+    /// Day 23: Crab Cups
+    /// </summary>
     public sealed class Day23 : Day
     {
         private const int PART_2_ELEMENTS_COUNT = 1000000;
@@ -64,8 +67,9 @@ namespace AventOfCode
 
         private int LoopValues(ref int[] cupsArray, int loop)
         {
-            var cupsArrayMinus3 = new int[cupsArray.Length - 3];
             var originalLength = cupsArray.Length;
+            var minus3Length = originalLength - 3;
+            var cupsArrayMinus3 = new int[minus3Length];
             var removed = new int[3];
             var cupsArrayCopy = new int[originalLength];
 
@@ -96,27 +100,32 @@ namespace AventOfCode
                     minusOne = cupsArray.Max();
                 }
 
-                var indexofminus = Array.IndexOf(cupsArray, minusOne);
-
-                for (int k = 0; k <= indexofminus; k++)
+                int indexOfMinus = -1;
+                for (int kk = 0; kk < cupsArray.Length; kk++)
                 {
-                    cupsArrayCopy[k] = cupsArray[k];
+                    if (cupsArray[kk] == minusOne)
+                    {
+                        indexOfMinus = kk;
+                        break;
+                    }
                 }
-                cupsArrayCopy[0 + indexofminus + 1] = removed[0];
-                cupsArrayCopy[1 + indexofminus + 1] = removed[1];
-                cupsArrayCopy[2 + indexofminus + 1] = removed[2];
-                for (int k = indexofminus + 1; k < cupsArray.Length; k++)
+                
+                for (int k = 0; k < indexOfMinus; k++)
                 {
-                    cupsArrayCopy[k + 3] = cupsArray[k];
-                }
-                cupsArray = cupsArrayCopy;
-
-                for (int k = 0; k < originalLength; k++)
-                {
-                    cupsArray[k] = k == originalLength - 1
+                    cupsArrayCopy[k] = k == minus3Length - 1
                         ? currentCup
                         : cupsArray[k + 1];
                 }
+                cupsArrayCopy[0 + indexOfMinus] = removed[0];
+                cupsArrayCopy[1 + indexOfMinus] = removed[1];
+                cupsArrayCopy[2 + indexOfMinus] = removed[2];
+                for (int k = indexOfMinus; k < minus3Length; k++)
+                {
+                    cupsArrayCopy[k + 3] = k == minus3Length - 1
+                        ? currentCup
+                        : cupsArray[k + 1];
+                }
+                cupsArray = cupsArrayCopy;
             }
 
             return Array.IndexOf(cupsArray, 1);
