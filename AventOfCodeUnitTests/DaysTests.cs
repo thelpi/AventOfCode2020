@@ -254,9 +254,9 @@ namespace AventOfCodeUnitTests
 
         // Part. 2 solution not found
         [Theory]
-        [InlineData(true, true, 67384529)]
-        [InlineData(true, false, 27865934)]
-        //[InlineData(false, true, 149245887792)]
+        //[InlineData(true, true, 67384529)]
+        //[InlineData(true, false, 27865934)]
+        [InlineData(false, true, 149245887792)]
         //[InlineData(false, false, "unknown")]
         public void Day23Test(bool firstPart, bool sample, long expected)
         {

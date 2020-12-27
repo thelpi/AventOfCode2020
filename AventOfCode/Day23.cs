@@ -72,10 +72,17 @@ namespace AventOfCode
             var cupsArrayMinus3 = new int[minus3Length];
             var removed = new int[3];
             var cupsArrayCopy = new int[originalLength];
+            
+            var maxi1 = cupsArray.Max();
+            var maxi2 = cupsArray.Where(k => k != maxi1).Max();
+            var maxi3 = cupsArray.Where(k => k != maxi1 && k != maxi2).Max();
+            var maxi4 = cupsArray.Where(k => k != maxi1 && k != maxi2 && k != maxi3).Max();
+            var maxs = new[] { maxi1, maxi2, maxi3, maxi4 };
 
             for (int i = 0; i < loop; i++)
             {
                 var currentCup = cupsArray[0];
+                var minusOne = currentCup - 1;
 
                 removed[2] = cupsArray[3];
                 removed[1] = cupsArray[2];
@@ -90,14 +97,51 @@ namespace AventOfCode
                 }
                 cupsArray = cupsArrayMinus3;
 
-                var minusOne = currentCup - 1;
-                while (Contains(removed, minusOne))
+                bool contains = true;
+                while (contains)
                 {
-                    minusOne -= 1;
+                    bool localContains = false;
+                    int m = 0;
+                    while (m < 3 && !localContains)
+                    {
+                        if (removed[m] == minusOne)
+                        {
+                            localContains = true;
+                            minusOne--;
+                        }
+                        m++;
+                    }
+                    if (!localContains)
+                    {
+                        contains = false;
+                    }
                 }
-                if (!Contains(cupsArray, minusOne))
+
+                if (minusOne == 0)
                 {
-                    minusOne = cupsArray.Max();
+                    var localMax = 0;
+
+                    bool containsMax = true;
+                    while (containsMax)
+                    {
+                        bool localContainsMax = false;
+                        int m = 0;
+                        while (m < 3 && !localContainsMax)
+                        {
+                            if (removed[m] == maxs[localMax])
+                            {
+                                localContainsMax = true;
+                                localMax++;
+                            }
+                            m++;
+                        }
+                        if (!localContainsMax)
+                        {
+                            containsMax = false;
+                        }
+                    }
+
+                    minusOne = maxs[localMax];
                 }
 
                 int indexOfMinus = -1;
