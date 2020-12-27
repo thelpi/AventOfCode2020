@@ -64,18 +64,27 @@ namespace AventOfCode
 
         private int LoopValues(ref int[] cupsArray, int loop)
         {
+            var cupsArrayMinus3 = new int[cupsArray.Length - 3];
+            var originalLength = cupsArray.Length;
+            var removed = new int[3];
+            var cupsArrayCopy = new int[originalLength];
+
             for (int i = 0; i < loop; i++)
             {
                 var currentCup = cupsArray[0];
 
-                var removed = new int[3];
-                int j = 2;
-                for (int k = 3; k >= 1; k--)
+                removed[2] = cupsArray[3];
+                removed[1] = cupsArray[2];
+                removed[0] = cupsArray[1];
+
+                cupsArrayMinus3[0] = cupsArray[0];
+                int u = 1;
+                for (int p = 4; p < originalLength; p++)
                 {
-                    removed[j] = cupsArray[k];
-                    RemoveAt(ref cupsArray, k);
-                    j--;
+                    cupsArrayMinus3[u] = cupsArray[p];
+                    u++;
                 }
+                cupsArray = cupsArrayMinus3;
 
                 var minusOne = currentCup - 1;
                 while (Contains(removed, minusOne))
@@ -89,46 +98,28 @@ namespace AventOfCode
 
                 var indexofminus = Array.IndexOf(cupsArray, minusOne);
 
-                var cupsArrayCopy = new int[cupsArray.Length + removed.Length];
                 for (int k = 0; k <= indexofminus; k++)
                 {
                     cupsArrayCopy[k] = cupsArray[k];
                 }
-                for (int k = 0; k < 3; k++)
-                {
-                    cupsArrayCopy[k + indexofminus + 1] = removed[k];
-                }
+                cupsArrayCopy[0 + indexofminus + 1] = removed[0];
+                cupsArrayCopy[1 + indexofminus + 1] = removed[1];
+                cupsArrayCopy[2 + indexofminus + 1] = removed[2];
                 for (int k = indexofminus + 1; k < cupsArray.Length; k++)
                 {
                     cupsArrayCopy[k + 3] = cupsArray[k];
                 }
                 cupsArray = cupsArrayCopy;
 
-                for (int k = 0; k < cupsArray.Length; k++)
+                for (int k = 0; k < originalLength; k++)
                 {
-                    cupsArray[k] = k == cupsArray.Length - 1
+                    cupsArray[k] = k == originalLength - 1
                         ? currentCup
                         : cupsArray[k + 1];
                 }
             }
 
             return Array.IndexOf(cupsArray, 1);
-        }
-
-        private void RemoveAt(ref int[] source, int index)
-        {
-            var dest = new int[source.Length - 1];
-            if (index > 0)
-            {
-                Array.Copy(source, 0, dest, 0, index);
-            }
-
-            if (index < source.Length - 1)
-            {
-                Array.Copy(source, index + 1, dest, index, source.Length - index - 1);
-            }
-
-            source = dest;
         }
 
         private bool Contains(int[] values, int value)
