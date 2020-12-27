@@ -9,7 +9,7 @@ namespace AventOfCode
     /// </summary>
     public sealed class Day24 : Day
     {
-        // Arbitray value (to form a grid large enough)
+        // Arbitray value (to form a grid large enough; borders MUST stay white at all time)
         private const int GRID_SIZE = 500;
         private const int DAYS_COUNT = 100;
 
@@ -26,59 +26,32 @@ namespace AventOfCode
         {
             var tiles = GetInitialGrid(sample);
 
-            var toSwitch = new List<(int, int)>();
+            var tilesToSwitch = new List<(int, int)>();
             for (int k = 1; k <= DAYS_COUNT; k++)
             {
-                toSwitch.Clear();
-                for (int i = 0; i < GRID_SIZE; i++)
+                tilesToSwitch.Clear();
+                for (int i = 1; i < GRID_SIZE - 1; i++)
                 {
-                    for (int j = 0; j < GRID_SIZE; j++)
+                    for (int j = 1; j < GRID_SIZE - 1; j++)
                     {
                         int count = 0;
-                        if (j > 0 && tiles[i][j - 1])
-                        {
-                            count++;
-                        }
-                        if (i > 0 && j > 0 && tiles[i - 1][j - 1])
-                        {
-                            count++;
-                        }
-                        if (i > 0 && tiles[i - 1][j])
-                        {
-                            count++;
-                        }
-                        if (i < (GRID_SIZE - 1) && tiles[i + 1][j])
-                        {
-                            count++;
-                        }
-                        if (i < (GRID_SIZE - 1) && j < (GRID_SIZE - 1) && tiles[i + 1][j + 1])
-                        {
-                            count++;
-                        }
-                        if (j < (GRID_SIZE - 1) && tiles[i][j + 1])
-                        {
-                            count++;
-                        }
+                        if (tiles[i][j - 1]) count++;
+                        if (tiles[i - 1][j - 1]) count++;
+                        if (tiles[i - 1][j]) count++;
+                        if (tiles[i + 1][j]) count++;
+                        if (tiles[i + 1][j + 1]) count++;
+                        if (tiles[i][j + 1]) count++;
 
-                        if (tiles[i][j])
+                        if ((tiles[i][j] && (count == 0 || count > 2))
+                            || (!tiles[i][j] && count == 2))
                         {
-                            if (count == 0 || count > 2)
-                            {
-                                toSwitch.Add((i, j));
-                            }
-                        }
-                        else
-                        {
-                            if (count == 2)
-                            {
-                                toSwitch.Add((i, j));
-                            }
+                            tilesToSwitch.Add((i, j));
                         }
                     }
                 }
-                foreach (var (a, b) in toSwitch)
+                foreach (var (i, j) in tilesToSwitch)
                 {
-                    tiles[a][b] = !tiles[a][b];
+                    tiles[i][j] = !tiles[i][j];
                 }
             }
 
