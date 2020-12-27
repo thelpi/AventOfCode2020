@@ -19,12 +19,12 @@ namespace AventOfCode
         {
             var content = GetContent(v => Convert.ToInt32(v), sample: sample);
 
-            var cupsArray = content.ToArray();
+            var cupsArray = content.ToList();
 
             var indexOfOne = LoopValues(ref cupsArray, PART_1_LOOP);
 
             var values = new List<char>();
-            for (int k = indexOfOne + 1; k < cupsArray.Length; k++)
+            for (int k = indexOfOne + 1; k < cupsArray.Count; k++)
             {
                 values.Add(cupsArray[k].ToString().First());
             }
@@ -46,17 +46,17 @@ namespace AventOfCode
                 content.Add(i);
             }
 
-            var cupsArray = content.ToArray();
+            var cupsArray = content.ToList();
 
             var indexOfOne = LoopValues(ref cupsArray, PART_2_LOOP);
 
             var i1 = indexOfOne + 1;
             var i2 = indexOfOne + 2;
-            if (indexOfOne == cupsArray.Length - 2)
+            if (indexOfOne == cupsArray.Count - 2)
             {
                 i2 = 0;
             }
-            else if (indexOfOne == cupsArray.Length - 1)
+            else if (indexOfOne == cupsArray.Count - 1)
             {
                 i1 = 0;
                 i2 = 1;
@@ -65,13 +65,10 @@ namespace AventOfCode
             return cupsArray[i1] * (long)cupsArray[i2];
         }
 
-        private int LoopValues(ref int[] cupsArray, int loop)
+        private int LoopValues(ref List<int> cupsArray, int loop)
         {
-            var originalLength = cupsArray.Length;
-            var minus3Length = originalLength - 3;
-            var cupsArrayMinus3 = new int[minus3Length];
+            var originalLength = cupsArray.Count;
             var removed = new int[3];
-            var cupsArrayCopy = new int[originalLength];
             
             var maxi1 = cupsArray.Max();
             var maxi2 = cupsArray.Where(k => k != maxi1).Max();
@@ -79,23 +76,46 @@ namespace AventOfCode
             var maxi4 = cupsArray.Where(k => k != maxi1 && k != maxi2 && k != maxi3).Max();
             var maxs = new[] { maxi1, maxi2, maxi3, maxi4 };
 
+            int currentI = 0;
+
             for (int i = 0; i < loop; i++)
             {
-                var currentCup = cupsArray[0];
+                var currentCup = cupsArray[currentI];
                 var minusOne = currentCup - 1;
 
-                removed[2] = cupsArray[3];
-                removed[1] = cupsArray[2];
-                removed[0] = cupsArray[1];
+                removed[2] = cupsArray[currentI == originalLength - 1 ? 2 : (currentI == originalLength - 2 ? 1 : (currentI == originalLength - 3 ? 0 : currentI + 3))];
+                removed[1] = cupsArray[currentI == originalLength - 1 ? 1 : (currentI == originalLength - 2 ? 0 : currentI + 2)];
+                removed[0] = cupsArray[currentI == originalLength - 1 ? 0 : currentI + 1];
 
-                cupsArrayMinus3[0] = cupsArray[0];
-                int u = 1;
-                for (int p = 4; p < originalLength; p++)
+                if (currentI == originalLength - 1)
                 {
-                    cupsArrayMinus3[u] = cupsArray[p];
-                    u++;
+                    cupsArray.RemoveAt(0);
+                    cupsArray.RemoveAt(0);
+                    cupsArray.RemoveAt(0);
                 }
-                cupsArray = cupsArrayMinus3;
+                else
+                {
+                    cupsArray.RemoveAt(currentI + 1);
+                    if (currentI == originalLength - 2)
+                    {
+                        cupsArray.RemoveAt(0);
+                        cupsArray.RemoveAt(0);
+                    }
+                    else
+                    {
+                        cupsArray.RemoveAt(currentI + 1);
+                        if (currentI == originalLength - 3)
+                        {
+                            cupsArray.RemoveAt(0);
+                        }
+                        else
+                        {
+                            cupsArray.RemoveAt(currentI + 1);
+                        }
+                    }
+                }
+
+
 
                 bool contains = true;
                 while (contains)
@@ -144,37 +164,29 @@ namespace AventOfCode
                     minusOne = maxs[localMax];
                 }
 
-                int indexOfMinus = -1;
-                int kk = 0;
-                while (indexOfMinus == -1)
+                int indexOfMinus = cupsArray.IndexOf(minusOne);
+
+                if (indexOfMinus + 1 == originalLength)
                 {
-                    if (cupsArray[kk] == minusOne)
-                    {
-                        indexOfMinus = kk;
-                    }
-                    kk++;
+                    cupsArray.Insert(0, removed[2]);
+                    cupsArray.Insert(0, removed[1]);
+                    cupsArray.Insert(0, removed[0]);
+                }
+                else
+                {
+                    cupsArray.Insert(indexOfMinus + 1, removed[2]);
+                    cupsArray.Insert(indexOfMinus + 1, removed[1]);
+                    cupsArray.Insert(indexOfMinus + 1, removed[0]);
                 }
 
-                int ic = 0;
-                for (int k = 0; k < originalLength; k++)
+                currentI = cupsArray.IndexOf(currentCup) + 1;
+                if (currentI == originalLength)
                 {
-                    if (k >= indexOfMinus && k < indexOfMinus + 3)
-                    {
-                        cupsArrayCopy[indexOfMinus + ic] = removed[ic];
-                        ic++;
-                    }
-                    else
-                    {
-                        cupsArrayCopy[k] = k == originalLength - 1
-                            ? currentCup
-                            : cupsArray[k - ic + 1];
-                    }
+                    currentI = 0;
                 }
-
-                cupsArray = cupsArrayCopy;
             }
 
-            return Array.IndexOf(cupsArray, 1);
+            return cupsArray.IndexOf(1);
         }
 
         private bool Contains(int[] values, int value)
