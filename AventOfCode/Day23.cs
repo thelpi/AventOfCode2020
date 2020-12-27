@@ -76,6 +76,10 @@ namespace AventOfCode
             var maxi4 = cupsArray.Where(k => k != maxi1 && k != maxi2 && k != maxi3).Max();
             var maxs = new[] { maxi1, maxi2, maxi3, maxi4 };
 
+            var i1 = originalLength - 1;
+            var i2 = originalLength - 2;
+            var i3 = originalLength - 3;
+
             int currentI = 0;
 
             for (int i = 0; i < loop; i++)
@@ -83,11 +87,11 @@ namespace AventOfCode
                 var currentCup = cupsArray[currentI];
                 var minusOne = currentCup - 1;
 
-                removed[2] = cupsArray[currentI == originalLength - 1 ? 2 : (currentI == originalLength - 2 ? 1 : (currentI == originalLength - 3 ? 0 : currentI + 3))];
-                removed[1] = cupsArray[currentI == originalLength - 1 ? 1 : (currentI == originalLength - 2 ? 0 : currentI + 2)];
-                removed[0] = cupsArray[currentI == originalLength - 1 ? 0 : currentI + 1];
+                removed[2] = cupsArray[currentI == i1 ? 2 : (currentI == i2 ? 1 : (currentI == i3 ? 0 : currentI + 3))];
+                removed[1] = cupsArray[currentI == i1 ? 1 : (currentI == i2 ? 0 : currentI + 2)];
+                removed[0] = cupsArray[currentI == i1 ? 0 : currentI + 1];
 
-                if (currentI == originalLength - 1)
+                if (currentI == i1)
                 {
                     cupsArray.RemoveAt(0);
                     cupsArray.RemoveAt(0);
@@ -96,7 +100,7 @@ namespace AventOfCode
                 else
                 {
                     cupsArray.RemoveAt(currentI + 1);
-                    if (currentI == originalLength - 2)
+                    if (currentI == i2)
                     {
                         cupsArray.RemoveAt(0);
                         cupsArray.RemoveAt(0);
@@ -104,7 +108,7 @@ namespace AventOfCode
                     else
                     {
                         cupsArray.RemoveAt(currentI + 1);
-                        if (currentI == originalLength - 3)
+                        if (currentI == i3)
                         {
                             cupsArray.RemoveAt(0);
                         }
@@ -114,8 +118,6 @@ namespace AventOfCode
                         }
                     }
                 }
-
-
 
                 bool contains = true;
                 while (contains)
@@ -166,7 +168,7 @@ namespace AventOfCode
 
                 int indexOfMinus = cupsArray.IndexOf(minusOne);
 
-                if (indexOfMinus + 1 == originalLength)
+                if (indexOfMinus == i1)
                 {
                     cupsArray.Insert(0, removed[2]);
                     cupsArray.Insert(0, removed[1]);
@@ -179,11 +181,12 @@ namespace AventOfCode
                     cupsArray.Insert(indexOfMinus + 1, removed[0]);
                 }
 
-                currentI = cupsArray.IndexOf(currentCup) + 1;
-                if (currentI == originalLength)
+                currentI = cupsArray.IndexOf(currentCup);
+                if (currentI == i1)
                 {
-                    currentI = 0;
+                    currentI = -1;
                 }
+                currentI++;
             }
 
             return cupsArray.IndexOf(1);
