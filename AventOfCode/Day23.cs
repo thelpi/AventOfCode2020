@@ -101,30 +101,32 @@ namespace AventOfCode
                 }
 
                 int indexOfMinus = -1;
-                for (int kk = 0; kk < cupsArray.Length; kk++)
+                int kk = 0;
+                while (indexOfMinus == -1)
                 {
                     if (cupsArray[kk] == minusOne)
                     {
                         indexOfMinus = kk;
-                        break;
+                    }
+                    kk++;
+                }
+
+                int ic = 0;
+                for (int k = 0; k < originalLength; k++)
+                {
+                    if (k >= indexOfMinus && k < indexOfMinus + 3)
+                    {
+                        cupsArrayCopy[indexOfMinus + ic] = removed[ic];
+                        ic++;
+                    }
+                    else
+                    {
+                        cupsArrayCopy[k] = k == originalLength - 1
+                            ? currentCup
+                            : cupsArray[k - ic + 1];
                     }
                 }
-                
-                for (int k = 0; k < indexOfMinus; k++)
-                {
-                    cupsArrayCopy[k] = k == minus3Length - 1
-                        ? currentCup
-                        : cupsArray[k + 1];
-                }
-                cupsArrayCopy[0 + indexOfMinus] = removed[0];
-                cupsArrayCopy[1 + indexOfMinus] = removed[1];
-                cupsArrayCopy[2 + indexOfMinus] = removed[2];
-                for (int k = indexOfMinus; k < minus3Length; k++)
-                {
-                    cupsArrayCopy[k + 3] = k == minus3Length - 1
-                        ? currentCup
-                        : cupsArray[k + 1];
-                }
+
                 cupsArray = cupsArrayCopy;
             }
 
