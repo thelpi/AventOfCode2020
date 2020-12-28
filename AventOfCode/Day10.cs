@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using LpiLib;
 
 namespace AventOfCode
 {
@@ -13,125 +14,107 @@ namespace AventOfCode
 
         public override long GetFirstPartResult(bool sample)
         {
-            var datas = GetContent(v => Convert.ToInt32(v), sample: sample);
+            var adapters = GetSortedAdapters(sample);
 
-            datas.Add(0);
-
-            datas.Sort();
-
-            int voltage = 0;
-            bool found = true;
-            var spreadCount = new Dictionary<int, int>
-                {
-                    { 1, 0 },
-                    { 2, 0 },
-                    { 3, 0 }
-                };
-            while (found)
+            var countByJoltsDelta = new Dictionary<int, int>
             {
-                var matches = datas.Where(x => x > voltage && x <= voltage + 3).ToList();
-                if (matches.Count > 0)
+                { 1, 0 },
+                { 2, 0 },
+                { 3, 0 }
+            };
+
+            var foundVoltageAbove = true;
+            var voltage = 0;
+            while (foundVoltageAbove)
+            {
+                var matches = adapters
+                    .Where(x => x > voltage && x <= voltage + 3);
+                foundVoltageAbove = matches.Any();
+                if (foundVoltageAbove)
                 {
                     var nextVoltage = matches.Min();
-                    spreadCount[nextVoltage - voltage]++;
+                    countByJoltsDelta[nextVoltage - voltage]++;
                     voltage = nextVoltage;
                 }
-                found = matches.Count > 0;
             }
-            spreadCount[3]++;
+            countByJoltsDelta[3]++;
 
-            var total = spreadCount[1] * spreadCount[3];
-
-            return total;
+            return countByJoltsDelta[1] * countByJoltsDelta[3];
         }
 
         public override long GetSecondPartResult(bool sample)
         {
-            var datas = GetContent(v => Convert.ToInt32(v), sample: sample);
+            var adapters = GetSortedAdapters(sample);
+            adapters.Add(adapters.Last() + 3);
 
-            datas.Add(0);
-            datas.Add(datas.Max() + 3);
-
-            datas.Sort();
-
-            List<List<int>> splitBy3 = new List<List<int>>();
-            var subList = new List<int>();
-            int current = 0;
-            foreach (var d in datas)
+            // each time there's a 3 jolts gap between adapters
+            // a new subgroup is created
+            var adaptersSubgroups = new List<List<int>>();
+            var currentAdaptersSubGroup = new List<int>();
+            var currentAdapter = 0;
+            foreach (var adapter in adapters)
             {
-                if (d - current == 3)
+                if (adapter - currentAdapter == 3)
                 {
-                    splitBy3.Add(new List<int>(subList));
-                    subList = new List<int>();
+                    adaptersSubgroups.Add(new List<int>(currentAdaptersSubGroup));
+                    currentAdaptersSubGroup = new List<int>();
                 }
-                subList.Add(d);
-                current = d;
+                currentAdaptersSubGroup.Add(adapter);
+                currentAdapter = adapter;
             }
 
-            void Calculate(List<int> baseList, List<List<int>> listToAdd, List<int> currentIteration, int currentIndex, int currentCount, int countofSubGroup)
+            var results = new List<int>();
+            
+            foreach (var adaptersSubgroup in adaptersSubgroups)
             {
-                if (currentCount == countofSubGroup)
+                // generates every combination for the current subgroup of adapters
+                var adaptersCombinations = new List<List<int>>();
+                for (int i = 1; i <= adaptersSubgroup.Count; i++)
                 {
-                    listToAdd.Add(new List<int>(currentIteration));
-                    return;
+                    adaptersCombinations.AddRange(Stat.Combination(adaptersSubgroup, i));
                 }
 
-                if (currentIndex >= baseList.Count)
-                    return;
-
-                currentIteration.Add(baseList[currentIndex]);
-                Calculate(baseList, listToAdd, currentIteration, currentIndex + 1, currentCount + 1, countofSubGroup);
-                currentIteration.Remove(baseList[currentIndex]);
-
-
-                Calculate(baseList, listToAdd, currentIteration, currentIndex + 1, currentCount, countofSubGroup);
-
-            }
-
-            Dictionary<List<int>, int> combosCount = splitBy3.ToDictionary(v => v, v => 0);
-            var keys = combosCount.Keys.ToList();
-
-            foreach (var combo in keys)
-            {
-                var subgroups = new List<List<int>>();
-                for (int i = 1; i <= combo.Count; i++)
+                var combinationsCount = 0;
+                foreach (var adaptersCombination in adaptersCombinations)
                 {
-                    Calculate(combo, subgroups, new List<int>(), 0, 0, i);
-                }
-
-                var count = 0;
-                foreach (var subgroup in subgroups)
-                {
-                    if (!subgroup.Contains(combo[0]) || !subgroup.Contains(combo.Last()))
+                    // a combination is valid if:
+                    // - contains the lowest element
+                    // - contains the highest element
+                    // - has no gap above 3 jolts
+                    bool validCombination = false;
+                    if (adaptersCombination.Contains(adaptersSubgroup[0])
+                        && adaptersCombination.Contains(adaptersSubgroup.Last()))
                     {
-                        continue;
-                    }
-
-                    bool breakNotGood = false;
-                    for (int i = 1; i < subgroup.Count; i++)
-                    {
-                        if (subgroup[i] - subgroup[i - 1] > 3)
+                        validCombination = true;
+                        int i = 1;
+                        while (i < adaptersCombination.Count && validCombination)
                         {
-                            breakNotGood = true;
-                            break;
+                            if (adaptersCombination[i] - adaptersCombination[i - 1] > 3)
+                            {
+                                validCombination = false;
+                            }
+                            i++;
                         }
                     }
-                    if (!breakNotGood)
+                    
+                    if (validCombination)
                     {
-                        count++;
+                        combinationsCount++;
                     }
                 }
 
-                combosCount[combo] = count;
+                results.Add(combinationsCount);
             }
 
-            long total2 = 1;
-            foreach (var combo in combosCount.Keys)
-            {
-                total2 = total2 * combosCount[combo];
-            }
+            return results.Aggregate((long)1, (x, v) => x *= v);
+        }
 
-            return total2;
+        private List<int> GetSortedAdapters(bool sample)
+        {
+            var datas = GetContent(v => Convert.ToInt32(v), sample: sample);
+            datas.Add(0);
+            datas.Sort();
+            return datas;
         }
     }
 }

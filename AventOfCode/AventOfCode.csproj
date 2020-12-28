@@ -9,6 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="LpiLib">
+      <HintPath>..\..\LpiLib\LpiLib\bin\x64\Release\netcoreapp2.0\LpiLib.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="Datas\20.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
