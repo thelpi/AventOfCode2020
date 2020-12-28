@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace AventOfCode
@@ -13,59 +12,37 @@ namespace AventOfCode
 
         public override long GetFirstPartResult(bool sample)
         {
-            var baseList = GetContent(v => v, sample: sample);
-
-            var tuples = new List<(int min, int max, char car, string val)>();
-            foreach (var l in baseList)
+            return GetItemsCountMatchingCondition(sample, (min, max, car, strValue) =>
             {
-                var splitted = l.Split(new[] { ' ' });
-                var min = Convert.ToInt32(splitted[0].Split('-')[0]);
-                var max = Convert.ToInt32(splitted[0].Split('-')[1]);
-                var car = splitted[1][0];
-                var val = splitted[2];
-                tuples.Add((min, max, car, val));
-            }
-
-            int countValid = 0;
-            foreach (var (min, max, car, val) in tuples)
-            {
-                var countChar = val.Count(c => c == car);
-                if (countChar >= min && countChar <= max)
-                {
-                    countValid++;
-                }
-            }
-
-            return countValid;
+                var countChar = strValue.Count(c => c == car);
+                return countChar >= min && countChar <= max;
+            });
         }
 
         public override long GetSecondPartResult(bool sample)
         {
-            var baseList = GetContent(v => v, sample: sample);
-
-            var tuples = new List<(int min, int max, char car, string val)>();
-            foreach (var l in baseList)
+            return GetItemsCountMatchingCondition(sample, (min, max, car, strValue) =>
             {
-                var splitted = l.Split(new[] { ' ' });
-                var min = Convert.ToInt32(splitted[0].Split('-')[0]);
-                var max = Convert.ToInt32(splitted[0].Split('-')[1]);
-                var car = splitted[1][0];
-                var val = splitted[2];
-                tuples.Add((min, max, car, val));
-            }
+                return (strValue[min - 1] == car && strValue[max - 1] != car)
+                    || (strValue[min - 1] != car && strValue[max - 1] == car);
+            });
+        }
 
-            int countValid = 0;
-            foreach (var (min, max, car, val) in tuples)
+        private int GetItemsCountMatchingCondition(bool sample,
+            Func<int, int, char, string, bool> condition)
+        {
+            var items = GetContent(v =>
             {
-                if (
-                    (val[min - 1] == car && val[max - 1] != car)
-                    || (val[min - 1] != car && val[max - 1] == car))
-                {
-                    countValid++;
-                }
-            }
+                var splitted = v.Split(new[] { ' ' });
+                return (
+                    Convert.ToInt32(splitted[0].Split('-')[0]),
+                    Convert.ToInt32(splitted[0].Split('-')[1]),
+                    splitted[1][0],
+                    splitted[2]
+                );
+            }, sample: sample);
 
-            return countValid;
+            return items.Count(v => condition(v.Item1, v.Item2, v.Item3, v.Item4));
         }
     }
 }
