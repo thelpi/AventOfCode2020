@@ -226,7 +226,12 @@ namespace AventOfCodeUnitTests
         [InlineData(false, false, 2489)]
         public void Day20Test(bool firstPart, bool sample, long expected)
         {
-            var result = Days.Day20(firstPart, sample);
+            var day = new Day20();
+
+            var result = firstPart
+                ? day.GetFirstPartResult(sample)
+                : day.GetSecondPartResult(sample);
+
             Assert.Equal(expected, result);
         }
 
@@ -248,7 +253,12 @@ namespace AventOfCodeUnitTests
         [InlineData(false, false, 33441)]
         public void Day22Test(bool firstPart, bool sample, long expected)
         {
-            var result = Days.Day22(firstPart, sample);
+            var day = new Day22();
+
+            var result = firstPart
+                ? day.GetFirstPartResult(sample)
+                : day.GetSecondPartResult(sample);
+
             Assert.Equal(expected, result);
         }
 
