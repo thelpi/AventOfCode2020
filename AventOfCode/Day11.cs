@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace AventOfCode
@@ -12,47 +11,25 @@ namespace AventOfCode
         private const char OCCUPIED = '#';
         private const char FLOOR = '.';
         private const char EMPTY = 'L';
+        private const int EMPTY_COUNT_SWITCH = 8;
+        private const int EMPTY_OCCUPIED_SWITCH_1 = 4;
+        private const int EMPTY_OCCUPIED_SWITCH_2 = 3;
 
         public Day11() : base(11) { }
 
         public override long GetFirstPartResult(bool sample)
         {
-            return CommonTrunk(sample, (char[][] seatsConfiguration, int i, int j) =>
-            {
-                if (seatsConfiguration[i][j] == EMPTY
-                    && GetDirectSurroundingEmptiness(seatsConfiguration, i, j) == 8)
-                {
-                    return OCCUPIED;
-                }
-                else if (seatsConfiguration[i][j] == OCCUPIED
-                    && GetDirectSurroundingEmptiness(seatsConfiguration, i, j) <= 4)
-                {
-                    return EMPTY;
-                }
-
-                return null;
-            });
+            return CommonTrunk(sample, GetDirectSurroundingEmptiness, EMPTY_OCCUPIED_SWITCH_1);
         }
 
         public override long GetSecondPartResult(bool sample)
         {
-            return CommonTrunk(sample, (char[][] seatsConfiguration, int i, int j) =>
-            {
-                if (seatsConfiguration[i][j] == EMPTY
-                    && GetDeepSurroundingEmptiness(seatsConfiguration, i, j) == 0)
-                {
-                    return OCCUPIED;
-                }
-                else if (seatsConfiguration[i][j] == OCCUPIED
-                    && GetDeepSurroundingEmptiness(seatsConfiguration, i, j) >= 5)
-                {
-                    return EMPTY;
-                }
-                return null;
-            });
+            return CommonTrunk(sample, GetDeepSurroundingEmptiness, EMPTY_OCCUPIED_SWITCH_2);
         }
 
-        private long CommonTrunk(bool sample, Func<char[][], int, int, char?> checkSeats)
+        private long CommonTrunk(bool sample,
+            Func<char[][], int, int, int> countEmptinessCallback,
+            int occupiedCountToSwitch)
         {
             var seatsConfiguration = GetContent(v => v.ToArray(), sample: sample).ToArray();
             
@@ -66,7 +43,18 @@ namespace AventOfCode
                     newConfiguration[i] = new char[seatsConfiguration[i].Length];
                     for (int j = 0; j < seatsConfiguration[i].Length; j++)
                     {
-                        var switchTo = checkSeats(seatsConfiguration, i, j);
+                        char? switchTo = null;
+                        if (seatsConfiguration[i][j] == EMPTY
+                            && countEmptinessCallback(seatsConfiguration, i, j) == EMPTY_COUNT_SWITCH)
+                        {
+                            switchTo = OCCUPIED;
+                        }
+                        else if (seatsConfiguration[i][j] == OCCUPIED
+                            && countEmptinessCallback(seatsConfiguration, i, j) <= occupiedCountToSwitch)
+                        {
+                            switchTo = EMPTY;
+                        }
+
                         if (switchTo.HasValue)
                         {
                             newConfiguration[i][j] = switchTo.Value;
@@ -115,7 +103,7 @@ namespace AventOfCode
 
         private int GetDeepSurroundingEmptiness(char[][] seatsConfig, int i, int j)
         {
-            int count = 0;
+            int count = 8;
 
             bool findOccupied = false;
             bool findEmpty = false;
@@ -128,7 +116,7 @@ namespace AventOfCode
             }
             if (findOccupied)
             {
-                count++;
+                count--;
             }
 
             findOccupied = false;
@@ -144,7 +132,7 @@ namespace AventOfCode
             }
             if (findOccupied)
             {
-                count++;
+                count--;
             }
 
             findOccupied = false;
@@ -158,7 +146,7 @@ namespace AventOfCode
             }
             if (findOccupied)
             {
-                count++;
+                count--;
             }
 
             findOccupied = false;
@@ -174,7 +162,7 @@ namespace AventOfCode
             }
             if (findOccupied)
             {
-                count++;
+                count--;
             }
 
             findOccupied = false;
@@ -188,7 +176,7 @@ namespace AventOfCode
             }
             if (findOccupied)
             {
-                count++;
+                count--;
             }
 
             findOccupied = false;
@@ -204,7 +192,7 @@ namespace AventOfCode
             }
             if (findOccupied)
             {
-                count++;
+                count--;
             }
 
             findOccupied = false;
@@ -218,7 +206,7 @@ namespace AventOfCode
             }
             if (findOccupied)
             {
-                count++;
+                count--;
             }
 
             findOccupied = false;
@@ -234,7 +222,7 @@ namespace AventOfCode
             }
             if (findOccupied)
             {
-                count++;
+                count--;
             }
 
             return count;
