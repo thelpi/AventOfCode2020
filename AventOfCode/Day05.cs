@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace AventOfCode
 {
@@ -10,130 +8,70 @@ namespace AventOfCode
     /// </summary>
     public sealed class Day05 : DayBase
     {
+        private const int ROW_MAX = 128;
+        private const int COL_MAX = 8;
+        private const char FRONT = 'F';
+        private const char BACK = 'B';
+        private const char LEFT = 'L';
+        private const char RIGHT = 'R';
+
         public Day05() : base(5) { }
 
         public override long GetFirstPartResult(bool sample)
         {
-            var list = GetContent( v => v, sample: sample);
-
-            var ids = new List<int>();
-
-            foreach (string board in list)
-            {
-                string rowInfo = board.Substring(0, 7);
-                string colInfo = board.Substring(7);
-
-                (int, int) rangeRow = (0, 127);
-                (int, int) rangeCol = (0, 7);
-
-                foreach (var c in rowInfo)
-                {
-                    int currentHalf = (rangeRow.Item2 - rangeRow.Item1) / 2;
-                    if (c == 'F')
-                    {
-                        rangeRow = (rangeRow.Item1, rangeRow.Item1 + currentHalf);
-                    }
-                    else if (c == 'B')
-                    {
-                        rangeRow = (rangeRow.Item1 + currentHalf + 1, rangeRow.Item2);
-                    }
-                    else
-                    {
-
-                    }
-                }
-
-                foreach (var c in colInfo)
-                {
-                    int currentHalf = (rangeCol.Item2 - rangeCol.Item1) / 2;
-                    if (c == 'L')
-                    {
-                        rangeCol = (rangeCol.Item1, rangeCol.Item1 + currentHalf);
-                    }
-                    else if (c == 'R')
-                    {
-                        rangeCol = (rangeCol.Item1 + currentHalf + 1, rangeCol.Item2);
-                    }
-                    else
-                    {
-
-                    }
-                }
-
-                ids.Add((rangeRow.Item1 * 8) + rangeCol.Item1);
-            }
-
-            var max = ids.Max();
-
-            return max;
+            return GetBoardingIdList(sample).Max();
         }
 
         public override long GetSecondPartResult(bool sample)
         {
-            var list = GetContent( v => v, sample: sample);
+            var idList = GetBoardingIdList(sample);
 
-            var ids = new List<int>();
-
-            foreach (string board in list)
+            for (int i = idList.Max() - 1; i >= 0; i--)
             {
-                string rowInfo = board.Substring(0, 7);
-                string colInfo = board.Substring(7);
-
-                (int, int) rangeRow = (0, 127);
-                (int, int) rangeCol = (0, 7);
-
-                foreach (var c in rowInfo)
+                if (!idList.Contains(i)
+                    && idList.Contains(i - 1)
+                    && idList.Contains(i + 1))
                 {
-                    int currentHalf = (rangeRow.Item2 - rangeRow.Item1) / 2;
-                    if (c == 'F')
-                    {
-                        rangeRow = (rangeRow.Item1, rangeRow.Item1 + currentHalf);
-                    }
-                    else if (c == 'B')
-                    {
-                        rangeRow = (rangeRow.Item1 + currentHalf + 1, rangeRow.Item2);
-                    }
-                    else
-                    {
-
-                    }
-                }
-
-                foreach (var c in colInfo)
-                {
-                    int currentHalf = (rangeCol.Item2 - rangeCol.Item1) / 2;
-                    if (c == 'L')
-                    {
-                        rangeCol = (rangeCol.Item1, rangeCol.Item1 + currentHalf);
-                    }
-                    else if (c == 'R')
-                    {
-                        rangeCol = (rangeCol.Item1 + currentHalf + 1, rangeCol.Item2);
-                    }
-                    else
-                    {
-
-                    }
-                }
-
-                ids.Add((rangeRow.Item1 * 8) + rangeCol.Item1);
-            }
-
-            var max = ids.Max();
-
-            var match = -1;
-            for (int i = 0; i < max; i++)
-            {
-                if (!ids.Contains(i))
-                {
-                    if (ids.Contains(i - 1) && ids.Contains(i + 1))
-                    {
-                        match = i;
-                    }
+                    return i;
                 }
             }
 
-            return match;
+            return -1;
+        }
+
+        private List<int> GetBoardingIdList(bool sample)
+        {
+            var boardList = GetContent(v => v, sample: sample);
+
+            var idList = new List<int>();
+
+            foreach (string board in boardList)
+            {
+                var rowIndex = GetIndex(board.Substring(0, COL_MAX - 1), ROW_MAX - 1, FRONT, BACK);
+                var colIndex = GetIndex(board.Substring(COL_MAX - 1), COL_MAX - 1, LEFT, RIGHT);
+                idList.Add((rowIndex * COL_MAX) + colIndex);
+            }
+
+            return idList;
+        }
+
+        private int GetIndex(string boardSequence,
+            int initialMax, char firstHalfIndicator, char secondHalfIndicator)
+        {
+            (int Min, int Max) range = (0, initialMax);
+            foreach (var sequenceElement in boardSequence)
+            {
+                int rangeHalf = (range.Max - range.Min) / 2;
+                if (sequenceElement == firstHalfIndicator)
+                {
+                    range = (range.Min, range.Min + rangeHalf);
+                }
+                else if (sequenceElement == secondHalfIndicator)
+                {
+                    range = (range.Min + rangeHalf + 1, range.Max);
+                }
+            }
+            return range.Min;
         }
     }
 }
