@@ -101,131 +101,37 @@ namespace AventOfCode
             }.Count(_ => _);
         }
 
-        private int GetDeepSurroundingEmptiness(char[][] seatsConfig, int i, int j)
+        private bool OccupiedInDirection(char[][] seatsConfig, int k, int l, int kInc, int lInc)
         {
-            int count = 8;
-
             bool findOccupied = false;
             bool findEmpty = false;
-            int k = i - 1;
-            while (k >= 0 && !findOccupied && !findEmpty)
-            {
-                findOccupied = seatsConfig[k][j] == OCCUPIED;
-                findEmpty = seatsConfig[k][j] == EMPTY;
-                k--;
-            }
-            if (findOccupied)
-            {
-                count--;
-            }
-
-            findOccupied = false;
-            findEmpty = false;
-            k = i - 1;
-            var l = j + 1;
-            while (k >= 0 && l < seatsConfig[i].Length && !findOccupied && !findEmpty)
+            k += kInc;
+            l += lInc;
+            while (k >= 0 && l >= 0
+                && k < seatsConfig.Length && l < seatsConfig[k].Length
+                && !findOccupied && !findEmpty)
             {
                 findOccupied = seatsConfig[k][l] == OCCUPIED;
                 findEmpty = seatsConfig[k][l] == EMPTY;
-                k--;
-                l++;
+                k += kInc;
+                l += lInc;
             }
-            if (findOccupied)
-            {
-                count--;
-            }
+            return findOccupied;
+        }
 
-            findOccupied = false;
-            findEmpty = false;
-            l = j + 1;
-            while (l < seatsConfig[i].Length && !findOccupied && !findEmpty)
+        private int GetDeepSurroundingEmptiness(char[][] seatsConfig, int i, int j)
+        {
+            return new[]
             {
-                findOccupied = seatsConfig[i][l] == OCCUPIED;
-                findEmpty = seatsConfig[i][l] == EMPTY;
-                l++;
-            }
-            if (findOccupied)
-            {
-                count--;
-            }
-
-            findOccupied = false;
-            findEmpty = false;
-            k = i + 1;
-            l = j + 1;
-            while (k < seatsConfig.Length && l < seatsConfig[i].Length && !findOccupied && !findEmpty)
-            {
-                findOccupied = seatsConfig[k][l] == OCCUPIED;
-                findEmpty = seatsConfig[k][l] == EMPTY;
-                k++;
-                l++;
-            }
-            if (findOccupied)
-            {
-                count--;
-            }
-
-            findOccupied = false;
-            findEmpty = false;
-            k = i + 1;
-            while (k < seatsConfig.Length && !findOccupied && !findEmpty)
-            {
-                findOccupied = seatsConfig[k][j] == OCCUPIED;
-                findEmpty = seatsConfig[k][j] == EMPTY;
-                k++;
-            }
-            if (findOccupied)
-            {
-                count--;
-            }
-
-            findOccupied = false;
-            findEmpty = false;
-            k = i + 1;
-            l = j - 1;
-            while (k < seatsConfig.Length && l >= 0 && !findOccupied && !findEmpty)
-            {
-                findOccupied = seatsConfig[k][l] == OCCUPIED;
-                findEmpty = seatsConfig[k][l] == EMPTY;
-                k++;
-                l--;
-            }
-            if (findOccupied)
-            {
-                count--;
-            }
-
-            findOccupied = false;
-            findEmpty = false;
-            l = j - 1;
-            while (l >= 0 && !findOccupied && !findEmpty)
-            {
-                findOccupied = seatsConfig[i][l] == OCCUPIED;
-                findEmpty = seatsConfig[i][l] == EMPTY;
-                l--;
-            }
-            if (findOccupied)
-            {
-                count--;
-            }
-
-            findOccupied = false;
-            findEmpty = false;
-            k = i - 1;
-            l = j - 1;
-            while (k >= 0 && l >= 0 && !findOccupied && !findEmpty)
-            {
-                findOccupied = seatsConfig[k][l] == OCCUPIED;
-                findEmpty = seatsConfig[k][l] == EMPTY;
-                k--;
-                l--;
-            }
-            if (findOccupied)
-            {
-                count--;
-            }
-
-            return count;
+                OccupiedInDirection(seatsConfig, i, j, -1, 0),
+                OccupiedInDirection(seatsConfig, i, j, -1, 1),
+                OccupiedInDirection(seatsConfig, i, j, 0, 1),
+                OccupiedInDirection(seatsConfig, i, j, 1, 1),
+                OccupiedInDirection(seatsConfig, i, j, 1, 0),
+                OccupiedInDirection(seatsConfig, i, j, 1, -1),
+                OccupiedInDirection(seatsConfig, i, j, 0, -1),
+                OccupiedInDirection(seatsConfig, i, j, -1, -1)
+            }.Count(_ => !_);
         }
     }
 }
