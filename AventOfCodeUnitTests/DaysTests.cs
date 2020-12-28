@@ -331,9 +331,12 @@ namespace AventOfCodeUnitTests
         [InlineData(false, 2584, "fqhpsl,zxncg,clzpsl,zbbnj,jkgbvlxh,dzqc,ppj,glzb")]
         public void Day21Test(bool sample, long expectedCount, string expectedCanonical)
         {
-            var result = Days.Day21(sample);
-            Assert.Equal(expectedCount, result.Item1);
-            Assert.Equal(expectedCanonical, result.Item2);
+            var day = new Day21();
+
+            var result = day.GetSecondPartResult(sample);
+
+            Assert.Equal(expectedCount, result);
+            Assert.Equal(expectedCanonical, day.Part2CanonicalResult);
         }
 
         [Theory]
