@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace AventOfCode
 {
@@ -14,42 +13,23 @@ namespace AventOfCode
 
         public override long GetFirstPartResult(bool sample)
         {
-            var byGroupByPeople = GetContent(v => v.Split("\r\n").ToList(), "\r\n\r\n", sample: sample);
-
-            var yesCount = 0;
-
-            foreach (var group in byGroupByPeople)
-            {
-                var datasGroup = group.SelectMany(g => g).ToList();
-
-                var result = datasGroup
-                    .GroupBy(k => k)
-                    .Where(k => k.Count() > 0);
-
-                yesCount += result.Count();
-            }
-
-            return yesCount;
+            return InternalCount(sample, (count, group) => count > 0);
         }
 
         public override long GetSecondPartResult(bool sample)
         {
+            return InternalCount(sample, (count, group) => count == group.Count);
+        }
+
+        private long InternalCount(bool sample, Func<int, List<string>, bool> matchPredicate)
+        {
             var byGroupByPeople = GetContent(v => v.Split("\r\n").ToList(), "\r\n\r\n", sample: sample);
 
-            var yesCount = 0;
-
-            foreach (var group in byGroupByPeople)
-            {
-                var datasGroup = group.SelectMany(g => g).ToList();
-
-                var result = datasGroup
+            return byGroupByPeople.Sum(group =>
+                group
+                    .SelectMany(g => g)
                     .GroupBy(k => k)
-                    .Where(k => k.Count() == group.Count);
-
-                yesCount += result.Count();
-            }
-
-            return yesCount;
+                    .Count(k => matchPredicate(k.Count(), group)));
         }
     }
 }
