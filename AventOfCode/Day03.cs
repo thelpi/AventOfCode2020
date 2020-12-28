@@ -9,80 +9,66 @@ namespace AventOfCode
     /// </summary>
     public sealed class Day03 : DayBase
     {
+        private const char TREE = '#';
+
         public Day03() : base(3) { }
 
         public override long GetFirstPartResult(bool sample)
         {
-            var fullList = GetContent(v => v.ToArray().Select(subV => subV == '#' ? 1 : 0).ToList(), sample: sample);
+            return CountTreeForEachSlide(sample,
+                new List<(int, int)>
+                {
+                    (3, 1)
+                });
+        }
 
-            var combos = new List<(int right, int down)>
-            {
-                (3, 1)
-            };
+        public override long GetSecondPartResult(bool sample)
+        {
+            return CountTreeForEachSlide(sample,
+                new List<(int, int)>
+                {
+                    (3, 1), (1, 1), (5, 1), (7, 1), (1, 2)
+                });
+        }
+
+        private long CountTreeForEachSlide(bool sample, List<(int right, int down)> moveCombos)
+        {
+            var slideGrid = GetContent(v =>
+                v.Select(subV => subV == TREE).ToList(),
+                sample: sample);
+
             long treeMultiply = 1;
 
-            foreach (var (right, down) in combos)
+            foreach (var (right, down) in moveCombos)
             {
-                int treeCount = 0;
-                int currentRight = 0;
-                int lastIndexByRow = fullList[0].Count - 1;
-                for (int i = 0; i < fullList.Count; i += down)
-                {
-                    if (fullList[i][currentRight] == 1)
-                    {
-                        treeCount++;
-                    }
-                    currentRight += right;
-                    var diffRight = lastIndexByRow - currentRight;
-                    if (diffRight < 0)
-                    {
-                        currentRight = Math.Abs(diffRight) - 1;
-                    }
-                }
-
-                treeMultiply *= treeCount;
+                treeMultiply *= CountTreeOnSlide(slideGrid, right, down);
             }
 
             return treeMultiply;
         }
 
-        public override long GetSecondPartResult(bool sample)
+        private static int CountTreeOnSlide(List<List<bool>> slideGrid, int right, int down)
         {
-            var fullList = GetContent(v => v.ToArray().Select(subV => subV == '#' ? 1 : 0).ToList(), sample: sample);
+            // Assumes X-axis is the same for each row
+            int lastIndexAxisX = slideGrid[0].Count - 1;
 
-            var combos = new List<(int right, int down)>
+            int treeCount = 0;
+            int currentRight = 0;
+            for (int currentDown = 0; currentDown < slideGrid.Count; currentDown += down)
             {
-                (3, 1)
-            };
-            combos.Add((1, 1));
-            combos.Add((5, 1));
-            combos.Add((7, 1));
-            combos.Add((1, 2));
-            long treeMultiply = 1;
-
-            foreach (var (right, down) in combos)
-            {
-                int treeCount = 0;
-                int currentRight = 0;
-                int lastIndexByRow = fullList[0].Count - 1;
-                for (int i = 0; i < fullList.Count; i += down)
+                if (slideGrid[currentDown][currentRight])
                 {
-                    if (fullList[i][currentRight] == 1)
-                    {
-                        treeCount++;
-                    }
-                    currentRight += right;
-                    var diffRight = lastIndexByRow - currentRight;
-                    if (diffRight < 0)
-                    {
-                        currentRight = Math.Abs(diffRight) - 1;
-                    }
+                    treeCount++;
                 }
-
-                treeMultiply *= treeCount;
+                currentRight += right;
+                var rightOverflow = lastIndexAxisX - currentRight;
+                if (rightOverflow < 0)
+                {
+                    currentRight = Math.Abs(rightOverflow) - 1;
+                }
             }
 
-            return treeMultiply;
+            return treeCount;
         }
     }
 }
