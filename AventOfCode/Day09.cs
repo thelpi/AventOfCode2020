@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AventOfCode
@@ -8,107 +9,88 @@ namespace AventOfCode
     /// </summary>
     public sealed class Day09 : DayBase
     {
+        private const int SAMPLE_SUM_SIZE = 5;
+        private const int FULL_SUM_SIZE = 25;
+
         public Day09() : base(9) { }
 
         public override long GetFirstPartResult(bool sample)
         {
-            var datas = GetContent(v => Convert.ToInt64(v), sample: sample);
+            var (outputsList, weaknessIndex) = FindXmasWeakness(sample);
 
-            int baseP = sample ? 5 : 25;
-
-            bool ok = true;
-            int p = baseP;
-            int skip = 0;
-            long mark = -1;
-            while (ok)
-            {
-                var lastPCount = datas.Skip(skip).Take(baseP).ToList();
-
-                bool found = false;
-                for (int j = 0; j < baseP; j++)
-                {
-                    for (int k = 0; k < baseP; k++)
-                    {
-                        if (lastPCount[j] != lastPCount[k])
-                        {
-                            if (lastPCount[j] + lastPCount[k] == datas[p])
-                            {
-                                found = true;
-                            }
-                        }
-                    }
-                }
-
-                ok = found;
-                mark = datas[p];
-                p++;
-                skip++;
-            }
-
-            return mark;
+            return weaknessIndex;
         }
 
         public override long GetSecondPartResult(bool sample)
         {
-            var datas = GetContent(v => Convert.ToInt64(v), sample: sample);
+            var (outputsList, weaknessIndex) = FindXmasWeakness(sample);
 
-            int baseP = sample ? 5 : 25;
-
-            bool ok = true;
-            int p = baseP;
-            int skip = 0;
-            long mark = -1;
-            while (ok)
+            var rangeIndexBegin = -1;
+            var rangeIndexEnd = -1;
+            for (int i = 0; i < outputsList.Count; i++)
             {
-                var lastPCount = datas.Skip(skip).Take(baseP).ToList();
-
-                bool found = false;
-                for (int j = 0; j < baseP; j++)
-                {
-                    for (int k = 0; k < baseP; k++)
-                    {
-                        if (lastPCount[j] != lastPCount[k])
-                        {
-                            if (lastPCount[j] + lastPCount[k] == datas[p])
-                            {
-                                found = true;
-                            }
-                        }
-                    }
-                }
-
-                ok = found;
-                mark = datas[p];
-                p++;
-                skip++;
-            }
-
-            int okFirstIndex = -1;
-            int okLastIndex = -1;
-            for (int i = 0; i < datas.Count; i++)
-            {
-                int localOkIndex = -1;
-                long currentSum = datas[i];
+                long outputsSum = outputsList[i];
                 for (int j = i - 1; j >= 0; j--)
                 {
-                    if (currentSum >= mark)
+                    if (outputsSum >= weaknessIndex)
                     {
                         break;
                     }
-                    localOkIndex = j;
-                    currentSum += datas[j];
+                    rangeIndexBegin = j;
+                    outputsSum += outputsList[j];
                 }
-                if (currentSum == mark)
+
+                if (outputsSum == weaknessIndex)
                 {
-                    okLastIndex = i;
-                    okFirstIndex = localOkIndex;
+                    rangeIndexEnd = i;
                     break;
                 }
             }
 
-            var ranged = datas.Skip(okFirstIndex).Take(okLastIndex - okFirstIndex).ToList();
+            var outputsRange = outputsList
+                .Skip(rangeIndexBegin)
+                .Take(rangeIndexEnd - rangeIndexBegin);
 
-            return ranged.Min() + ranged.Max();
+            return outputsRange.Min() + outputsRange.Max();
+        }
+
+        private (List<long>, long) FindXmasWeakness(bool sample)
+        {
+            var outputsList = GetContent(v => Convert.ToInt64(v), sample: sample);
+
+            int countToSum = sample ? SAMPLE_SUM_SIZE : FULL_SUM_SIZE;
+
+            var noWeakness = true;
+            var startAt = countToSum;
+            var skipCount = 0;
+            long weaknessIndex = -1;
+            while (noWeakness)
+            {
+                var remainingOutputs = outputsList
+                    .Skip(skipCount)
+                    .Take(countToSum)
+                    .ToArray();
+
+                bool reachSumCount = false;
+                for (int j = 0; j < countToSum; j++)
+                {
+                    for (int k = 0; k < countToSum; k++)
+                    {
+                        if (remainingOutputs[j] != remainingOutputs[k]
+                            && remainingOutputs[j] + remainingOutputs[k] == outputsList[startAt])
+                        {
+                            reachSumCount = true;
+                        }
+                    }
+                }
+
+                noWeakness = reachSumCount;
+                weaknessIndex = outputsList[startAt];
+                startAt++;
+                skipCount++;
+            }
+
+            return (outputsList, weaknessIndex);
         }
     }
 }
