@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 
 namespace AventOfCode
 {
@@ -15,102 +14,101 @@ namespace AventOfCode
         private const int EMPTY_OCCUPIED_SWITCH_1 = 4;
         private const int EMPTY_OCCUPIED_SWITCH_2 = 3;
 
+        private char[][] _seatsConfig;
+        private int _i;
+        private int _j;
+        private bool _extended;
+        private int _emptyOccupedSwitch;
+
         public Day11() : base(11) { }
 
         public override long GetFirstPartResult(bool sample)
         {
-            return CommonTrunk(sample,
-                (char[][] seatsConfig, int k, int l, int kInc, int lInc) =>
-                {
-                    return (k + kInc) >= 0
-                        && (l + lInc) >= 0
-                        && (k + kInc) < seatsConfig.Length
-                        && (l + lInc) < seatsConfig[(k + kInc)].Length
-                        && seatsConfig[(k + kInc)][(l + lInc)] == OCCUPIED;
-                },
-                EMPTY_OCCUPIED_SWITCH_1);
+            _extended = false;
+            _emptyOccupedSwitch = EMPTY_OCCUPIED_SWITCH_1;
+            return CommonTrunk(sample);
         }
 
         public override long GetSecondPartResult(bool sample)
         {
-            return CommonTrunk(sample,
-                (char[][] seatsConfig, int k, int l, int kInc, int lInc) =>
-                {
-                    bool findOccupied = false;
-                    bool findEmpty = false;
-                    k += kInc;
-                    l += lInc;
-                    while (k >= 0 && l >= 0
-                        && k < seatsConfig.Length && l < seatsConfig[k].Length
-                        && !findOccupied && !findEmpty)
-                    {
-                        findOccupied = seatsConfig[k][l] == OCCUPIED;
-                        findEmpty = seatsConfig[k][l] == EMPTY;
-                        k += kInc;
-                        l += lInc;
-                    }
-                    return findOccupied;
-                },
-                EMPTY_OCCUPIED_SWITCH_2);
+            _extended = true;
+            _emptyOccupedSwitch = EMPTY_OCCUPIED_SWITCH_2;
+            return CommonTrunk(sample);
         }
 
-        private long CommonTrunk(bool sample,
-            Func<char[][], int, int, int, int, bool> checkOccupiedCallback,
-            int occupiedCountToSwitch)
+        private bool IsOccupied(int kInc, int lInc)
         {
-            var seatsConfiguration = GetContent(v => v.ToArray(), sample: sample).ToArray();
+            bool findOccupied = false;
+            bool findEmpty = false;
+            int k = _i + kInc;
+            int l = _j + lInc;
+            while (k >= 0 && l >= 0
+                && k < _seatsConfig.Length && l < _seatsConfig[k].Length
+                && !findOccupied && !findEmpty)
+            {
+                findOccupied = _seatsConfig[k][l] == OCCUPIED;
+                findEmpty = !_extended || _seatsConfig[k][l] == EMPTY;
+                k += kInc;
+                l += lInc;
+            }
+            return findOccupied;
+        }
+
+        private long CommonTrunk(bool sample)
+        {
+            _seatsConfig = GetContent(v => v.ToArray(), sample: sample).ToArray();
             
             var isNewConfiguration = true;
             while (isNewConfiguration)
             {
                 isNewConfiguration = false;
-                var newConfiguration = new char[seatsConfiguration.Length][];
-                for (int i = 0; i < seatsConfiguration.Length; i++)
+                var newConfiguration = new char[_seatsConfig.Length][];
+                for (_i = 0; _i < _seatsConfig.Length; _i++)
                 {
-                    newConfiguration[i] = new char[seatsConfiguration[i].Length];
-                    for (int j = 0; j < seatsConfiguration[i].Length; j++)
+                    newConfiguration[_i] = new char[_seatsConfig[_i].Length];
+                    for (_j = 0; _j < _seatsConfig[_i].Length; _j++)
                     {
                         char? switchTo = null;
-                        if (seatsConfiguration[i][j] == EMPTY
-                            && GetSurroundingEmptiness(seatsConfiguration, i, j, checkOccupiedCallback) == EMPTY_COUNT_SWITCH)
+                        if (_seatsConfig[_i][_j] == EMPTY
+                            && GetSurroundingEmptiness() == EMPTY_COUNT_SWITCH)
                         {
                             switchTo = OCCUPIED;
                         }
-                        else if (seatsConfiguration[i][j] == OCCUPIED
-                            && GetSurroundingEmptiness(seatsConfiguration, i, j, checkOccupiedCallback) <= occupiedCountToSwitch)
+                        else if (_seatsConfig[_i][_j] == OCCUPIED
+                            && GetSurroundingEmptiness() <= _emptyOccupedSwitch)
                         {
                             switchTo = EMPTY;
                         }
 
                         if (switchTo.HasValue)
                         {
-                            newConfiguration[i][j] = switchTo.Value;
+                            newConfiguration[_i][_j] = switchTo.Value;
                             isNewConfiguration = true;
                         }
                         else
                         {
-                            newConfiguration[i][j] = seatsConfiguration[i][j];
+                            newConfiguration[_i][_j] = _seatsConfig[_i][_j];
                         }
                     }
                 }
-                seatsConfiguration = newConfiguration;
+                _seatsConfig = newConfiguration;
             }
 
-            return seatsConfiguration.Sum(seatsRow => seatsRow.Count(v => v == OCCUPIED));
+            return _seatsConfig.Sum(seatsRow => seatsRow.Count(v => v == OCCUPIED));
         }
 
-        private int GetSurroundingEmptiness(char[][] seatsConfig, int i, int j, Func<char[][], int, int, int, int, bool> checkOccupiedCallback)
+        private int GetSurroundingEmptiness()
         {
             return new[]
             {
-                checkOccupiedCallback(seatsConfig, i, j, -1, 0),
-                checkOccupiedCallback(seatsConfig, i, j, -1, 1),
-                checkOccupiedCallback(seatsConfig, i, j, 0, 1),
-                checkOccupiedCallback(seatsConfig, i, j, 1, 1),
-                checkOccupiedCallback(seatsConfig, i, j, 1, 0),
-                checkOccupiedCallback(seatsConfig, i, j, 1, -1),
-                checkOccupiedCallback(seatsConfig, i, j, 0, -1),
-                checkOccupiedCallback(seatsConfig, i, j, -1, -1)
+                IsOccupied(-1, 0),
+                IsOccupied(-1, 1),
+                IsOccupied(0, 1),
+                IsOccupied(1, 1),
+                IsOccupied(1, 0),
+                IsOccupied(1, -1),
+                IsOccupied(0, -1),
+                IsOccupied(-1, -1)
             }.Count(_ => !_);
         }
     }
