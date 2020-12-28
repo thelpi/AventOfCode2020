@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace AventOfCode
 {
@@ -9,129 +8,86 @@ namespace AventOfCode
     /// </summary>
     public sealed class Day08 : DayBase
     {
+        private const string ACC = "acc";
+        private const string JMP = "jmp";
+        private const string NOP = "nop";
+
         public Day08() : base(8) { }
 
         public override long GetFirstPartResult(bool sample)
         {
-            var instructions = GetContent(v =>
-                (v.Split(' ')[0], Convert.ToInt32(v.Split(' ')[1].Replace("+", ""))),
-                sample: sample);
-
-            var realAccumulateur = -1;
-
-            bool realEnding = false;
-            var localInstructions = new List<(string, int)>(instructions);
-
-            var ij = instructions[0];
-
-            int previousI = 0;
-            int i = 0;
-            List<int> passed = new List<int>();
-            var accumulateur = 0;
-            var stop = passed.Contains(i);
-            while (!stop)
-            {
-                passed.Add(i);
-                switch (localInstructions[i].Item1)
-                {
-                    case "nop":
-                        previousI = i;
-                        i += 1;
-                        break;
-                    case "acc":
-                        accumulateur += localInstructions[i].Item2;
-                        previousI = i;
-                        i += 1;
-                        break;
-                    case "jmp":
-                        previousI = i;
-                        i += localInstructions[i].Item2;
-                        break;
-                    default:
-                        break;
-                }
-                realEnding = i == localInstructions.Count;
-                stop = passed.Contains(i) || realEnding;
-            }
-
-            realAccumulateur = accumulateur;
-
-            return realAccumulateur;
+            return Accumulate(sample, true);
         }
 
         public override long GetSecondPartResult(bool sample)
         {
-            var instructions = GetContent(v =>
-                (v.Split(' ')[0], Convert.ToInt32(v.Split(' ')[1].Replace("+", ""))),
+            return Accumulate(sample, false);
+        }
+
+        private long Accumulate(bool sample, bool firstPart)
+        {
+            var initialInstructions = GetContent(v =>
+                {
+                    var type = v.Split(' ')[0];
+                    var value = Convert.ToInt32(v.Split(' ')[1].Replace("+", ""));
+                    return (type, value);
+                },
                 sample: sample);
 
-            var realAccumulateur = -1;
+            var accResult = -1;
 
-            bool realEnding = false;
-            for (int j = 0; j < instructions.Count; j++)
+            for (int j = 0; j < initialInstructions.Count; j++)
             {
-                var localInstructions = new List<(string, int)>(instructions);
+                var instructions = new List<(string type, int value)>(initialInstructions);
 
-                var ij = instructions[j];
-
-                (string, int) newInstruction = ("", 0);
-                if (ij.Item1 == "acc")
+                if (!firstPart)
                 {
-                    continue;
-                }
-                else if (ij.Item1 == "nop")
-                {
-                    if (j + ij.Item2 < 0)
+                    switch (instructions[j].type)
                     {
-                        continue;
+                        case ACC:
+                            continue;
+                        case NOP:
+                            if (j + instructions[j].value < 0)
+                                continue;
+                            instructions[j] = (JMP, instructions[j].value);
+                            break;
+                        case JMP:
+                            instructions[j] = (NOP, instructions[j].value);
+                            break;
                     }
-                    newInstruction = ("jmp", ij.Item2);
-                }
-                else if (instructions[j].Item1 == "jmp")
-                {
-                    newInstruction = ("nop", ij.Item2);
                 }
 
-                localInstructions[j] = newInstruction;
-
-                int previousI = 0;
-                int i = 0;
-                List<int> passed = new List<int>();
+                var resolvedLoop = false;
+                var i = 0;
+                var instructionsHistory = new List<int>();
                 var accumulateur = 0;
-                var stop = passed.Contains(i);
-                while (!stop)
+                while (!instructionsHistory.Contains(i) && !resolvedLoop)
                 {
-                    passed.Add(i);
-                    switch (localInstructions[i].Item1)
+                    instructionsHistory.Add(i);
+                    switch (instructions[i].type)
                     {
-                        case "nop":
-                            previousI = i;
+                        case NOP:
                             i += 1;
                             break;
-                        case "acc":
-                            accumulateur += localInstructions[i].Item2;
-                            previousI = i;
+                        case ACC:
+                            accumulateur += instructions[i].value;
                             i += 1;
                             break;
-                        case "jmp":
-                            previousI = i;
-                            i += localInstructions[i].Item2;
-                            break;
-                        default:
+                        case JMP:
+                            i += instructions[i].value;
                             break;
                     }
-                    realEnding = i == localInstructions.Count;
-                    stop = passed.Contains(i) || realEnding;
+                    resolvedLoop = i == instructions.Count;
                 }
 
-                if (realEnding)
+                if (resolvedLoop || firstPart)
                 {
-                    realAccumulateur = accumulateur;
+                    accResult = accumulateur;
                     break;
                 }
             }
 
-            return realAccumulateur;
+            return accResult;
         }
     }
 }
