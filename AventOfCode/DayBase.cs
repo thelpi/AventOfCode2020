@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace AventOfCode
 {
-    public abstract class Day
+    public abstract class DayBase
     {
         private const string DEFAULT_SEPARATOR = "\r\n";
         private const string SAMPLE_FOLDER = "Samples";
@@ -15,7 +15,7 @@ namespace AventOfCode
 
         public int DayNumber { get; }
 
-        protected Day(int dayNumber)
+        protected DayBase(int dayNumber)
         {
             DayNumber = dayNumber;
         }

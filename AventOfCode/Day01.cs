@@ -7,7 +7,7 @@ namespace AventOfCode
     /// <summary>
     /// Day 1: Report Repair
     /// </summary>
-    public sealed class Day01 : Day
+    public sealed class Day01 : DayBase
     {
         private const int SUM_EXPECT = 2020;
 

@@ -7,7 +7,7 @@ namespace AventOfCode
     /// <summary>
     /// Day 23: Crab Cups
     /// </summary>
-    public sealed class Day23 : Day
+    public sealed class Day23 : DayBase
     {
         private const int PART_2_ELEMENTS_COUNT = 1000000;
         private const int PART_1_LOOP = 100;

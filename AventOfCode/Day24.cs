@@ -7,7 +7,7 @@ namespace AventOfCode
     /// <summary>
     /// Day 24: Lobby Layout
     /// </summary>
-    public sealed class Day24 : Day
+    public sealed class Day24 : DayBase
     {
         // Arbitray value (to form a grid large enough; borders MUST stay white at all time)
         private const int GRID_SIZE = 500;

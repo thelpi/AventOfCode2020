@@ -5,7 +5,7 @@ namespace AventOfCode
     /// <summary>
     /// Day 25: Combo Breaker
     /// </summary>
-    public sealed class Day25 : Day
+    public sealed class Day25 : DayBase
     {
         private const long DEFAULT_SUBJECT = 7;
         private const long MODULO = 20201227;
