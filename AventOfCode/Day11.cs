@@ -21,109 +21,22 @@ namespace AventOfCode
             {
                 bool configurationChange = false;
 
-                if (seatsConfiguration[i][j] == EMPTY)
+                char? switchTo = null;
+                if (seatsConfiguration[i][j] == EMPTY
+                    && GetSurroundingEmptiness(seatsConfiguration, i, j) == 8)
                 {
-                    var top =
-                        i == 0
-                        || seatsConfiguration[i - 1][j] == EMPTY
-                        || seatsConfiguration[i - 1][j] == FLOOR
-                            ? 1 : 0;
-                    var top_right =
-                        i == 0
-                        || j + 1 == seatsConfiguration[i].Length
-                        || seatsConfiguration[i - 1][j + 1] == EMPTY
-                        || seatsConfiguration[i - 1][j + 1] == FLOOR
-                            ? 1 : 0;
-                    var right =
-                        j + 1 == seatsConfiguration[i].Length
-                        || seatsConfiguration[i][j + 1] == EMPTY
-                        || seatsConfiguration[i][j + 1] == FLOOR
-                            ? 1 : 0;
-                    var bottom_right =
-                        i + 1 == seatsConfiguration.Length
-                        || j + 1 == seatsConfiguration[i].Length
-                        || seatsConfiguration[i + 1][j + 1] == EMPTY
-                        || seatsConfiguration[i + 1][j + 1] == FLOOR
-                            ? 1 : 0;
-                    var bottom =
-                        i + 1 == seatsConfiguration.Length
-                        || seatsConfiguration[i + 1][j] == EMPTY
-                        || seatsConfiguration[i + 1][j] == FLOOR
-                            ? 1 : 0;
-                    var bottom_left =
-                        i + 1 == seatsConfiguration.Length
-                        || j == 0
-                        || seatsConfiguration[i + 1][j - 1] == EMPTY
-                        || seatsConfiguration[i + 1][j - 1] == FLOOR
-                            ? 1 : 0;
-                    var left =
-                        j == 0
-                        || seatsConfiguration[i][j - 1] == EMPTY
-                        || seatsConfiguration[i][j - 1] == FLOOR
-                            ? 1 : 0;
-                    var top_left =
-                        i == 0
-                        || j == 0
-                        || seatsConfiguration[i - 1][j - 1] == EMPTY
-                        || seatsConfiguration[i - 1][j - 1] == FLOOR
-                            ? 1 : 0;
-                    if (top + top_right + right + bottom_right + bottom + bottom_left + left + top_left == 8)
-                    {
-                        newConfiguration[i][j] = OCCUPIED;
-                        configurationChange = true;
-                    }
-                    else
-                    {
-                        newConfiguration[i][j] = seatsConfiguration[i][j];
-                    }
+                    switchTo = OCCUPIED;
                 }
-                else if (seatsConfiguration[i][j] == OCCUPIED)
+                else if (seatsConfiguration[i][j] == OCCUPIED
+                    && GetSurroundingEmptiness(seatsConfiguration, i, j) <= 4)
                 {
-                    var top =
-                         i != 0
-                         && seatsConfiguration[i - 1][j] == OCCUPIED
-                             ? 1 : 0;
-                    var top_right =
-                        i != 0
-                        && j + 1 != seatsConfiguration[i].Length
-                        && seatsConfiguration[i - 1][j + 1] == OCCUPIED
-                            ? 1 : 0;
-                    var right =
-                        j + 1 != seatsConfiguration[i].Length
-                        && seatsConfiguration[i][j + 1] == OCCUPIED
-                            ? 1 : 0;
-                    var bottom_right =
-                        i + 1 != seatsConfiguration.Length
-                        && j + 1 != seatsConfiguration[i].Length
-                        && seatsConfiguration[i + 1][j + 1] == OCCUPIED
-                            ? 1 : 0;
-                    var bottom =
-                        i + 1 != seatsConfiguration.Length
-                        && seatsConfiguration[i + 1][j] == OCCUPIED
-                            ? 1 : 0;
-                    var bottom_left =
-                        i + 1 != seatsConfiguration.Length
-                        && j != 0
-                        && seatsConfiguration[i + 1][j - 1] == OCCUPIED
-                            ? 1 : 0;
-                    var left =
-                        j != 0
-                        && seatsConfiguration[i][j - 1] == OCCUPIED
-                            ? 1 : 0;
-                    var top_left =
-                        i != 0
-                        && j != 0
-                        && seatsConfiguration[i - 1][j - 1] == OCCUPIED
-                            ? 1 : 0;
-                    if (top + top_right + right + bottom_right + bottom + bottom_left + left + top_left >= 4)
-                    {
-                        newConfiguration[i][j] = EMPTY;
-                        configurationChange = true;
-                    }
-                    else
-                    {
-                        newConfiguration[i][j] = seatsConfiguration[i][j];
-                    }
+                    switchTo = EMPTY;
+                }
+
+                if (switchTo.HasValue)
+                {
+                    newConfiguration[i][j] = switchTo.Value;
+                    configurationChange = true;
                 }
                 else
                 {
@@ -295,6 +208,35 @@ namespace AventOfCode
             }
 
             return seatsConfiguration.Sum(seatsRow => seatsRow.Count(v => v == OCCUPIED));
+        }
+
+        private bool EmptyOrFloor(char[][] seatsConfig, int i, int j)
+        {
+            return seatsConfig[i][j] == EMPTY
+                || seatsConfig[i][j] == FLOOR;
+        }
+
+        private int GetSurroundingEmptiness(char[][] seatsConfig, int i, int j)
+        {
+            return new[]
+            {
+                i == 0
+                    || EmptyOrFloor(seatsConfig, i - 1, j),
+                i == 0 || j + 1 == seatsConfig[i].Length
+                    || EmptyOrFloor(seatsConfig, i - 1, j + 1),
+                j + 1 == seatsConfig[i].Length
+                    || EmptyOrFloor(seatsConfig, i, j + 1),
+                i + 1 == seatsConfig.Length || j + 1 == seatsConfig[i].Length
+                    || EmptyOrFloor(seatsConfig, i + 1, j + 1),
+                i + 1 == seatsConfig.Length
+                    || EmptyOrFloor(seatsConfig, i + 1, j),
+                i + 1 == seatsConfig.Length || j == 0
+                    || EmptyOrFloor(seatsConfig, i + 1, j - 1),
+                j == 0
+                    || EmptyOrFloor(seatsConfig, i, j - 1),
+                i == 0 || j == 0
+                    || EmptyOrFloor(seatsConfig, i - 1, j - 1)
+            }.Count(_ => _);
         }
     }
 }
