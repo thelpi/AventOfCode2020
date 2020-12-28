@@ -72,36 +72,31 @@ namespace AventOfCode
             return seatsConfiguration.Sum(seatsRow => seatsRow.Count(v => v == OCCUPIED));
         }
 
-        private bool EmptyOrFloor(char[][] seatsConfig, int i, int j)
+        private bool OccupiedDirect(char[][] seatsConfig, int k, int l, int kInc, int lInc)
         {
-            return seatsConfig[i][j] == EMPTY
-                || seatsConfig[i][j] == FLOOR;
+            return (k + kInc) >= 0
+                && (l + lInc) >= 0
+                && (k + kInc) < seatsConfig.Length
+                && (l + lInc) < seatsConfig[(k + kInc)].Length
+                && seatsConfig[(k + kInc)][(l + lInc)] == OCCUPIED;
         }
 
         private int GetDirectSurroundingEmptiness(char[][] seatsConfig, int i, int j)
         {
             return new[]
             {
-                i == 0
-                    || EmptyOrFloor(seatsConfig, i - 1, j),
-                i == 0 || j + 1 == seatsConfig[i].Length
-                    || EmptyOrFloor(seatsConfig, i - 1, j + 1),
-                j + 1 == seatsConfig[i].Length
-                    || EmptyOrFloor(seatsConfig, i, j + 1),
-                i + 1 == seatsConfig.Length || j + 1 == seatsConfig[i].Length
-                    || EmptyOrFloor(seatsConfig, i + 1, j + 1),
-                i + 1 == seatsConfig.Length
-                    || EmptyOrFloor(seatsConfig, i + 1, j),
-                i + 1 == seatsConfig.Length || j == 0
-                    || EmptyOrFloor(seatsConfig, i + 1, j - 1),
-                j == 0
-                    || EmptyOrFloor(seatsConfig, i, j - 1),
-                i == 0 || j == 0
-                    || EmptyOrFloor(seatsConfig, i - 1, j - 1)
-            }.Count(_ => _);
+                OccupiedDirect(seatsConfig, i, j, -1, 0),
+                OccupiedDirect(seatsConfig, i, j, -1, 1),
+                OccupiedDirect(seatsConfig, i, j, 0, 1),
+                OccupiedDirect(seatsConfig, i, j, 1, 1),
+                OccupiedDirect(seatsConfig, i, j, 1, 0),
+                OccupiedDirect(seatsConfig, i, j, 1, -1),
+                OccupiedDirect(seatsConfig, i, j, 0, -1),
+                OccupiedDirect(seatsConfig, i, j, -1, -1)
+            }.Count(_ => !_);
         }
 
-        private bool OccupiedInDirection(char[][] seatsConfig, int k, int l, int kInc, int lInc)
+        private bool OccupiedDeep(char[][] seatsConfig, int k, int l, int kInc, int lInc)
         {
             bool findOccupied = false;
             bool findEmpty = false;
@@ -123,14 +118,14 @@ namespace AventOfCode
         {
             return new[]
             {
-                OccupiedInDirection(seatsConfig, i, j, -1, 0),
-                OccupiedInDirection(seatsConfig, i, j, -1, 1),
-                OccupiedInDirection(seatsConfig, i, j, 0, 1),
-                OccupiedInDirection(seatsConfig, i, j, 1, 1),
-                OccupiedInDirection(seatsConfig, i, j, 1, 0),
-                OccupiedInDirection(seatsConfig, i, j, 1, -1),
-                OccupiedInDirection(seatsConfig, i, j, 0, -1),
-                OccupiedInDirection(seatsConfig, i, j, -1, -1)
+                OccupiedDeep(seatsConfig, i, j, -1, 0),
+                OccupiedDeep(seatsConfig, i, j, -1, 1),
+                OccupiedDeep(seatsConfig, i, j, 0, 1),
+                OccupiedDeep(seatsConfig, i, j, 1, 1),
+                OccupiedDeep(seatsConfig, i, j, 1, 0),
+                OccupiedDeep(seatsConfig, i, j, 1, -1),
+                OccupiedDeep(seatsConfig, i, j, 0, -1),
+                OccupiedDeep(seatsConfig, i, j, -1, -1)
             }.Count(_ => !_);
         }
     }
