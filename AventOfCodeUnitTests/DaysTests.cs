@@ -252,7 +252,12 @@ namespace AventOfCodeUnitTests
         [InlineData(false, false, 1289178686687)]
         public void Day16Test(bool firstPart, bool sample, long expected)
         {
-            var result = Days.Day16(firstPart, sample);
+            var day = new Day16();
+
+            var result = firstPart
+                ? day.GetFirstPartResult(sample)
+                : day.GetSecondPartResult(sample);
+
             Assert.Equal(expected, result);
         }
 
@@ -263,7 +268,12 @@ namespace AventOfCodeUnitTests
         [InlineData(false, false, 2240)]
         public void Day17Test(bool firstPart, bool sample, long expected)
         {
-            var result = Days.Day17(firstPart, sample);
+            var day = new Day17();
+
+            var result = firstPart
+                ? day.GetFirstPartResult(sample)
+                : day.GetSecondPartResult(sample);
+
             Assert.Equal(expected, result);
         }
 
@@ -274,7 +284,12 @@ namespace AventOfCodeUnitTests
         [InlineData(false, false, 216975281211165)]
         public void Day18Test(bool firstPart, bool sample, long expected)
         {
-            var result = Days.Day18(firstPart, sample);
+            var day = new Day18();
+
+            var result = firstPart
+                ? day.GetFirstPartResult(sample)
+                : day.GetSecondPartResult(sample);
+
             Assert.Equal(expected, result);
         }
 
@@ -285,7 +300,12 @@ namespace AventOfCodeUnitTests
         [InlineData(false, false, 422)]
         public void Day19Test(bool firstPart, bool sample, long expected)
         {
-            var result = Days.Day19(firstPart, sample);
+            var day = new Day19();
+
+            var result = firstPart
+                ? day.GetFirstPartResult(sample)
+                : day.GetSecondPartResult(sample);
+
             Assert.Equal(expected, result);
         }
 
