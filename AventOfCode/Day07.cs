@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace AventOfCode
 {
@@ -10,131 +9,105 @@ namespace AventOfCode
     /// </summary>
     public sealed class Day07 : DayBase
     {
+        private const string MY_BAG = "shiny gold";
+
         public Day07() : base(7) { }
 
         public override long GetFirstPartResult(bool sample)
         {
-            var datas = GetContent(v => v, "\r\n", sample: sample);
+            var bagsInfos = ParseBagsInfos(sample);
 
-            var finalList = new Dictionary<string, List<(int, string)>>();
+            var parentBags = new List<string>();
+            RecursiveParentSearch(bagsInfos, MY_BAG, parentBags);
 
-            foreach (var d in datas)
-            {
-                var realD = d;
-                if (realD.EndsWith("."))
-                {
-                    realD = realD.Substring(0, realD.Length - 1);
-                }
-
-                var sub = realD.Split(" bags contain ");
-
-                List<(int, string)> subBags = new List<(int qty, string val)>();
-                finalList.Add(sub[0], subBags);
-
-                foreach (var dd in sub[1].Split(new[] { " bags, ", " bag, " }, StringSplitOptions.None))
-                {
-                    if (dd != "no other bags")
-                    {
-                        var ddd = dd.Split(' ');
-                        var vall = string.Join(" ", ddd.Skip(1));
-                        if (vall.EndsWith(" bags"))
-                        {
-                            vall = vall.Substring(0, vall.Length - 5);
-                        }
-                        else if (vall.EndsWith(" bag"))
-                        {
-                            vall = vall.Substring(0, vall.Length - 4);
-                        }
-                        subBags.Add((Convert.ToInt32(ddd[0]), vall));
-                    }
-                    else
-                    {
-
-                    }
-                }
-            }
-
-            // part one
-            void RecursiveSearchUp(Dictionary<string, List<(int, string)>> baseList,
-                string search, List<string> finaLList)
-            {
-                List<string> bagsWithSearch = baseList.Where(kvp => kvp.Value.Any(v => v.Item2 == search)).Select(kvp => kvp.Key).ToList();
-                finaLList.AddRange(bagsWithSearch);
-                foreach (var bagWithSearch in bagsWithSearch)
-                {
-                    RecursiveSearchUp(baseList, bagWithSearch, finaLList);
-                }
-            }
-
-            List<string> foundList = new List<string>();
-            RecursiveSearchUp(finalList, "shiny gold", foundList);
-
-            var count = foundList.Distinct().Count();
-
-            return count;
+            return parentBags.Distinct().Count();
         }
 
         public override long GetSecondPartResult(bool sample)
         {
-            var datas = GetContent(v => v, "\r\n", sample: sample);
+            var bagsInfos = ParseBagsInfos(sample);
 
-            var finalList = new Dictionary<string, List<(int, string)>>();
+            var childrenBagsCount = new List<int>();
+            RecursiveChildrenSearch(bagsInfos, MY_BAG, childrenBagsCount);
 
-            foreach (var d in datas)
+            return childrenBagsCount.Sum();
+        }
+
+        private Dictionary<string, List<(int childCount, string childBagName)>> ParseBagsInfos(bool sample)
+        {
+            var content = GetContent(v => v, "\r\n", sample: sample);
+
+            var bagsInfos = new Dictionary<string, List<(int, string)>>();
+
+            foreach (var rowContent in content)
             {
-                var realD = d;
-                if (realD.EndsWith("."))
+                var rowContentWithoutEndingDot =
+                    rowContent.EndsWith(".")
+                        ? rowContent.Substring(0, rowContent.Length - 1)
+                        : rowContent;
+
+                var rowElements = rowContentWithoutEndingDot.Split(" bags contain ");
+
+                var subBags = new List<(int, string)>();
+                bagsInfos.Add(rowElements[0], subBags);
+
+                foreach (var childBagRow in rowElements[1].Split(new[] { " bags, ", " bag, " }, StringSplitOptions.None))
                 {
-                    realD = realD.Substring(0, realD.Length - 1);
-                }
-
-                var sub = realD.Split(" bags contain ");
-
-                List<(int, string)> subBags = new List<(int qty, string val)>();
-                finalList.Add(sub[0], subBags);
-
-                foreach (var dd in sub[1].Split(new[] { " bags, ", " bag, " }, StringSplitOptions.None))
-                {
-                    if (dd != "no other bags")
+                    if (childBagRow != "no other bags")
                     {
-                        var ddd = dd.Split(' ');
-                        var vall = string.Join(" ", ddd.Skip(1));
-                        if (vall.EndsWith(" bags"))
-                        {
-                            vall = vall.Substring(0, vall.Length - 5);
-                        }
-                        else if (vall.EndsWith(" bag"))
-                        {
-                            vall = vall.Substring(0, vall.Length - 4);
-                        }
-                        subBags.Add((Convert.ToInt32(ddd[0]), vall));
-                    }
-                    else
-                    {
+                        var childBagRowElements = childBagRow.Split(' ');
+                        var childQty = Convert.ToInt32(childBagRowElements[0]);
 
+                        var childName = string.Join(" ", childBagRowElements.Skip(1));
+                        if (childName.EndsWith(" bags"))
+                        {
+                            childName = childName.Substring(0, childName.Length - 5);
+                        }
+                        else if (childName.EndsWith(" bag"))
+                        {
+                            childName = childName.Substring(0, childName.Length - 4);
+                        }
+
+                        subBags.Add((childQty, childName));
                     }
                 }
             }
 
-            // part two
-            void RecursiveSearchDown(Dictionary<string, List<(int, string)>> baseList,
-            string search, List<(int, string)> finaLList)
+            return bagsInfos;
+        }
+
+        private void RecursiveParentSearch(Dictionary<string, List<(int childCount, string childBagName)>> baseList,
+                string bagName,
+                List<string> parentsList)
+        {
+            var immediateParentBags = baseList
+                .Where(kvp => kvp.Value.Any(v => v.childBagName == bagName))
+                .Select(kvp => kvp.Key)
+                .ToList();
+            parentsList.AddRange(immediateParentBags);
+            foreach (var parentBag in immediateParentBags)
             {
-                var vals = baseList.Where(kvp => kvp.Key == search).SelectMany(kvp => kvp.Value).ToList();
-                finaLList.AddRange(vals);
-                foreach (var val in vals)
+                RecursiveParentSearch(baseList, parentBag, parentsList);
+            }
+        }
+
+        private void RecursiveChildrenSearch(
+            Dictionary<string, List<(int childCount, string childBagName)>> baseList,
+            string bagName,
+            List<int> childrenCountList)
+        {
+            var childrenDetails = baseList
+                .Where(kvp => kvp.Key == bagName)
+                .SelectMany(kvp => kvp.Value)
+                .ToList();
+            childrenCountList.AddRange(childrenDetails.Select(v => v.childCount));
+            foreach (var (childCount, childBagName) in childrenDetails)
+            {
+                for (int i = 0; i < childCount; i++)
                 {
-                    for (int i = 0; i < val.Item1; i++)
-                    {
-                        RecursiveSearchDown(baseList, val.Item2, finaLList);
-                    }
+                    RecursiveChildrenSearch(baseList, childBagName, childrenCountList);
                 }
             }
-
-            var foundList2 = new List<(int, string)>();
-            RecursiveSearchDown(finalList, "shiny gold", foundList2);
-
-            return foundList2.Sum(kvp => kvp.Item1);
         }
     }
 }
