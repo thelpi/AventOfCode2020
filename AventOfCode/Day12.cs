@@ -54,49 +54,10 @@ namespace AventOfCode
             {
                 if (COORDINATES.Contains(moveType))
                 {
-                    coordinatesValues_p1[COORDINATES.IndexOf(moveType)] += moveValue;
-                    if (moveType == NORTH || moveType == SOUTH)
-                    {
-                        int newPoint1 = point.Item1, newPoint2 = point.Item2;
-                        if (move.Item2 == COORDINATES.IndexOf(NORTH))
-                        {
-                            newPoint2 = moveType == NORTH ? point.Item2 + moveValue : point.Item2 - moveValue;
-                        }
-                        else if (move.Item2 == COORDINATES.IndexOf(SOUTH))
-                        {
-                            newPoint2 = moveType == NORTH ? point.Item2 - moveValue : point.Item2 + moveValue;
-                        }
-                        else if (move.Item1 == COORDINATES.IndexOf(NORTH))
-                        {
-                            newPoint1 = moveType == NORTH ? point.Item1 + moveValue : point.Item1 - moveValue;
-                        }
-                        else if (move.Item1 == COORDINATES.IndexOf(SOUTH))
-                        {
-                            newPoint1 = moveType == NORTH ? point.Item1 - moveValue : point.Item1 + moveValue;
-                        }
-                        point = (newPoint1, newPoint2);
-                    }
-                    else if (moveType == EAST || moveType == WEST)
-                    {
-                        int newPoint1 = point.Item1, newPoint2 = point.Item2;
-                        if (move.Item2 == COORDINATES.IndexOf(EAST))
-                        {
-                            newPoint2 = moveType == EAST ? point.Item2 + moveValue : point.Item2 - moveValue;
-                        }
-                        else if (move.Item2 == COORDINATES.IndexOf(WEST))
-                        {
-                            newPoint2 = moveType == EAST ? point.Item2 - moveValue : point.Item2 + moveValue;
-                        }
-                        else if (move.Item1 == COORDINATES.IndexOf(EAST))
-                        {
-                            newPoint1 = moveType == EAST ? point.Item1 + moveValue : point.Item1 - moveValue;
-                        }
-                        else if (move.Item1 == COORDINATES.IndexOf(WEST))
-                        {
-                            newPoint1 = moveType == EAST ? point.Item1 - moveValue : point.Item1 + moveValue;
-                        }
-                        point = (newPoint1, newPoint2);
-                    }
+                    var moveTypeIndex = COORDINATES.IndexOf(moveType);
+                    coordinatesValues_p1[moveTypeIndex] += moveValue;
+                    point = GetNewPoint(move, point, moveType, moveValue,
+                        moveTypeIndex % 2 == 1 ? NORTH : EAST);
                 }
                 else if (moveType == LEFT || moveType == RIGHT)
                 {
@@ -131,6 +92,34 @@ namespace AventOfCode
             return direction == LEFT
                 ? (currentDirectionIndex == 0 ? (COORDINATES.Length - 1) : currentDirectionIndex - 1)
                 : (currentDirectionIndex == (COORDINATES.Length - 1) ? 0 : currentDirectionIndex + 1);
+        }
+
+        private (int, int) GetNewPoint((int, int) move, (int, int) point,
+            char moveType, int moveValue, char dir)
+        {
+            var dirIndex = COORDINATES.IndexOf(dir);
+            var oppositeDirIndex = COORDINATES.IndexOf(dir) > 1
+                ? COORDINATES.IndexOf(dir) - 2
+                : COORDINATES.IndexOf(dir) + 2;
+
+            int newPoint1 = point.Item1, newPoint2 = point.Item2;
+            if (move.Item2 == dirIndex)
+            {
+                newPoint2 = moveType == dir ? point.Item2 + moveValue : point.Item2 - moveValue;
+            }
+            else if (move.Item2 == oppositeDirIndex)
+            {
+                newPoint2 = moveType == dir ? point.Item2 - moveValue : point.Item2 + moveValue;
+            }
+            else if (move.Item1 == dirIndex)
+            {
+                newPoint1 = moveType == dir ? point.Item1 + moveValue : point.Item1 - moveValue;
+            }
+            else if (move.Item1 == oppositeDirIndex)
+            {
+                newPoint1 = moveType == dir ? point.Item1 - moveValue : point.Item1 + moveValue;
+            }
+            return (newPoint1, newPoint2);
         }
     }
 }
