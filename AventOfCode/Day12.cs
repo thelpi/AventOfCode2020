@@ -102,24 +102,21 @@ namespace AventOfCode
                 ? COORDINATES.IndexOf(dir) - 2
                 : COORDINATES.IndexOf(dir) + 2;
 
-            int newPoint1 = point.Item1, newPoint2 = point.Item2;
-            if (move.Item2 == dirIndex)
-            {
-                newPoint2 = moveType == dir ? point.Item2 + moveValue : point.Item2 - moveValue;
-            }
-            else if (move.Item2 == oppositeDirIndex)
-            {
-                newPoint2 = moveType == dir ? point.Item2 - moveValue : point.Item2 + moveValue;
-            }
-            else if (move.Item1 == dirIndex)
-            {
-                newPoint1 = moveType == dir ? point.Item1 + moveValue : point.Item1 - moveValue;
-            }
-            else if (move.Item1 == oppositeDirIndex)
-            {
-                newPoint1 = moveType == dir ? point.Item1 - moveValue : point.Item1 + moveValue;
-            }
-            return (newPoint1, newPoint2);
+            return (
+                move.Item1 == dirIndex || move.Item1 == oppositeDirIndex
+                    ? AddMove(point.Item1, moveType, moveValue, dir, move.Item1 == dirIndex)
+                    : point.Item1,
+                move.Item2 == dirIndex || move.Item2 == oppositeDirIndex
+                    ? AddMove(point.Item2, moveType, moveValue, dir, move.Item2 == dirIndex)
+                    : point.Item2
+            );
+        }
+
+        private int AddMove(int point, char moveType, int moveValue, char dir, bool oppositeDir)
+        {
+            if (!oppositeDir) moveValue *= -1;
+            if (moveType != dir) moveValue *= -1;
+            return point + moveValue;
         }
     }
 }
