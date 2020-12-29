@@ -13,40 +13,43 @@ namespace AventOfCode
 
         public override long GetFirstPartResult(bool sample)
         {
-            var content = GetContent(v => v, sample: sample);
+            var (timestamp, busListNullable) = GetBusList(sample);
 
-            var timestamp = Convert.ToInt32(content[0]);
-            var buses1 = content[1].Split(",").Where(v => v != "x").Select(v => Convert.ToInt32(v)).ToList();
+            var busList = busListNullable
+                .Where(_ => _.HasValue)
+                .Select(_ => _.Value)
+                .ToList();
 
-            var currentBast = -1;
-            var busOk = -1;
-            foreach (var bus in buses1)
+            var timestampOfBestBus = -1;
+            var bestBus = -1;
+            foreach (var bus in busList)
             {
-                var ratio = timestamp / bus;
-                var fromRatio = bus * ratio;
-                if (fromRatio < timestamp)
+                // note: it's an Euclidean division
+                // so these 2 operations does not cancel each other 
+                var countBusPassBeforeTimestamp = timestamp / bus;
+                var closestBusPassTimestamp = countBusPassBeforeTimestamp * bus;
+
+                if (closestBusPassTimestamp < timestamp)
                 {
-                    fromRatio += bus;
+                    closestBusPassTimestamp += bus;
                 }
-                if (currentBast == -1 || fromRatio < currentBast)
+                if (timestampOfBestBus == -1 || closestBusPassTimestamp < timestampOfBestBus)
                 {
-                    currentBast = fromRatio;
-                    busOk = bus;
+                    timestampOfBestBus = closestBusPassTimestamp;
+                    bestBus = bus;
                 }
             }
 
-            return (currentBast - timestamp) * busOk;
+            return (timestampOfBestBus - timestamp) * bestBus;
         }
 
         public override long GetSecondPartResult(bool sample)
         {
-            var content = GetContent(v => v, sample: sample);
-
-            var buses2 = content[1].Split(",").Select(v => v == "x" ? null : (int?)Convert.ToInt32(v)).ToList();
+            var (timestamp, busList) = GetBusList(sample);
 
             var busDataList = new List<(int modulo, int delta)>();
             var i = 0;
-            foreach (var bus in buses2)
+            foreach (var bus in busList)
             {
                 if (bus.HasValue)
                 {
@@ -91,6 +94,17 @@ namespace AventOfCode
             }
 
             return response;
+        }
+
+        private (int, IEnumerable<int?>) GetBusList(bool sample)
+        {
+            var content = GetContent(v => v, sample: sample);
+            return (
+                Convert.ToInt32(content[0]),
+                content[1]
+                    .Split(",")
+                    .Select(v => v == "x" ? null : (int?)Convert.ToInt32(v))
+            );
         }
     }
 }
