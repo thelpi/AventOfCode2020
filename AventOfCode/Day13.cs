@@ -45,55 +45,34 @@ namespace AventOfCode
 
         public override long GetSecondPartResult(bool sample)
         {
-            var (timestamp, busList) = GetBusList(sample);
+            var (timestamp, enumerableBusList) = GetBusList(sample);
 
-            var busDataList = new List<(int modulo, int delta)>();
-            var i = 0;
-            foreach (var bus in busList)
+            var busList = enumerableBusList.ToList();
+            var busDatas = busList
+                .Where(_ => _.HasValue)
+                .OrderByDescending(_ => _.Value)
+                .Select(_ => (modulo: _.Value, delta: busList.IndexOf(_)))
+                .ToArray();
+            
+            long finalTimestamp = 1;
+            var notModulableBusList = true;
+            while (notModulableBusList)
             {
-                if (bus.HasValue)
+                notModulableBusList = false;
+                foreach (var (modulo, delta) in busDatas)
                 {
-                    busDataList.Add((bus.Value, i));
-                }
-                i++;
-            }
-
-            var busDatas = busDataList.OrderByDescending(bd => bd.modulo).ToArray();
-
-            long response = -1;
-
-            long j = 1;
-            while (response < 0)
-            {
-                long addedToStart = 0;
-                bool atLeastOneNoMatch = false;
-                int iBus = 0;
-                while (!atLeastOneNoMatch && iBus < busDatas.Length)
-                {
-                    if ((j + busDatas[iBus].delta) % busDatas[iBus].modulo != 0)
+                    if ((finalTimestamp + delta) % modulo != 0)
                     {
-                        long modulator = 1;
-                        for (int kk = 0; kk < iBus; kk++)
-                        {
-                            modulator *= busDatas[kk].modulo;
-                        }
-                        addedToStart += modulator;
-                        atLeastOneNoMatch = true;
+                        finalTimestamp += busDatas
+                            .TakeWhile(_ => _.modulo > modulo)
+                            .Aggregate((long)1, (agg, bus) => agg *= bus.modulo);
+                        notModulableBusList = true;
+                        break;
                     }
-                    iBus++;
-                }
-
-                if (atLeastOneNoMatch)
-                {
-                    j += addedToStart;
-                }
-                else
-                {
-                    response = j;
                 }
             }
 
-            return response;
+            return finalTimestamp;
         }
 
         private (int, IEnumerable<int?>) GetBusList(bool sample)
