@@ -36,20 +36,20 @@ namespace AventOfCode
             return CommonTrunk(sample);
         }
 
-        private bool IsOccupied(int kInc, int lInc)
+        private bool IsOccupied(int iInc, int jInc)
         {
             bool findOccupied = false;
             bool findEmpty = false;
-            int k = _i + kInc;
-            int l = _j + lInc;
+            int k = _i + iInc;
+            int l = _j + jInc;
             while (k >= 0 && l >= 0
                 && k < _seatsConfig.Length && l < _seatsConfig[k].Length
                 && !findOccupied && !findEmpty)
             {
                 findOccupied = _seatsConfig[k][l] == OCCUPIED;
                 findEmpty = !_extended || _seatsConfig[k][l] == EMPTY;
-                k += kInc;
-                l += lInc;
+                k += iInc;
+                l += jInc;
             }
             return findOccupied;
         }
@@ -99,17 +99,13 @@ namespace AventOfCode
 
         private int GetSurroundingEmptiness()
         {
-            return new[]
-            {
-                IsOccupied(-1, 0),
-                IsOccupied(-1, 1),
-                IsOccupied(0, 1),
-                IsOccupied(1, 1),
-                IsOccupied(1, 0),
-                IsOccupied(1, -1),
-                IsOccupied(0, -1),
-                IsOccupied(-1, -1)
-            }.Count(_ => !_);
+            int count = 0;
+            for (int k = -1; k <= 1; k++)
+                for (int l = -1; l <= 1; l++)
+                    if (l != 0 || k != 0)
+                        if (!IsOccupied(l, k))
+                            count++;
+            return count;
         }
     }
 }
