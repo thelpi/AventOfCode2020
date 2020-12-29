@@ -8,144 +8,129 @@ namespace AventOfCode
     /// </summary>
     public sealed class Day12 : DayBase
     {
+        private const char EAST = 'E';
+        private const char SOUTH = 'S';
+        private const char WEST = 'W';
+        private const char NORTH = 'N';
+        private const char LEFT = 'L';
+        private const char RIGHT = 'R';
+        private const char FORWARD = 'F';
+        private static readonly string COORDINATES = $"{EAST}{SOUTH}{WEST}{NORTH}";
+        private static readonly int ROTATION_ANGLE = 360 / COORDINATES.Length;
+
+        private static readonly (int, int) START_POINT_PART2 = (10, 1);
+        private static readonly (int, int) INIT_MOVE_PART2 = (0, COORDINATES.Length - 1);
+        private static readonly int INIT_MOVE_TYPE_PART1 = COORDINATES.IndexOf(EAST);
+
         public Day12() : base(12) { }
 
         public override long GetFirstPartResult(bool sample)
         {
-            var instructions = GetContent(v => (v[0], Convert.ToInt32(v.Substring(1))), sample: sample);
-
-            const char EAST = 'E';
-            const char SOUTH = 'S';
-            const char WEST = 'W';
-            const char NORTH = 'N';
-            const char LEFT = 'L';
-            const char RIGHT = 'R';
-            const char FORWARD = 'F';
-            string coordinates = $"{EAST}{SOUTH}{WEST}{NORTH}";
-            int[] coordinatesValues = new int[coordinates.Length];
-            int angleQuotient = 360 / coordinates.Length;
-            
-            var currentMoveType = coordinates.IndexOf(EAST);
-
-            foreach (var instruction in instructions)
-            {
-                var iType = instruction.Item1;
-                var iMove = instruction.Item2;
-                if (coordinates.Contains(iType))
-                {
-                    coordinatesValues[coordinates.IndexOf(iType)] += iMove;
-                }
-                else if (iType == LEFT || iType == RIGHT)
-                {
-                    var newAngle = iMove / angleQuotient;
-                    for (int i = 0; i < newAngle; i++)
-                    {
-                        currentMoveType = iType == LEFT
-                                ? (currentMoveType == 0 ? (coordinates.Length - 1) : currentMoveType - 1)
-                                : (currentMoveType == (coordinates.Length - 1) ? 0 : currentMoveType + 1);
-                    }
-                }
-                else if (iType == FORWARD)
-                {
-                    coordinatesValues[currentMoveType] += iMove;
-                }
-            }
-
-            return Math.Abs(coordinatesValues[1] - coordinatesValues[3])
-                + Math.Abs(coordinatesValues[0] - coordinatesValues[2]);
+            return CommonTrunk(sample).part1;
         }
 
         public override long GetSecondPartResult(bool sample)
         {
-            var instructions = GetContent(v => (v[0], Convert.ToInt32(v.Substring(1))), sample: sample);
+            return CommonTrunk(sample).part2;
+        }
 
-            const char EAST = 'E';
-            const char SOUTH = 'S';
-            const char WEST = 'W';
-            const char NORTH = 'N';
-            const char LEFT = 'L';
-            const char RIGHT = 'R';
-            const char FORWARD = 'F';
-            string coordinates = $"{EAST}{SOUTH}{WEST}{NORTH}";
-            int[] coordinatesValues = new int[coordinates.Length];
-            int angleQuotient = 360 / coordinates.Length;
-            
-            (int, int) point = (10, 1);
-            (int, int) move = (0, coordinates.Length - 1);
-
-            foreach (var instruction in instructions)
+        public (long part1, long part2) CommonTrunk(bool sample)
+        {
+            var instructions = GetContent(v =>
             {
-                var iType = instruction.Item1;
-                var iMove = instruction.Item2;
-                if (coordinates.Contains(iType))
+                var moveType = v[0];
+                var moveValue = Convert.ToInt32(v.Substring(1));
+                return (moveType, moveValue);
+            }, sample: sample);
+
+            var coordinatesValues_p1 = new int[COORDINATES.Length];
+            var coordinatesValues_p2 = new int[COORDINATES.Length];
+
+            var currentMoveType = INIT_MOVE_TYPE_PART1;
+            var point = START_POINT_PART2;
+            var move = INIT_MOVE_PART2;
+
+            foreach (var (moveType, moveValue) in instructions)
+            {
+                if (COORDINATES.Contains(moveType))
                 {
-                    if (iType == NORTH || iType == SOUTH)
+                    coordinatesValues_p1[COORDINATES.IndexOf(moveType)] += moveValue;
+                    if (moveType == NORTH || moveType == SOUTH)
                     {
                         int newPoint1 = point.Item1, newPoint2 = point.Item2;
-                        if (move.Item2 == coordinates.IndexOf(NORTH))
+                        if (move.Item2 == COORDINATES.IndexOf(NORTH))
                         {
-                            newPoint2 = iType == NORTH ? point.Item2 + iMove : point.Item2 - iMove;
+                            newPoint2 = moveType == NORTH ? point.Item2 + moveValue : point.Item2 - moveValue;
                         }
-                        else if (move.Item2 == coordinates.IndexOf(SOUTH))
+                        else if (move.Item2 == COORDINATES.IndexOf(SOUTH))
                         {
-                            newPoint2 = iType == NORTH ? point.Item2 - iMove : point.Item2 + iMove;
+                            newPoint2 = moveType == NORTH ? point.Item2 - moveValue : point.Item2 + moveValue;
                         }
-                        else if (move.Item1 == coordinates.IndexOf(NORTH))
+                        else if (move.Item1 == COORDINATES.IndexOf(NORTH))
                         {
-                            newPoint1 = iType == NORTH ? point.Item1 + iMove : point.Item1 - iMove;
+                            newPoint1 = moveType == NORTH ? point.Item1 + moveValue : point.Item1 - moveValue;
                         }
-                        else if (move.Item1 == coordinates.IndexOf(SOUTH))
+                        else if (move.Item1 == COORDINATES.IndexOf(SOUTH))
                         {
-                            newPoint1 = iType == NORTH ? point.Item1 - iMove : point.Item1 + iMove;
+                            newPoint1 = moveType == NORTH ? point.Item1 - moveValue : point.Item1 + moveValue;
                         }
                         point = (newPoint1, newPoint2);
                     }
-                    else if (iType == EAST || iType == WEST)
+                    else if (moveType == EAST || moveType == WEST)
                     {
                         int newPoint1 = point.Item1, newPoint2 = point.Item2;
-                        if (move.Item2 == coordinates.IndexOf(EAST))
+                        if (move.Item2 == COORDINATES.IndexOf(EAST))
                         {
-                            newPoint2 = iType == EAST ? point.Item2 + iMove : point.Item2 - iMove;
+                            newPoint2 = moveType == EAST ? point.Item2 + moveValue : point.Item2 - moveValue;
                         }
-                        else if (move.Item2 == coordinates.IndexOf(WEST))
+                        else if (move.Item2 == COORDINATES.IndexOf(WEST))
                         {
-                            newPoint2 = iType == EAST ? point.Item2 - iMove : point.Item2 + iMove;
+                            newPoint2 = moveType == EAST ? point.Item2 - moveValue : point.Item2 + moveValue;
                         }
-                        else if (move.Item1 == coordinates.IndexOf(EAST))
+                        else if (move.Item1 == COORDINATES.IndexOf(EAST))
                         {
-                            newPoint1 = iType == EAST ? point.Item1 + iMove : point.Item1 - iMove;
+                            newPoint1 = moveType == EAST ? point.Item1 + moveValue : point.Item1 - moveValue;
                         }
-                        else if (move.Item1 == coordinates.IndexOf(WEST))
+                        else if (move.Item1 == COORDINATES.IndexOf(WEST))
                         {
-                            newPoint1 = iType == EAST ? point.Item1 - iMove : point.Item1 + iMove;
+                            newPoint1 = moveType == EAST ? point.Item1 - moveValue : point.Item1 + moveValue;
                         }
                         point = (newPoint1, newPoint2);
                     }
                 }
-                else if (iType == LEFT || iType == RIGHT)
+                else if (moveType == LEFT || moveType == RIGHT)
                 {
-                    var newAngle = iMove / angleQuotient;
+                    var newAngle = moveValue / ROTATION_ANGLE;
                     for (int i = 0; i < newAngle; i++)
                     {
-                        if (iType == LEFT)
+                        if (moveType == LEFT)
                         {
-                            move = (move.Item1 == 0 ? (coordinates.Length - 1) : move.Item1 - 1,
-                                move.Item2 == 0 ? (coordinates.Length - 1) : move.Item2 - 1);
+                            currentMoveType = currentMoveType == 0 ? (COORDINATES.Length - 1) : currentMoveType - 1;
+                            move = (move.Item1 == 0 ? (COORDINATES.Length - 1) : move.Item1 - 1,
+                                move.Item2 == 0 ? (COORDINATES.Length - 1) : move.Item2 - 1);
                         }
                         else
                         {
-                            move = (move.Item1 == (coordinates.Length - 1) ? 0 : move.Item1 + 1,
-                                move.Item2 == (coordinates.Length - 1) ? 0 : move.Item2 + 1);
+                            currentMoveType = currentMoveType == (COORDINATES.Length - 1) ? 0 : currentMoveType + 1;
+                            move = (move.Item1 == (COORDINATES.Length - 1) ? 0 : move.Item1 + 1,
+                                move.Item2 == (COORDINATES.Length - 1) ? 0 : move.Item2 + 1);
                         }
                     }
                 }
-                else if (iType == FORWARD)
+                else if (moveType == FORWARD)
                 {
-                    coordinatesValues[move.Item1] += point.Item1 * iMove;
-                    coordinatesValues[move.Item2] += point.Item2 * iMove;
+                    coordinatesValues_p1[currentMoveType] += moveValue;
+                    coordinatesValues_p2[move.Item1] += point.Item1 * moveValue;
+                    coordinatesValues_p2[move.Item2] += point.Item2 * moveValue;
                 }
             }
 
+            return (GetCoordinatesSum(coordinatesValues_p1),
+                GetCoordinatesSum(coordinatesValues_p2));
+        }
+
+        private long GetCoordinatesSum(int[] coordinatesValues)
+        {
             return Math.Abs(coordinatesValues[1] - coordinatesValues[3])
                 + Math.Abs(coordinatesValues[0] - coordinatesValues[2]);
         }
