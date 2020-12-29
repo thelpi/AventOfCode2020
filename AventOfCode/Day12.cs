@@ -103,18 +103,9 @@ namespace AventOfCode
                     var newAngle = moveValue / ROTATION_ANGLE;
                     for (int i = 0; i < newAngle; i++)
                     {
-                        if (moveType == LEFT)
-                        {
-                            currentMoveType = currentMoveType == 0 ? (COORDINATES.Length - 1) : currentMoveType - 1;
-                            move = (move.Item1 == 0 ? (COORDINATES.Length - 1) : move.Item1 - 1,
-                                move.Item2 == 0 ? (COORDINATES.Length - 1) : move.Item2 - 1);
-                        }
-                        else
-                        {
-                            currentMoveType = currentMoveType == (COORDINATES.Length - 1) ? 0 : currentMoveType + 1;
-                            move = (move.Item1 == (COORDINATES.Length - 1) ? 0 : move.Item1 + 1,
-                                move.Item2 == (COORDINATES.Length - 1) ? 0 : move.Item2 + 1);
-                        }
+                        currentMoveType = GetTurnIndex(currentMoveType, moveType);
+                        move = (GetTurnIndex(move.Item1, moveType),
+                            GetTurnIndex(move.Item2, moveType));
                     }
                 }
                 else if (moveType == FORWARD)
@@ -133,6 +124,13 @@ namespace AventOfCode
         {
             return Math.Abs(coordinatesValues[1] - coordinatesValues[3])
                 + Math.Abs(coordinatesValues[0] - coordinatesValues[2]);
+        }
+
+        private int GetTurnIndex(int currentDirectionIndex, char direction)
+        {
+            return direction == LEFT
+                ? (currentDirectionIndex == 0 ? (COORDINATES.Length - 1) : currentDirectionIndex - 1)
+                : (currentDirectionIndex == (COORDINATES.Length - 1) ? 0 : currentDirectionIndex + 1);
         }
     }
 }
