@@ -20,136 +20,125 @@ namespace AventOfCode
 
         public override long GetSecondPartResult(bool sample)
         {
-            var datas = GetContent(v => v, sample: sample);
+            var recipes = GetRecipes(sample);
 
-            var food = new List<(List<string> ingredients, List<string> allergenes)>();
-            foreach (var data in datas)
+            var antigensDiscovered = new Dictionary<string, string>();
+
+            MakeAntigenHypothesis(null, recipes, antigensDiscovered);
+
+            // sorts by antigen alphabetical order
+            antigensDiscovered = antigensDiscovered
+                .OrderBy(ai => ai.Key)
+                .ToDictionary(ai => ai.Key, ai => ai.Value);
+
+            Part2CanonicalResult = string.Join(",", antigensDiscovered.Select(ai => ai.Value));
+
+            return recipes
+                .SelectMany(r => r.ingredients)
+                .Where(i => !antigensDiscovered.Any(ai => ai.Value == i))
+                .Count();
+        }
+
+        private List<(List<string> ingredients, List<string> antigens)> GetRecipes(bool sample)
+        {
+            return GetContent(v =>
             {
-                if (data.Contains("("))
+                if (v.Contains("("))
                 {
-                    var parts = data.Split("(");
+                    var parts = v.Split("(");
                     var ingredients = parts[0].Trim().Split(" ");
                     var allergenes = parts[1].Replace(")", "").Replace("contains", "").Trim().Split(", ");
-                    food.Add((ingredients.ToList(), allergenes.ToList()));
+                    return (ingredients.ToList(), allergenes.ToList());
                 }
                 else
                 {
-                    food.Add((data.Split(" ").ToList(), new List<string>()));
+                    return (v.Split(" ").ToList(), new List<string>());
                 }
-            }
+            }, sample: sample);
+        }
 
-            List<(List<string> ingredients, List<string> allergenes)> Copy(List<(List<string> ingredients, List<string> allergenes)> localFood)
-            {
-                return localFood.Select(lf => (new List<string>(lf.ingredients), new List<string>((lf.allergenes)))).ToList();
-            }
+        private List<(List<string> ingredients, List<string> allergenes)> CopyRecipes(List<(List<string> ingredients, List<string> antigens)> recipes)
+        {
+            return recipes
+                .Select(r => (
+                    new List<string>(r.ingredients),
+                    new List<string>((r.antigens))))
+                .ToList();
+        }
 
-            bool IsValid(List<(List<string> ingredients, List<string> allergenes)> localFood)
+        private bool AreRecipesConsistent(List<(List<string> ingredients, List<string> antigens)> recipes)
+        {
+            // recipes are inconsistent if:
+            // - they have more antigens than ingredients
+            // - they's more than one ingredient for one specific antigen
+            return !recipes.Any(r => r.antigens.Count > r.ingredients.Count)
+                && !recipes
+                    .SelectMany(r => r.antigens)
+                    .Any(a => recipes
+                        .Where(r => r.antigens.Contains(a) && r.ingredients.Count == 1)
+                        .SelectMany(r => r.ingredients)
+                        .Distinct()
+                        .Count() > 1);
+        }
+
+        private bool MakeAntigenHypothesis((string ingredient, string antigen)? hypothesis,
+            List<(List<string> ingredients, List<string> antigens)> recipes,
+            Dictionary<string, string> antigensDiscovered)
+        {
+            if (hypothesis.HasValue)
             {
-                if (localFood.Any(lf => lf.allergenes.Count > lf.ingredients.Count))
+                // remove hypothesis from recipes list
+                foreach (var (ingredients, allergenes) in recipes)
                 {
-                    return false;
-                }
-                foreach (var alg in localFood.SelectMany(lf => lf.allergenes))
-                {
-                    if (localFood.Where(lf => lf.allergenes.Contains(alg) && lf.ingredients.Count == 1).SelectMany(lf => lf.ingredients).Distinct().Count() > 1)
+                    // recipe is inconsistent: hard break
+                    if (allergenes.Contains(hypothesis.Value.antigen)
+                        && !ingredients.Contains(hypothesis.Value.ingredient))
                     {
                         return false;
                     }
+                    allergenes.Remove(hypothesis.Value.antigen);
+                    ingredients.Remove(hypothesis.Value.ingredient);
                 }
-                return true;
-            }
 
-            bool Pick((string igLoc, string algLoc) hypo,
-                List<(List<string> ingredients,
-                List<string> allergenes)> localFood,
-                Dictionary<string, string> picks)
-            {
-                foreach (var (ingredients, allergenes) in localFood)
-                {
-                    if (allergenes.Contains(hypo.algLoc))
-                    {
-                        if (ingredients.Contains(hypo.igLoc))
-                        {
-                            ingredients.Remove(hypo.igLoc);
-                            allergenes.Remove(hypo.algLoc);
-                        }
-                        else
-                        {
-                            return false;
-                        }
-                    }
-                    else
-                    {
-                        ingredients.Remove(hypo.igLoc);
-                    }
-                }
-                if (!IsValid(localFood))
+                // remaining recipes are inconsistent: hard break
+                if (!AreRecipesConsistent(recipes))
                 {
                     return false;
                 }
-                if (!localFood.Any(lf => lf.allergenes.Count > 0))
+
+                // no unidentified antigens remaining: we are done
+                if (!recipes.Any(r => r.antigens.Count > 0))
                 {
                     return true;
                 }
-                var firstPick = localFood.First(lf => lf.allergenes.Count > 0);
-                var alg = firstPick.allergenes.First();
-                bool found = false;
-                foreach (var ig in firstPick.ingredients)
-                {
-                    var localPick = new Dictionary<string, string>();
-                    var isOk = Pick((ig, alg), Copy(localFood), localPick);
-                    if (isOk)
-                    {
-                        found = true;
-                        picks.Add(alg, ig);
-                        foreach (var k in localPick.Keys)
-                        {
-                            picks.Add(k, localPick[k]);
-                        }
-                        break;
-                    }
-                }
-                return found;
             }
 
-            var finalPicks = new Dictionary<string, string>();
-
-            bool doStuff = true;
-            while (doStuff)
+            // takes a remaining recipe with at least one antigen
+            var newRecipeForHypothesis = recipes.First(lf => lf.antigens.Count > 0);
+            var newAntigenHypothesis = newRecipeForHypothesis.antigens.First();
+            var hypothesisIsValid = false;
+            // makes an hypothesis on each ingredient of the recipe
+            foreach (var newIngredientHypothesis in newRecipeForHypothesis.ingredients)
             {
-                var (ingredients, allergenes) = food.First(lf => lf.allergenes.Count > 0);
-                var alg = allergenes.First();
-                foreach (var ig in ingredients)
+                var antigensDiscoveredForHypothesis = new Dictionary<string, string>();
+                if (MakeAntigenHypothesis(
+                    (newIngredientHypothesis, newAntigenHypothesis),
+                    CopyRecipes(recipes),
+                    antigensDiscoveredForHypothesis))
                 {
-                    var myLocalPicks = new Dictionary<string, string>();
-                    if (Pick((ig, alg), Copy(food), myLocalPicks))
+                    // hypothesis seems valid: add the antigen, with its related ingredient
+                    // to our base of knowledge
+                    hypothesisIsValid = true;
+                    antigensDiscovered.Add(newAntigenHypothesis, newIngredientHypothesis);
+                    foreach (var antigen in antigensDiscoveredForHypothesis.Keys)
                     {
-                        finalPicks.Add(alg, ig);
-                        foreach (var k in myLocalPicks.Keys)
-                        {
-                            finalPicks.Add(k, myLocalPicks[k]);
-                        }
-                        doStuff = false;
-                        break;
+                        antigensDiscovered.Add(antigen, antigensDiscoveredForHypothesis[antigen]);
                     }
+                    break;
                 }
             }
 
-            var usedIg = finalPicks.Select(mp => mp.Value).ToList();
-            var notUsed = food.SelectMany(f => f.ingredients).Where(f => !usedIg.Contains(f)).Count();
-
-            string canonical = "";
-            bool first = true;
-            finalPicks = finalPicks.OrderBy(fp => fp.Key).ToDictionary(fp => fp.Key, fp => fp.Value);
-            foreach (var k in finalPicks.Keys)
-            {
-                canonical += $"{(first ? "" : ",")}{finalPicks[k]}";
-                first = false;
-            }
-
-            Part2CanonicalResult = canonical;
-
-            return notUsed;
+            return hypothesisIsValid;
         }
     }
 }
