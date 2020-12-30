@@ -19,15 +19,44 @@ namespace AventOfCode
 
         public override long GetFirstPartResult(bool sample)
         {
-            return CommonTrunk(sample, true);
+            return CommonTrunk(sample, 1, (mask, address, value) =>
+            {
+                var bits = ToBitsArray(mask, value, X);
+                return Enumerable.Repeat((address, ToLong(bits)), 1);
+            });
         }
 
         public override long GetSecondPartResult(bool sample)
         {
-            return CommonTrunk(sample, false);
+            return CommonTrunk(sample, 2, (mask, address, value) =>
+            {
+                var bits = ToBitsArray(mask, address, ZERO);
+
+                var bitsCollection = new List<bool?[]> { bits };
+                for (int i = 0; i < bits.Length; i++)
+                {
+                    if (!bits[i].HasValue)
+                    {
+                        // replace each undefined mask bit by
+                        // one version with 0
+                        // one version with 1
+                        var replacementBitsCollection = new List<bool?[]>();
+                        foreach (var localBits in bitsCollection)
+                        {
+                            replacementBitsCollection.Add(CopyAndSwitch(localBits, i, false));
+                            replacementBitsCollection.Add(CopyAndSwitch(localBits, i, true));
+                        }
+                        bitsCollection.Clear();
+                        bitsCollection.AddRange(replacementBitsCollection);
+                    }
+                }
+
+                return bitsCollection.Select(_ => (ToLong(_), value));
+            });
         }
 
-        private long CommonTrunk(bool sample, bool firstPart)
+        private long CommonTrunk(bool sample, int samplePart,
+            Func<string, long, long, IEnumerable<(long, long)>> memorySetsCallback)
         {
             var memorySetsByMask = GetContent(v =>
                 {
@@ -45,7 +74,7 @@ namespace AventOfCode
                             })
                             .ToList()
                     );
-                }, "\r\n\r\n", sample, sample ? (firstPart ? 1 : 2) : (int?)null)
+                }, "\r\n\r\n", sample, sample ? samplePart : (int?)null)
                 .ToDictionary(v => v.Item1, v => v.Item2);
 
             var newMemorySets = new List<(long, long)>();
@@ -54,57 +83,10 @@ namespace AventOfCode
             {
                 var memorySet = memorySetsByMask[reversedMask];
                 var mask = new String(reversedMask.Reverse().ToArray());
-                var newMemorySet = new List<(long, long)>();
                 foreach (var (address, value) in memorySet)
                 {
-                    if (firstPart)
-                    {
-                        var bits = ToBytesArray(mask, value, X);
-
-                        BitArray newBitArray = new BitArray(bits.Select(bb => bb == true).ToArray());
-
-                        newMemorySet.Add((address, GetIntFromBitArray(newBitArray)));
-                    }
-                    else
-                    {
-                        var bits = ToBytesArray(mask, address, ZERO);
-
-                        var allBits = new List<bool?[]> { bits };
-                        var countXToChange = bits.Count(bbb => !bbb.HasValue);
-                        for (int k = 0; k < bits.Length; k++)
-                        {
-                            if (bits[k] != null)
-                            {
-                                continue;
-                            }
-
-                            var allBits2 = new List<bool?[]>();
-                            foreach (var albb in allBits)
-                            {
-                                var bitZub0 = new bool?[albb.Length];
-                                var bitZub1 = new bool?[albb.Length];
-                                albb.CopyTo(bitZub0, 0);
-                                albb.CopyTo(bitZub1, 0);
-                                bitZub0[k] = false;
-                                bitZub1[k] = true;
-                                allBits2.Add(bitZub0);
-                                allBits2.Add(bitZub1);
-                            }
-                            allBits.Clear();
-                            allBits.AddRange(allBits2);
-                        }
-
-                        allBits.RemoveAll(alb => alb.Contains(null));
-
-                        foreach (var bi in allBits)
-                        {
-                            BitArray newBitArray = new BitArray(bi.Select(bb => bb == true).ToArray());
-                            long newKey = GetIntFromBitArray(newBitArray);
-                            newMemorySets.Add((newKey, value));
-                        }
-                    }
+                    newMemorySets.AddRange(memorySetsCallback(mask, address, value));
                 }
-                newMemorySets.AddRange(newMemorySet);
             }
 
             // sum of the latest value for each address
@@ -114,14 +96,15 @@ namespace AventOfCode
                 .Sum(_ => _.Item2);
         }
 
-        private long GetIntFromBitArray(BitArray bitArray)
+        private long ToLong(bool?[] bits)
         {
-            var array = new byte[bitArray.Count / 8];
-            bitArray.CopyTo(array, 0);
-            return BitConverter.ToInt64(array, 0);
+            BitArray bitArray = new BitArray(bits.Select(bb => bb == true).ToArray());
+            var tmpArray = new byte[bitArray.Count / 8];
+            bitArray.CopyTo(tmpArray, 0);
+            return BitConverter.ToInt64(tmpArray, 0);
         }
 
-        private bool?[] ToBytesArray(string mask, long value, char exclude)
+        private bool?[] ToBitsArray(string mask, long value, char exclude)
         {
             var bits = new BitArray(BitConverter.GetBytes(value))
                 .Cast<bool?>()
@@ -138,6 +121,14 @@ namespace AventOfCode
             }
 
             return bits;
+        }
+
+        private bool?[] CopyAndSwitch(bool?[] bits, int i, bool value)
+        {
+            var switchedBits = new bool?[bits.Length];
+            bits.CopyTo(switchedBits, 0);
+            switchedBits[i] = value;
+            return switchedBits;
         }
     }
 }
