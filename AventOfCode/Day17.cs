@@ -18,13 +18,11 @@ namespace AventOfCode
 
         public override long GetFirstPartResult(bool sample)
         {
-            var content = GetContent(row => row.Select(v => v == ONE_VALUE ? 1 : 0).ToArray(), sample: sample).ToArray();
-
             // creates an empty grid
             var grid = AddDim(i => AddDim(j => AddDim(k => 0)));
 
             // fills with puzzle in the middle (barely) of the grid
-            FillArraycenter(content, grid[GRID_CENTER]);
+            FillArraycenter(GetContentGrid(sample), grid[GRID_CENTER]);
 
             // for each cycle
             for (int cycle = 0; cycle < CYCLES_COUNT; cycle++)
@@ -38,7 +36,7 @@ namespace AventOfCode
                         for (int k = 0; k < grid[i][j].Length; k++)
                         {
                             // loops on every point around the current point
-                            var count1 = 0;
+                            var count = 0;
                             for (int iAr = i - 1; iAr <= i + 1; iAr++)
                             {
                                 for (int jAr = j - 1; jAr <= j + 1; jAr++)
@@ -62,14 +60,12 @@ namespace AventOfCode
                                         }
                                         else if (grid[iAr][jAr][kAr] == 1)
                                         {
-                                            count1++;
+                                            count++;
                                         }
                                     }
                                 }
                             }
-                            // Is "count1" apply to switch rules ?
-                            if ((grid[i][j][k] == 0 && count1 == 3) ||
-                                (grid[i][j][k] == 1 && count1 != 3 && count1 != 2))
+                            if (ApplyToSwitch(grid[i][j][k], count))
                             {
                                 coordinatesToSwitch.Add((i, j, k));
                             }
@@ -88,13 +84,11 @@ namespace AventOfCode
 
         public override long GetSecondPartResult(bool sample)
         {
-            var content = GetContent(row => row.Select(v => v == ONE_VALUE ? 1 : 0).ToArray(), sample: sample).ToArray();
-
             // creates an empty grid
             var grid = AddDim(i => AddDim(j => AddDim(k => AddDim(l => 0))));
 
             // fills with puzzle in the middle (barely) of the grid
-            FillArraycenter(content, grid[GRID_CENTER][GRID_CENTER]);
+            FillArraycenter(GetContentGrid(sample), grid[GRID_CENTER][GRID_CENTER]);
 
             // for each cycle
             for (int cycle = 0; cycle < CYCLES_COUNT; cycle++)
@@ -110,7 +104,7 @@ namespace AventOfCode
                             for (int l = 0; l < grid[i][j][k].Length; l++)
                             {
                                 // loops on every point around the current point
-                                var count1 = 0;
+                                var count = 0;
                                 for (int iAr = i - 1; iAr <= i + 1; iAr++)
                                 {
                                     for (int jAr = j - 1; jAr <= j + 1; jAr++)
@@ -136,15 +130,13 @@ namespace AventOfCode
                                                 }
                                                 else if (grid[iAr][jAr][kAr][lAr] == 1)
                                                 {
-                                                    count1++;
+                                                    count++;
                                                 }
                                             }
                                         }
                                     }
                                 }
-                                // Is "count1" apply to switch rules ?
-                                if ((grid[i][j][k][l] == 0 && count1 == 3) ||
-                                    (grid[i][j][k][l] == 1 && count1 != 3 && count1 != 2))
+                                if (ApplyToSwitch(grid[i][j][k][l], count))
                                 {
                                     coordinatesToSwitch.Add((i, j, k, l));
                                 }
@@ -179,6 +171,17 @@ namespace AventOfCode
                     gridCenter[i][j] = sourceContent[i - GRID_CENTER][j - GRID_CENTER];
                 }
             }
+        }
+
+        private bool ApplyToSwitch(int gridValue, int count)
+        {
+            return (gridValue == 0 && count == 3) ||
+                (gridValue == 1 && count != 3 && count != 2);
+        }
+
+        private int[][] GetContentGrid(bool sample)
+        {
+            return GetContent(row => row.Select(v => v == ONE_VALUE ? 1 : 0).ToArray(), sample: sample).ToArray();
         }
     }
 }

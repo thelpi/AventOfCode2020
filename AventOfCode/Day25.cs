@@ -16,18 +16,7 @@ namespace AventOfCode
         {
             var content = GetContent(v => Convert.ToInt64(v), sample: sample);
 
-            long publicKeyCard = content[0];
-            long publicKeyDoor = content[1];
-
-            long doorEncryptionKey = ApplyLoop(FindLoop(publicKeyCard), publicKeyDoor);
-            long cardEncryptionKey = ApplyLoop(FindLoop(publicKeyDoor), publicKeyCard);
-
-            if (doorEncryptionKey != cardEncryptionKey)
-            {
-                throw new InvalidOperationException();
-            }
-
-            return doorEncryptionKey;
+            return ApplyLoop(FindLoop(content[0]), content[1]);
         }
 
         public override long GetSecondPartResult(bool sample)
