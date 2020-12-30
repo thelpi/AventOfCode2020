@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace AventOfCode
 {
@@ -13,45 +14,6 @@ namespace AventOfCode
         {
             var expressions = GetContent(v => v, sample: sample, part: (sample ? 1 : (int?)null));
 
-            long SubSub(string subExp)
-            {
-                var cars = subExp.Split(" ");
-                long subTot = -1;
-                bool nextIsMultiply = false;
-                foreach (var car in cars)
-                {
-                    if (subTot == -1)
-                    {
-                        subTot = Convert.ToInt32(car);
-                    }
-                    else if (car == "+")
-                    {
-                        nextIsMultiply = false;
-                    }
-                    else if (car == "*")
-                    {
-                        nextIsMultiply = true;
-                    }
-                    else
-                    {
-                        if (nextIsMultiply)
-                        {
-                            subTot = subTot * Convert.ToInt32(car);
-                        }
-                        else
-                        {
-                            subTot = subTot + Convert.ToInt32(car);
-                        }
-                    }
-                }
-                return subTot;
-            }
-
-            long ComputeSubTot(string subExp)
-            {
-                return SubSub(subExp);
-            }
-
             long sum = 0;
 
             for (int k = 0; k < expressions.Count; k++)
@@ -78,12 +40,12 @@ namespace AventOfCode
                     if (parenthesePos > -1)
                     {
                         var subExp = exp.Substring(parenthesePos + 1, endParenthesePos - parenthesePos - 1);
-                        var subToto = ComputeSubTot(subExp);
+                        var subToto = ComputeComplexExpressionValue(subExp, false);
                         exp = exp.Replace($"({subExp})", subToto.ToString());
                     }
                     else
                     {
-                        sum += ComputeSubTot(exp);
+                        sum += ComputeComplexExpressionValue(exp, false);
                         break;
                     }
                 }
@@ -96,52 +58,6 @@ namespace AventOfCode
         {
             var expressions = GetContent(v => v, sample: sample, part: (sample ? 2 : (int?)null));
 
-            long SubSub(string subExp)
-            {
-                var cars = subExp.Split(" ");
-                long subTot = -1;
-                bool nextIsMultiply = false;
-                foreach (var car in cars)
-                {
-                    if (subTot == -1)
-                    {
-                        subTot = Convert.ToInt32(car);
-                    }
-                    else if (car == "+")
-                    {
-                        nextIsMultiply = false;
-                    }
-                    else if (car == "*")
-                    {
-                        nextIsMultiply = true;
-                    }
-                    else
-                    {
-                        if (nextIsMultiply)
-                        {
-                            subTot = subTot * Convert.ToInt32(car);
-                        }
-                        else
-                        {
-                            subTot = subTot + Convert.ToInt32(car);
-                        }
-                    }
-                }
-                return subTot;
-            }
-
-            long ComputeSubTot(string subExp)
-            {
-                var subSubExp = subExp.Split("*");
-                long tot = 1;
-                foreach (var sse in subSubExp)
-                {
-                    var subTot = SubSub(sse.Trim());
-                    tot = tot * subTot;
-                }
-                return tot;
-            }
-
             long sum = 0;
 
             for (int k = 0; k < expressions.Count; k++)
@@ -168,18 +84,42 @@ namespace AventOfCode
                     if (parenthesePos > -1)
                     {
                         var subExp = exp.Substring(parenthesePos + 1, endParenthesePos - parenthesePos - 1);
-                        var subToto = ComputeSubTot(subExp);
+                        var subToto = ComputeComplexExpressionValue(subExp, true);
                         exp = exp.Replace($"({subExp})", subToto.ToString());
                     }
                     else
                     {
-                        sum += ComputeSubTot(exp);
+                        sum += ComputeComplexExpressionValue(exp, true);
                         break;
                     }
                 }
             }
 
             return sum;
+        }
+
+        private long ComputeExpressionValue(string expression)
+        {
+            var expressionParts = expression.Split(" ");
+            long total = Convert.ToInt32(expressionParts[0]);
+            bool nextIsMultiply = false;
+            foreach (var car in expressionParts.Skip(1))
+            {
+                if (car == "+") nextIsMultiply = false;
+                else if (car == "*") nextIsMultiply = true;
+                else if (nextIsMultiply) total *= Convert.ToInt32(car);
+                else total += Convert.ToInt32(car);
+            }
+            return total;
+        }
+
+        private long ComputeComplexExpressionValue(string expression, bool applyMultiplyPriority)
+        {
+            return applyMultiplyPriority
+                ? expression
+                    .Split("*")
+                    .Aggregate((long)1, (agg, v) => agg *= ComputeExpressionValue(v.Trim()))
+                : ComputeExpressionValue(expression);
         }
     }
 }
