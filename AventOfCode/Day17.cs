@@ -9,43 +9,33 @@ namespace AventOfCode
     /// </summary>
     public sealed class Day17 : DayBase
     {
+        private const int CYCLES_COUNT = 6;
+        private const int GRID_LENGTH = 25; // arbitrary; minimal for 8x8x8x8
+        private const char ONE_VALUE = '#';
+        private static readonly int GRID_CENTER = GRID_LENGTH / 2;
+
         public Day17() : base(17) { }
 
         public override long GetFirstPartResult(bool sample)
         {
-            const int CYCLES_COUNT = 6;
-            const int GRID_LENGTH = 25; // arbitrary; minimal for 8x8x8x8
-            const char ONE_VALUE = '#';
-
             var content = GetContent(row => row.Select(v => v == ONE_VALUE ? 1 : 0).ToArray(), sample: sample).ToArray();
 
             // creates an empty grid
-            var grid1 = Enumerable.Range(0, GRID_LENGTH)
-                .Select(_0 => Enumerable.Range(0, GRID_LENGTH)
-                    .Select(_1 => Enumerable.Range(0, GRID_LENGTH)
-                        .Select(_2 => 0)
-                .ToArray()).ToArray()).ToArray();
+            var grid = AddDim(i => AddDim(j => AddDim(k => 0)));
 
             // fills with puzzle in the middle (barely) of the grid
-            var center1 = GRID_LENGTH / 2;
-            for (int i = center1; i < center1 + content[0].Length; i++)
-            {
-                for (int j = center1; j < center1 + content[0].Length; j++)
-                {
-                    grid1[center1][i][j] = content[i - center1][j - center1];
-                }
-            }
+            FillArraycenter(content, grid[GRID_CENTER]);
 
             // for each cycle
             for (int cycle = 0; cycle < CYCLES_COUNT; cycle++)
             {
                 var coordinatesToSwitch = new List<(int i, int j, int k)>();
                 // loops on each point
-                for (int i = 0; i < grid1.Length; i++)
+                for (int i = 0; i < grid.Length; i++)
                 {
-                    for (int j = 0; j < grid1[i].Length; j++)
+                    for (int j = 0; j < grid[i].Length; j++)
                     {
-                        for (int k = 0; k < grid1[i][j].Length; k++)
+                        for (int k = 0; k < grid[i][j].Length; k++)
                         {
                             // loops on every point around the current point
                             var count1 = 0;
@@ -65,12 +55,12 @@ namespace AventOfCode
                                             // exclude min border
                                             continue;
                                         }
-                                        else if (jAr >= grid1[i].Length || iAr >= grid1.Length || kAr >= grid1[i][j].Length)
+                                        else if (jAr >= grid[i].Length || iAr >= grid.Length || kAr >= grid[i][j].Length)
                                         {
                                             // exclude max border
                                             continue;
                                         }
-                                        else if (grid1[iAr][jAr][kAr] == 1)
+                                        else if (grid[iAr][jAr][kAr] == 1)
                                         {
                                             count1++;
                                         }
@@ -78,8 +68,8 @@ namespace AventOfCode
                                 }
                             }
                             // Is "count1" apply to switch rules ?
-                            if ((grid1[i][j][k] == 0 && count1 == 3) ||
-                                (grid1[i][j][k] == 1 && count1 != 3 && count1 != 2))
+                            if ((grid[i][j][k] == 0 && count1 == 3) ||
+                                (grid[i][j][k] == 1 && count1 != 3 && count1 != 2))
                             {
                                 coordinatesToSwitch.Add((i, j, k));
                             }
@@ -89,51 +79,35 @@ namespace AventOfCode
                 // reverse values
                 foreach (var (i, j, k) in coordinatesToSwitch)
                 {
-                    grid1[i][j][k] = Math.Abs(grid1[i][j][k] - 1);
+                    grid[i][j][k] = Math.Abs(grid[i][j][k] - 1);
                 }
             }
             // sums every "1"
-            return grid1.Sum(_0 => _0.Sum(_1 => _1.Sum()));
+            return grid.Sum(_0 => _0.Sum(_1 => _1.Sum()));
         }
 
         public override long GetSecondPartResult(bool sample)
         {
-            const int CYCLES_COUNT = 6;
-            const int GRID_LENGTH = 25; // arbitrary; minimal for 8x8x8x8
-            const char ONE_VALUE = '#';
-
-            var content = GetContent(row => row.Select(v => v == ONE_VALUE ? 1 : 0).ToArray(), sample: sample).ToArray(); 
+            var content = GetContent(row => row.Select(v => v == ONE_VALUE ? 1 : 0).ToArray(), sample: sample).ToArray();
 
             // creates an empty grid
-            var grid2 = Enumerable.Range(0, GRID_LENGTH)
-                .Select(_0 => Enumerable.Range(0, GRID_LENGTH)
-                    .Select(_1 => Enumerable.Range(0, GRID_LENGTH)
-                        .Select(_2 => Enumerable.Range(0, GRID_LENGTH)
-                              .Select(_3 => 0)
-                .ToArray()).ToArray()).ToArray()).ToArray();
+            var grid = AddDim(i => AddDim(j => AddDim(k => AddDim(l => 0))));
 
             // fills with puzzle in the middle (barely) of the grid
-            var center2 = GRID_LENGTH / 2;
-            for (int i = center2; i < center2 + content[0].Length; i++)
-            {
-                for (int j = center2; j < center2 + content[0].Length; j++)
-                {
-                    grid2[center2][center2][i][j] = content[i - center2][j - center2];
-                }
-            }
+            FillArraycenter(content, grid[GRID_CENTER][GRID_CENTER]);
 
             // for each cycle
             for (int cycle = 0; cycle < CYCLES_COUNT; cycle++)
             {
                 var coordinatesToSwitch = new List<(int i, int j, int k, int l)>();
                 // loops on each point
-                for (int i = 0; i < grid2.Length; i++)
+                for (int i = 0; i < grid.Length; i++)
                 {
-                    for (int j = 0; j < grid2[i].Length; j++)
+                    for (int j = 0; j < grid[i].Length; j++)
                     {
-                        for (int k = 0; k < grid2[i][j].Length; k++)
+                        for (int k = 0; k < grid[i][j].Length; k++)
                         {
-                            for (int l = 0; l < grid2[i][j][k].Length; l++)
+                            for (int l = 0; l < grid[i][j][k].Length; l++)
                             {
                                 // loops on every point around the current point
                                 var count1 = 0;
@@ -155,12 +129,12 @@ namespace AventOfCode
                                                     // exclude min border
                                                     continue;
                                                 }
-                                                else if (jAr >= grid2[i].Length || iAr >= grid2.Length || kAr >= grid2[i][j].Length || lAr >= grid2[i][j][k].Length)
+                                                else if (jAr >= grid[i].Length || iAr >= grid.Length || kAr >= grid[i][j].Length || lAr >= grid[i][j][k].Length)
                                                 {
                                                     // exclude max border
                                                     continue;
                                                 }
-                                                else if (grid2[iAr][jAr][kAr][lAr] == 1)
+                                                else if (grid[iAr][jAr][kAr][lAr] == 1)
                                                 {
                                                     count1++;
                                                 }
@@ -169,8 +143,8 @@ namespace AventOfCode
                                     }
                                 }
                                 // Is "count1" apply to switch rules ?
-                                if ((grid2[i][j][k][l] == 0 && count1 == 3) ||
-                                    (grid2[i][j][k][l] == 1 && count1 != 3 && count1 != 2))
+                                if ((grid[i][j][k][l] == 0 && count1 == 3) ||
+                                    (grid[i][j][k][l] == 1 && count1 != 3 && count1 != 2))
                                 {
                                     coordinatesToSwitch.Add((i, j, k, l));
                                 }
@@ -181,11 +155,30 @@ namespace AventOfCode
                 // reverse values
                 foreach (var (i, j, k, l) in coordinatesToSwitch)
                 {
-                    grid2[i][j][k][l] = Math.Abs(grid2[i][j][k][l] - 1);
+                    grid[i][j][k][l] = Math.Abs(grid[i][j][k][l] - 1);
                 }
             }
             // sums every "1"
-            return grid2.Sum(_0 => _0.Sum(_1 => _1.Sum(_2 => _2.Sum())));
+            return grid.Sum(_0 => _0.Sum(_1 => _1.Sum(_2 => _2.Sum())));
+        }
+
+        private TDim[] AddDim<TDim>(Func<int, TDim> callback)
+        {
+            return Enumerable
+                .Range(0, GRID_LENGTH)
+                .Select(_ => callback(_))
+                .ToArray();
+        }
+
+        private void FillArraycenter(int[][] sourceContent, int[][] gridCenter)
+        {
+            for (int i = GRID_CENTER; i < GRID_CENTER + sourceContent[0].Length; i++)
+            {
+                for (int j = GRID_CENTER; j < GRID_CENTER + sourceContent[1].Length; j++)
+                {
+                    gridCenter[i][j] = sourceContent[i - GRID_CENTER][j - GRID_CENTER];
+                }
+            }
         }
     }
 }
