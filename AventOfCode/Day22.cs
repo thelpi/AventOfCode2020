@@ -13,101 +13,93 @@ namespace AventOfCode
 
         public override long GetFirstPartResult(bool sample)
         {
-            var datas = GetContent(v => v, "\r\n\r\n", sample: sample);
-            var p1 = datas[0].Split("\r\n").Skip(1).Select(v => Convert.ToInt32(v)).ToList();
-            var p2 = datas[1].Split("\r\n").Skip(1).Select(v => Convert.ToInt32(v)).ToList();
+            GetPlayerDecks(sample, out List<int> p1Deck, out List<int> p2Deck);
 
-            List<int> winner;
-
-            while (p1.Count > 0 && p2.Count > 0)
+            while (p1Deck.Count > 0 && p2Deck.Count > 0)
             {
-                var p1Card = p1[0];
-                var p2Card = p2[0];
-                p1.RemoveAt(0);
-                p2.RemoveAt(0);
-                if (p1Card > p2Card)
-                {
-                    p1.Add(p1Card);
-                    p1.Add(p2Card);
-                }
-                else
-                {
-                    p2.Add(p2Card);
-                    p2.Add(p1Card);
-                }
+                Round(p1Deck, p2Deck, false);
             }
 
-            winner = p1.Count == 0 ? p2 : p1;
-
-            return Score(winner);
+            return ComputeScore(p1Deck.Count == 0 ? p2Deck : p1Deck);
         }
 
         public override long GetSecondPartResult(bool sample)
         {
-            var datas = GetContent(v => v, "\r\n\r\n", sample: sample);
-            var p1 = datas[0].Split("\r\n").Skip(1).Select(v => Convert.ToInt32(v)).ToList();
-            var p2 = datas[1].Split("\r\n").Skip(1).Select(v => Convert.ToInt32(v)).ToList();
+            GetPlayerDecks(sample, out List<int> p1, out List<int> p2);
 
-            List<int> winner;
-            
-            bool Round(List<int> p1Bis, List<int> p2Bis, List<List<int>> p1Decks, List<List<int>> p2Decks)
-            {
-                while (p1Bis.Count > 0 && p2Bis.Count > 0)
-                {
-                    for (int k = 0; k < p1Decks.Count; k++)
-                    {
-                        if (p1Decks[k].SequenceEqual(p1Bis) && p2Decks[k].SequenceEqual(p2Bis))
-                        {
-                            return true;
-                        }
-                    }
+            var p1Win = RecursiveRound(p1, p2, new List<List<int>>(), new List<List<int>>());
 
-                    p1Decks.Add(new List<int>(p1Bis));
-                    p2Decks.Add(new List<int>(p2Bis));
-
-                    bool isP1Win;
-                    var p1Card = p1Bis[0];
-                    var p2Card = p2Bis[0];
-                    if (p1Card <= p1Bis.Count - 1 && p2Card <= p2Bis.Count - 1)
-                    {
-                        isP1Win = Round(p1Bis.Skip(1).Take(p1Card).ToList(), p2Bis.Skip(1).Take(p2Card).ToList(), new List<List<int>>(), new List<List<int>>());
-                    }
-                    else
-                    {
-                        isP1Win = p1Card > p2Card;
-                    }
-                    p1Bis.RemoveAt(0);
-                    p2Bis.RemoveAt(0);
-                    if (isP1Win)
-                    {
-                        p1Bis.Add(p1Card);
-                        p1Bis.Add(p2Card);
-                    }
-                    else
-                    {
-                        p2Bis.Add(p2Card);
-                        p2Bis.Add(p1Card);
-                    }
-                }
-                return p1Bis.Count > 0;
-            }
-
-            var p1Win = Round(p1, p2, new List<List<int>>(), new List<List<int>>());
-            winner = p1Win ? p1 : p2;
-
-            return Score(winner);
+            return ComputeScore(p1Win ? p1 : p2);
         }
 
-        private long Score(List<int> winnerLocal)
+        private void GetPlayerDecks(bool sample, out List<int> p1Deck, out List<int> p2Deck)
+        {
+            var datas = GetContent(v => v, "\r\n\r\n", sample: sample);
+            p1Deck = datas[0].Split("\r\n").Skip(1).Select(v => Convert.ToInt32(v)).ToList();
+            p2Deck = datas[1].Split("\r\n").Skip(1).Select(v => Convert.ToInt32(v)).ToList();
+        }
+
+        private long ComputeScore(List<int> winnerDeck)
         {
             long score = 0;
-            int j = 1;
-            for (int i = winnerLocal.Count - 1; i >= 0; i--)
+            var j = 1;
+            for (int i = winnerDeck.Count - 1; i >= 0; i--)
             {
-                score += winnerLocal[i] * j;
+                score += winnerDeck[i] * j;
                 j++;
             }
             return score;
+        }
+
+        private bool RecursiveRound(List<int> p1Deck, List<int> p2Deck,
+            List<List<int>> p1DecksHistory, List<List<int>> p2DecksHistory)
+        {
+            while (p1Deck.Count > 0 && p2Deck.Count > 0)
+            {
+                for (int k = 0; k < p1DecksHistory.Count; k++)
+                {
+                    if (p1DecksHistory[k].SequenceEqual(p1Deck)
+                        && p2DecksHistory[k].SequenceEqual(p2Deck))
+                    {
+                        // Hard break
+                        return true;
+                    }
+                }
+
+                p1DecksHistory.Add(new List<int>(p1Deck));
+                p2DecksHistory.Add(new List<int>(p2Deck));
+
+                Round(p1Deck, p2Deck, true);
+            }
+
+            return p1Deck.Count > 0;
+        }
+
+        private void Round(List<int> p1Deck, List<int> p2Deck, bool recursive)
+        {
+            var p1Card = p1Deck[0];
+            var p2Card = p2Deck[0];
+            var isP1Win = recursive
+                && p1Card <= p1Deck.Count - 1
+                && p2Card <= p2Deck.Count - 1
+                    ? RecursiveRound(
+                        p1Deck.Skip(1).Take(p1Card).ToList(),
+                        p2Deck.Skip(1).Take(p2Card).ToList(),
+                        new List<List<int>>(),
+                        new List<List<int>>())
+                    : p1Card > p2Card;
+            p1Deck.RemoveAt(0);
+            p2Deck.RemoveAt(0);
+            if (isP1Win)
+            {
+                p1Deck.Add(p1Card);
+                p1Deck.Add(p2Card);
+            }
+            else
+            {
+                p2Deck.Add(p2Card);
+                p2Deck.Add(p1Card);
+            }
         }
     }
 }
