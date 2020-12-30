@@ -59,45 +59,17 @@ namespace AventOfCode
                 {
                     if (firstPart)
                     {
-                        byte[] bytesDatas = BitConverter.GetBytes(value);
-                        var b = new BitArray(bytesDatas);
-                        int[] bits = b.Cast<bool>().Select(bit => bit ? 1 : 0).ToArray();
+                        var bits = ToBytesArray(mask, value, X);
 
-                        for (int j = 0; j < SIZE_MASK; j++)
-                        {
-                            if (mask[j] == ZERO)
-                            {
-                                bits[j] = 0;
-                            }
-                            else if (mask[j] == ONE)
-                            {
-                                bits[j] = 1;
-                            }
-                        }
-
-                        BitArray newBitArray = new BitArray(bits.Select(bb => bb == 1).ToArray());
+                        BitArray newBitArray = new BitArray(bits.Select(bb => bb == true).ToArray());
 
                         newMemorySet.Add((address, GetIntFromBitArray(newBitArray)));
                     }
                     else
                     {
-                        byte[] bytesDatas = BitConverter.GetBytes(address);
-                        var b = new BitArray(bytesDatas);
-                        int?[] bits = b.Cast<bool>().Select(bit => bit ? (int?)1 : 0).ToArray();
+                        var bits = ToBytesArray(mask, address, ZERO);
 
-                        for (int j = 0; j < SIZE_MASK; j++)
-                        {
-                            if (mask[j] == X)
-                            {
-                                bits[j] = null;
-                            }
-                            else if (mask[j] == ONE)
-                            {
-                                bits[j] = 1;
-                            }
-                        }
-
-                        var allBits = new List<int?[]> { bits };
+                        var allBits = new List<bool?[]> { bits };
                         var countXToChange = bits.Count(bbb => !bbb.HasValue);
                         for (int k = 0; k < bits.Length; k++)
                         {
@@ -106,15 +78,15 @@ namespace AventOfCode
                                 continue;
                             }
 
-                            var allBits2 = new List<int?[]>();
+                            var allBits2 = new List<bool?[]>();
                             foreach (var albb in allBits)
                             {
-                                int?[] bitZub0 = new int?[albb.Length];
-                                int?[] bitZub1 = new int?[albb.Length];
+                                var bitZub0 = new bool?[albb.Length];
+                                var bitZub1 = new bool?[albb.Length];
                                 albb.CopyTo(bitZub0, 0);
                                 albb.CopyTo(bitZub1, 0);
-                                bitZub0[k] = 0;
-                                bitZub1[k] = 1;
+                                bitZub0[k] = false;
+                                bitZub1[k] = true;
                                 allBits2.Add(bitZub0);
                                 allBits2.Add(bitZub1);
                             }
@@ -126,7 +98,7 @@ namespace AventOfCode
 
                         foreach (var bi in allBits)
                         {
-                            BitArray newBitArray = new BitArray(bi.Select(bb => bb == 1).ToArray());
+                            BitArray newBitArray = new BitArray(bi.Select(bb => bb == true).ToArray());
                             long newKey = GetIntFromBitArray(newBitArray);
                             newMemorySets.Add((newKey, value));
                         }
@@ -147,6 +119,25 @@ namespace AventOfCode
             var array = new byte[bitArray.Count / 8];
             bitArray.CopyTo(array, 0);
             return BitConverter.ToInt64(array, 0);
+        }
+
+        private bool?[] ToBytesArray(string mask, long value, char exclude)
+        {
+            var bits = new BitArray(BitConverter.GetBytes(value))
+                .Cast<bool?>()
+                .ToArray();
+
+            for (int j = 0; j < SIZE_MASK; j++)
+            {
+                if (exclude != mask[j])
+                {
+                    if (mask[j] == X) bits[j] = null;
+                    else if (mask[j] == ONE) bits[j] = true;
+                    else if (mask[j] == ZERO) bits[j] = false;
+                }
+            }
+
+            return bits;
         }
     }
 }
