@@ -10,8 +10,6 @@ namespace AventOfCode
     public sealed class Day19 : DayBase
     {
         private const int START_RULE_ID = 0;
-        private const int SPECIFIC_RULE_ID_1 = 42;
-        private const int SPECIFIC_RULE_ID_2 = 31;
 
         public Day19() : base(19) { }
 
@@ -28,57 +26,66 @@ namespace AventOfCode
         {
             var rules = GetRulesAndMessages(sample, 2, out string[] messages);
 
-            var patterns42 = GetRuleIdMessagesRecursive(rules, SPECIFIC_RULE_ID_1);
-            var patterns31 = GetRuleIdMessagesRecursive(rules, SPECIFIC_RULE_ID_2);
+            // this is an observation from datas; no way to generalize that easily
 
-            List<string> valids = new List<string>();
-            foreach (var msg in messages)
+            // p8 is one or more repetition of p42
+
+            // p11 is one or more repetition of p42,
+            // followed by one or more repetition of p31
+            // both parts has the same number of repetition
+
+            // p0 is based on p8 (once) followed by p11 (once)
+            // so it's p42 (X) times, then p31 (X - 1) times
+            // with X at least 2
+
+            var patterns42 = GetRuleIdMessagesRecursive(rules, 42);
+            var patterns31 = GetRuleIdMessagesRecursive(rules, 31);
+
+            var messagesWithValidPattern = new List<string>();
+            foreach (var message in messages)
             {
-                var localMsg = msg;
-                int subCount = 0;
-                bool found = true;
-                while (found && localMsg != "")
+                var workingMessage = message;
+                
+                var pattern42Count = CountPatterns(patterns42, ref workingMessage);
+                
+                // at least two pattern 42
+                // and the remaining message is not empty
+                if (!string.IsNullOrWhiteSpace(workingMessage) && pattern42Count > 1)
                 {
-                    bool locFound = false;
-                    foreach (var p42 in patterns42)
+                    var countPattern31 = CountPatterns(patterns31, ref workingMessage);
+                    // at least one pattern 31
+                    // but less than pattern 42
+                    // and no remaining
+                    if (string.IsNullOrWhiteSpace(workingMessage) && pattern42Count > countPattern31)
                     {
-                        if (localMsg.StartsWith(p42))
-                        {
-                            localMsg = localMsg.Substring(p42.Length);
-                            subCount++;
-                            locFound = true;
-                            break;
-                        }
-                    }
-                    found = locFound;
-                }
-                if (localMsg != "" && subCount > 0)
-                {
-                    int subCount2 = 0;
-                    found = true;
-                    while (found && localMsg != "")
-                    {
-                        bool locFound = false;
-                        foreach (var p31 in patterns31)
-                        {
-                            if (localMsg.StartsWith(p31))
-                            {
-                                localMsg = localMsg.Substring(p31.Length);
-                                subCount2++;
-                                locFound = true;
-                                break;
-                            }
-                        }
-                        found = locFound;
-                    }
-                    if (localMsg == "" && subCount > subCount2)
-                    {
-                        valids.Add(msg);
+                        messagesWithValidPattern.Add(message);
                     }
                 }
             }
 
-            return valids.Count;
+            return messagesWithValidPattern.Count;
+        }
+
+        private int CountPatterns(List<string> patterns, ref string workingMessage)
+        {
+            var patternsCount = 0;
+            var foundAnyPattern = true;
+            while (foundAnyPattern && !string.IsNullOrWhiteSpace(workingMessage))
+            {
+                bool foundCurrentPattern = false;
+                foreach (var pattern in patterns)
+                {
+                    if (workingMessage.StartsWith(pattern))
+                    {
+                        workingMessage = workingMessage.Substring(pattern.Length);
+                        patternsCount++;
+                        foundCurrentPattern = true;
+                        break;
+                    }
+                }
+                foundAnyPattern = foundCurrentPattern;
+            }
+            return patternsCount;
         }
 
         private Dictionary<int, string> GetRulesAndMessages(bool sample, int samplePartIndex, out string[] expectedMessages)
