@@ -9,32 +9,27 @@ namespace AventOfCode
     /// </summary>
     public sealed class Day19 : DayBase
     {
+        private const int START_RULE_ID = 0;
+        private const int SPECIFIC_RULE_ID_1 = 42;
+        private const int SPECIFIC_RULE_ID_2 = 31;
+
         public Day19() : base(19) { }
 
         public override long GetFirstPartResult(bool sample)
         {
-            var content = GetContent(v => v, "\r\n\r\n", sample: sample, part: 1);
+            var rules = GetRulesAndMessages(sample, 1, out string[] messages);
 
-            var rules = content[0].Split("\r\n").ToDictionary(v =>
-                Convert.ToInt32(v.Split(":")[0]),
-                v => v.Split(":")[1]);
-            var messages = content[1].Split("\r\n");
+            var results = GetRuleIdMessagesRecursive(rules, START_RULE_ID);
 
-            var results = MatchRuleId(rules, 0);
-            return messages.Count(msg => results.Contains(msg));
+            return messages.Count(_ => results.Contains(_));
         }
 
         public override long GetSecondPartResult(bool sample)
         {
-            var content = GetContent(v => v, "\r\n\r\n", sample: sample, part: 2);
+            var rules = GetRulesAndMessages(sample, 2, out string[] messages);
 
-            var rules = content[0].Split("\r\n").ToDictionary(v =>
-                Convert.ToInt32(v.Split(":")[0]),
-                v => v.Split(":")[1]);
-            var messages = content[1].Split("\r\n");
-
-            var patterns42 = MatchRuleId(rules, 42);
-            var patterns31 = MatchRuleId(rules, 31);
+            var patterns42 = GetRuleIdMessagesRecursive(rules, SPECIFIC_RULE_ID_1);
+            var patterns31 = GetRuleIdMessagesRecursive(rules, SPECIFIC_RULE_ID_2);
 
             List<string> valids = new List<string>();
             foreach (var msg in messages)
@@ -86,83 +81,81 @@ namespace AventOfCode
             return valids.Count;
         }
 
+        private Dictionary<int, string> GetRulesAndMessages(bool sample, int samplePartIndex, out string[] expectedMessages)
+        {
+            var content = GetContent(v => v, "\r\n\r\n", sample: sample, part: samplePartIndex);
+
+            expectedMessages = content[1].Split("\r\n");
+
+            return content[0]
+                .Split("\r\n")
+                .ToDictionary(
+                    v => Convert.ToInt32(v.Split(":")[0]),
+                    v => v.Split(":")[1]);
+        }
+
+        private List<string> GetRuleIdMessagesRecursive(Dictionary<int, string> rules, int ruleId)
+        {
+            var messages = new List<string>();
+            if (IsFinalRule(rules, ruleId))
+            {
+                messages.Add(GetFinalRuleIdMessage(rules, ruleId).ToString());
+            }
+            else
+            {
+                var rule = rules[ruleId]
+                    .Split("|")
+                    .Select(r => r
+                        .Trim()
+                        .Split(" ")
+                        .Select(_ => Convert.ToInt32(_))
+                        .ToList())
+                    .ToList();
+
+                messages.AddRange(rule
+                    .SelectMany(r => GetNonFinalRuleMessages(rules, r))
+                    .ToList());
+            }
+            return messages;
+        }
+
         private bool IsFinalRule(Dictionary<int, string> rules, int ruleId)
         {
             return rules[ruleId].Contains("\"");
         }
 
-        private char MatchFinalRule(Dictionary<int, string> rules, int ruleId)
+        private string GetFinalRuleIdMessage(Dictionary<int, string> rules, int ruleId)
         {
-            return rules[ruleId].Trim().Replace("\"", string.Empty)[0];
+            return rules[ruleId].Trim().Replace("\"", string.Empty)[0].ToString();
         }
 
-        private List<string> GroupRulePoss(Dictionary<int, string> rules, List<List<int>> rulesGroupIds)
+        private List<string> GetNonFinalRuleMessages(Dictionary<int, string> rules, List<int> ruleIds)
         {
-            List<string> oks = new List<string>();
-            foreach (var rulesGroupId in rulesGroupIds)
-            {
-                var loc = GroupPos(rules, rulesGroupId);
-                oks.AddRange(loc);
-            }
-            return oks;
-        }
-
-        private List<string> GroupPos(Dictionary<int, string> rules, List<int> ruleIds)
-        {
-            var possS = new List<string>();
-            bool firstRule = true;
+            var messages = new List<string>();
+            var firstRule = true;
             foreach (int ruleId in ruleIds)
             {
-                var strCurr = MatchRuleId(rules, ruleId);
-                if (strCurr.Count == 0)
+                var subMessages = GetRuleIdMessagesRecursive(rules, ruleId);
+                if (subMessages.Count == 0)
                 {
                     return new List<string>();
                 }
-
-                if (firstRule)
+                else if (firstRule)
                 {
-                    possS.AddRange(strCurr);
+                    messages.AddRange(subMessages);
+                    firstRule = false;
                 }
                 else
                 {
-                    var newPossS = new List<string>();
-                    foreach (var p in possS)
-                    {
-                        foreach (var k in strCurr)
-                        {
-                            newPossS.Add(string.Concat(p, k));
-                        }
-                    }
-                    possS = newPossS;
+                    messages = messages
+                        .SelectMany(m =>
+                            subMessages
+                                .Select(sm => string.Concat(m, sm)))
+                        .ToList();
                 }
-
-                firstRule = false;
             }
 
-            return possS;
-        }
-
-        private List<string> MatchRuleId(Dictionary<int, string> rules, int ruleId)
-        {
-            List<string> oks = new List<string>();
-            if (IsFinalRule(rules, ruleId))
-            {
-                oks.Add(MatchFinalRule(rules, ruleId).ToString());
-            }
-            else
-            {
-                var ruleTxt = rules[ruleId].Trim();
-                var ruleTxtSplit = ruleTxt.Split("|");
-                var rule = ruleTxtSplit.Select(vBis =>
-                {
-                    var ttt = vBis.Trim().Split(" ").Select(vTer =>
-                        Convert.ToInt32(vTer)).ToList();
-                    return ttt;
-                }).ToList();
-
-                oks.AddRange(GroupRulePoss(rules, rule));
-            }
-            return oks;
+            return messages;
         }
     }
 }
