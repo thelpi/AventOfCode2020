@@ -11,6 +11,9 @@ namespace AventOfCode
     public sealed class Day14 : DayBase
     {
         private const int SIZE_MASK = 36;
+        private const char ZERO = '0';
+        private const char ONE = '1';
+        private const char X = 'X';
 
         public Day14() : base(14) { }
 
@@ -47,26 +50,26 @@ namespace AventOfCode
 
             var newMemorySets = new List<(long, long)>();
 
-            foreach (var maskOrigin in memorySetsByMask.Keys)
+            foreach (var reversedMask in memorySetsByMask.Keys)
             {
-                if (firstPart)
+                var memorySet = memorySetsByMask[reversedMask];
+                var mask = new String(reversedMask.Reverse().ToArray());
+                var newMemorySet = new List<(long, long)>();
+                foreach (var (address, value) in memorySet)
                 {
-                    var bytes = memorySetsByMask[maskOrigin];
-                    var mask = new String(maskOrigin.Reverse().ToArray());
-                    var newBytes = new List<(long, long)>();
-                    foreach (var (adr, val) in bytes)
+                    if (firstPart)
                     {
-                        byte[] bytesDatas = BitConverter.GetBytes(val);
+                        byte[] bytesDatas = BitConverter.GetBytes(value);
                         var b = new BitArray(bytesDatas);
                         int[] bits = b.Cast<bool>().Select(bit => bit ? 1 : 0).ToArray();
 
                         for (int j = 0; j < SIZE_MASK; j++)
                         {
-                            if (mask[j] == '0')
+                            if (mask[j] == ZERO)
                             {
                                 bits[j] = 0;
                             }
-                            else if (mask[j] == '1')
+                            else if (mask[j] == ONE)
                             {
                                 bits[j] = 1;
                             }
@@ -74,27 +77,21 @@ namespace AventOfCode
 
                         BitArray newBitArray = new BitArray(bits.Select(bb => bb == 1).ToArray());
 
-                        newBytes.Add((adr, GetIntFromBitArray(newBitArray)));
+                        newMemorySet.Add((address, GetIntFromBitArray(newBitArray)));
                     }
-                    newMemorySets.AddRange(newBytes);
-                }
-                else
-                {
-                    var bytes = memorySetsByMask[maskOrigin];
-                    var mask = new String(maskOrigin.Reverse().ToArray());
-                    foreach (var (adr, val) in bytes)
+                    else
                     {
-                        byte[] bytesDatas = BitConverter.GetBytes(adr);
+                        byte[] bytesDatas = BitConverter.GetBytes(address);
                         var b = new BitArray(bytesDatas);
                         int?[] bits = b.Cast<bool>().Select(bit => bit ? (int?)1 : 0).ToArray();
 
                         for (int j = 0; j < SIZE_MASK; j++)
                         {
-                            if (mask[j] == 'X')
+                            if (mask[j] == X)
                             {
                                 bits[j] = null;
                             }
-                            else if (mask[j] == '1')
+                            else if (mask[j] == ONE)
                             {
                                 bits[j] = 1;
                             }
@@ -127,16 +124,15 @@ namespace AventOfCode
 
                         allBits.RemoveAll(alb => alb.Contains(null));
 
-                        var newVs = new List<(long, long)>();
                         foreach (var bi in allBits)
                         {
                             BitArray newBitArray = new BitArray(bi.Select(bb => bb == 1).ToArray());
                             long newKey = GetIntFromBitArray(newBitArray);
-                            newVs.Add((newKey, val));
+                            newMemorySets.Add((newKey, value));
                         }
-                        newMemorySets.AddRange(newVs);
                     }
                 }
+                newMemorySets.AddRange(newMemorySet);
             }
 
             // sum of the latest value for each address
