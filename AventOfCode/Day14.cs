@@ -10,46 +10,24 @@ namespace AventOfCode
     /// </summary>
     public sealed class Day14 : DayBase
     {
+        private const int SIZE_MASK = 36;
+
         public Day14() : base(14) { }
 
         public override long GetFirstPartResult(bool sample)
         {
-            var datas = GetContent(v =>
-            {
-                var parts = v.Split("\r\n");
-                var mask = parts[0].Replace("mask = ", "");
-                var bytes = parts
-                    .Skip(1)
-                    .Select(p =>
-                    {
-                        var e1 = p.Split(" = ")[0].Replace("mem[", "").Replace("]", "");
-                        var e2 = p.Split(" = ")[1];
-                        return (Convert.ToInt64(e1), Convert.ToInt64(e2));
-                    })
-                    .ToList();
-
-                return (mask, bytes);
-            }, "\r\n\r\n", sample, sample ? 1 : (int?)null);
-
-            const int SIZE_MASK = 36;
+            var datas = GetDatas(sample, true);
 
             var newDatas = new List<(string, List<(long, long)>)>();
 
-            long GetIntFromBitArray(BitArray bitArray)
+            foreach (var maskOrigin in datas.Keys)
             {
-                var array = new byte[8];
-                bitArray.CopyTo(array, 0);
-                return BitConverter.ToInt64(array, 0);
-            }
-
-            for (int i = 0; i < datas.Count; i++)
-            {
-                var (mask, bytes) = datas[i];
-                mask = new String(mask.Reverse().ToArray());
+                var bytes = datas[maskOrigin];
+                var mask = new String(maskOrigin.Reverse().ToArray());
                 var newBytes = new List<(long, long)>();
-                foreach (var singleByteDatas in bytes)
+                foreach (var (adr, val) in bytes)
                 {
-                    byte[] bytesDatas = BitConverter.GetBytes(singleByteDatas.Item2);
+                    byte[] bytesDatas = BitConverter.GetBytes(val);
                     var b = new BitArray(bytesDatas);
                     int[] bits = b.Cast<bool>().Select(bit => bit ? 1 : 0).ToArray();
 
@@ -67,7 +45,7 @@ namespace AventOfCode
 
                     BitArray newBitArray = new BitArray(bits.Select(bb => bb == 1).ToArray());
 
-                    newBytes.Add((singleByteDatas.Item1, GetIntFromBitArray(newBitArray)));
+                    newBytes.Add((adr, GetIntFromBitArray(newBitArray)));
                 }
                 newDatas.Add((mask, newBytes));
             }
@@ -81,41 +59,17 @@ namespace AventOfCode
 
         public override long GetSecondPartResult(bool sample)
         {
-            var datas = GetContent(v =>
-            {
-                var parts = v.Split("\r\n");
-                var mask = parts[0].Replace("mask = ", "");
-                var bytes = parts
-                    .Skip(1)
-                    .Select(p =>
-                    {
-                        var e1 = p.Split(" = ")[0].Replace("mem[", "").Replace("]", "");
-                        var e2 = p.Split(" = ")[1];
-                        return (Convert.ToInt64(e1), Convert.ToInt64(e2));
-                    })
-                    .ToList();
-
-                return (mask, bytes);
-            }, "\r\n\r\n", sample, sample ? 2 : (int?)null);
-
-            const int SIZE_MASK = 36;
+            var datas = GetDatas(sample, false);
 
             var newDatas = new List<(string, List<(long, long)>)>();
 
-            long GetIntFromBitArray(BitArray bitArray)
+            foreach (var maskOrigin in datas.Keys)
             {
-                var array = new byte[8];
-                bitArray.CopyTo(array, 0);
-                return BitConverter.ToInt64(array, 0);
-            }
-
-            foreach (var data in datas)
-            {
-                var (mask, bytes) = data;
-                mask = new String(mask.Reverse().ToArray());
-                foreach (var singleByteDatas in bytes)
+                var bytes = datas[maskOrigin];
+                var mask = new String(maskOrigin.Reverse().ToArray());
+                foreach (var (adr, val) in bytes)
                 {
-                    byte[] bytesDatas = BitConverter.GetBytes(singleByteDatas.Item1);
+                    byte[] bytesDatas = BitConverter.GetBytes(adr);
                     var b = new BitArray(bytesDatas);
                     int?[] bits = b.Cast<bool>().Select(bit => bit ? (int?)1 : 0).ToArray();
 
@@ -163,7 +117,7 @@ namespace AventOfCode
                     {
                         BitArray newBitArray = new BitArray(bi.Select(bb => bb == 1).ToArray());
                         long newKey = GetIntFromBitArray(newBitArray);
-                        newVs.Add((newKey, singleByteDatas.Item2));
+                        newVs.Add((newKey, val));
                     }
                     newDatas.Add((mask, newVs));
                 }
@@ -174,6 +128,35 @@ namespace AventOfCode
             var ccCleaner = cleanedDatas.GroupBy(kvp => kvp.Item1).Select(kvp => kvp.Last()).ToList();
 
             return ccCleaner.Sum(cccc => cccc.Item2);
+        }
+
+        private Dictionary<string, List<(long adr, long val)>> GetDatas(bool sample, bool firstPart)
+        {
+            return GetContent(v =>
+            {
+                var parts = v.Split("\r\n");
+                return (
+                    parts[0].Replace("mask = ", ""), 
+                    parts
+                        .Skip(1)
+                        .Select(p =>
+                        {
+                            return (
+                                Convert.ToInt64(p.Split(" = ")[0].Replace("mem[", "").Replace("]", "")),
+                                Convert.ToInt64(p.Split(" = ")[1])
+                            );
+                        })
+                        .ToList()
+                );
+            }, "\r\n\r\n", sample, sample ? (firstPart ? 1 : 2) : (int?)null)
+            .ToDictionary(v => v.Item1, v => v.Item2);
+        }
+
+        private long GetIntFromBitArray(BitArray bitArray)
+        {
+            var array = new byte[bitArray.Count / 8];
+            bitArray.CopyTo(array, 0);
+            return BitConverter.ToInt64(array, 0);
         }
     }
 }
