@@ -12,85 +12,55 @@ namespace AventOfCode
 
         public override long GetFirstPartResult(bool sample)
         {
-            var expressions = GetContent(v => v, sample: sample, part: (sample ? 1 : (int?)null));
-
-            long sum = 0;
-
-            for (int k = 0; k < expressions.Count; k++)
-            {
-                string exp = expressions[k];
-                while (true)
-                {
-                    int parenthesePos = -1;
-                    int endParenthesePos = -1;
-                    int i = 0;
-                    foreach (var car in exp)
-                    {
-                        if (car == '(')
-                        {
-                            parenthesePos = i;
-                        }
-                        else if (car == ')')
-                        {
-                            endParenthesePos = i;
-                            break;
-                        }
-                        i++;
-                    }
-                    if (parenthesePos > -1)
-                    {
-                        var subExp = exp.Substring(parenthesePos + 1, endParenthesePos - parenthesePos - 1);
-                        var subToto = ComputeComplexExpressionValue(subExp, false);
-                        exp = exp.Replace($"({subExp})", subToto.ToString());
-                    }
-                    else
-                    {
-                        sum += ComputeComplexExpressionValue(exp, false);
-                        break;
-                    }
-                }
-            }
-
-            return sum;
+            return CommonTrunk(sample, 1, false);
         }
 
         public override long GetSecondPartResult(bool sample)
         {
-            var expressions = GetContent(v => v, sample: sample, part: (sample ? 2 : (int?)null));
+            return CommonTrunk(sample, 2, true);
+        }
+
+        private long CommonTrunk(bool sample, int sampleIndex, bool multiplyPriority)
+        {
+            var expressions = GetContent(v => v, sample: sample, part: (sample ? sampleIndex : (int?)null));
 
             long sum = 0;
 
-            for (int k = 0; k < expressions.Count; k++)
+            foreach (var exp in expressions)
             {
-                string exp = expressions[k];
-                while (true)
+                var editedExpression = exp;
+                int parenthesisBeginIndex = 0;
+                int parenthesisEndIndex = 0;
+                while (parenthesisBeginIndex >= 0)
                 {
-                    int parenthesePos = -1;
-                    int endParenthesePos = -1;
+                    parenthesisBeginIndex = -1;
+                    parenthesisEndIndex = -1;
                     int i = 0;
-                    foreach (var car in exp)
+                    foreach (var caracter in editedExpression)
                     {
-                        if (car == '(')
+                        if (caracter == '(')
                         {
-                            parenthesePos = i;
+                            parenthesisBeginIndex = i;
                         }
-                        else if (car == ')')
+                        else if (caracter == ')')
                         {
-                            endParenthesePos = i;
+                            parenthesisEndIndex = i;
                             break;
                         }
                         i++;
                     }
-                    if (parenthesePos > -1)
+
+                    if (parenthesisBeginIndex > -1)
                     {
-                        var subExp = exp.Substring(parenthesePos + 1, endParenthesePos - parenthesePos - 1);
-                        var subToto = ComputeComplexExpressionValue(subExp, true);
-                        exp = exp.Replace($"({subExp})", subToto.ToString());
+                        var expressionBetween = editedExpression.Substring(parenthesisBeginIndex + 1,
+                            parenthesisEndIndex - parenthesisBeginIndex - 1);
+                        editedExpression = editedExpression.Replace(
+                            $"({expressionBetween})",
+                            ComputeComplexExpressionValue(expressionBetween, multiplyPriority).ToString());
                     }
                     else
                     {
-                        sum += ComputeComplexExpressionValue(exp, true);
-                        break;
+                        sum += ComputeComplexExpressionValue(editedExpression, multiplyPriority);
                     }
                 }
             }
