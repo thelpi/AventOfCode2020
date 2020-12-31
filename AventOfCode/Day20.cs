@@ -13,82 +13,45 @@ namespace AventOfCode
 
         public override long GetFirstPartResult(bool sample)
         {
-            var content = GetContent(v =>
-            {
-                var rows = v.Split("\r\n");
-                return (Convert.ToInt32(rows[0].Replace(":", "").Replace("Tile ", "")), rows.Skip(1)
-                    .Select(_ => _.
-                        Select(__ =>
-                            Convert.ToInt32(__ == '.' ? 1 : 0))
-                        .ToArray())
-                    .ToArray());
-            }, "\r\n\r\n", sample: sample).ToDictionary(kvp => kvp.Item1, kvp => kvp.Item2);
+            var puzzle = CommonTrunk(sample);
 
-            var dim = (int)Math.Sqrt(content.Keys.Count);
-
-            var rightPossibilities = new List<Cube>();
-            var bottomPossibilities = new List<Cube>();
-
-            var grid = new Cube[dim, dim];
-
-            var cubPoses = content.Keys.SelectMany(k => ToCubeList(k, content[k])).ToList();
-
-            grid = Sequencial(0, 0, grid, cubPoses, rightPossibilities, bottomPossibilities, dim);
-
-            return (long)grid[0, 0].Id * grid[0, dim - 1].Id * grid[dim - 1, 0].Id * grid[dim - 1, dim - 1].Id;
+            return (long)puzzle[0, 0].Id
+                * puzzle[0, puzzle.GetLength(1) - 1].Id
+                * puzzle[puzzle.GetLength(0) - 1, 0].Id
+                * puzzle[puzzle.GetLength(0) - 1, puzzle.GetLength(1) - 1].Id;
         }
 
         public override long GetSecondPartResult(bool sample)
         {
-            var content = GetContent(v =>
+            var puzzle = CommonTrunk(sample);
+
+            var pixelSizeNoBorder = puzzle[0, 0].InsideContent.GetLength(0);
+            var image = new int[puzzle.GetLength(0) * pixelSizeNoBorder, puzzle.GetLength(1) * pixelSizeNoBorder];
+            for (int i = 0; i < puzzle.GetLength(0); i++)
             {
-                var rows = v.Split("\r\n");
-                return (Convert.ToInt32(rows[0].Replace(":", "").Replace("Tile ", "")), rows.Skip(1)
-                    .Select(_ => _.
-                        Select(__ =>
-                            Convert.ToInt32(__ == '.' ? 1 : 0))
-                        .ToArray())
-                    .ToArray());
-            }, "\r\n\r\n", sample: sample).ToDictionary(kvp => kvp.Item1, kvp => kvp.Item2);
-
-            var dim = (int)Math.Sqrt(content.Keys.Count);
-
-            var rightPossibilities = new List<Cube>();
-            var bottomPossibilities = new List<Cube>();
-
-            var grid = new Cube[dim, dim];
-
-            var cubPoses = content.Keys.SelectMany(k => ToCubeList(k, content[k])).ToList();
-
-            grid = Sequencial(0, 0, grid, cubPoses, rightPossibilities, bottomPossibilities, dim);
-
-            var pixelSizeNoBorder = grid[0, 0].Bottom.Length - 2;
-            var image = new int[dim * pixelSizeNoBorder, dim * pixelSizeNoBorder];
-            for (int i = 0; i < grid.GetLength(0); i++)
-            {
-                for (int j = 0; j < grid.GetLength(1); j++)
+                for (int j = 0; j < puzzle.GetLength(1); j++)
                 {
-                    for (int k = 0; k < grid[i, j].InsideContent.GetLength(0); k++)
+                    for (int k = 0; k < puzzle[i, j].InsideContent.GetLength(0); k++)
                     {
-                        for (int l = 0; l < grid[i, j].InsideContent.GetLength(1); l++)
+                        for (int l = 0; l < puzzle[i, j].InsideContent.GetLength(1); l++)
                         {
-                            image[(i * pixelSizeNoBorder) + k, (j * pixelSizeNoBorder) + l] = grid[i, j].InsideContent[k, l];
+                            image[(i * pixelSizeNoBorder) + k, (j * pixelSizeNoBorder) + l] = puzzle[i, j].InsideContent[k, l];
                         }
                     }
                 }
             }
 
-            var img2D = new int[dim * pixelSizeNoBorder][];
+            var img2D = new int[puzzle.GetLength(0) * pixelSizeNoBorder][];
             for (int i = 0; i < image.GetLength(0); i++)
             {
-                img2D[i] = new int[dim * pixelSizeNoBorder];
+                img2D[i] = new int[puzzle.GetLength(1) * pixelSizeNoBorder];
                 for (int j = 0; j < image.GetLength(1); j++)
                 {
                     img2D[i][j] = image[i, j];
                 }
             }
 
-            var imgVersions = ToCubeList(1, img2D).Select(_ => _.FullContent).ToList();
+            var imgVersions = ToOrientedPieces(1, img2D).Select(_ => _.FullContent).ToList();
 
             int resultCount = 0;
             foreach (var imgVersion in imgVersions)
@@ -147,7 +110,29 @@ namespace AventOfCode
             return resultCount;
         }
 
-        private int[][] Rotate(int[][] cube)
+        private OrientedPiece[,] CommonTrunk(bool sample)
+        {
+            var content = GetContent(v =>
+            {
+                var rows = v.Split("\r\n");
+                return (Convert.ToInt32(rows[0].Replace(":", "").Replace("Tile ", "")), rows.Skip(1)
+                    .Select(_ => _.
+                        Select(__ =>
+                            Convert.ToInt32(__ == '.' ? 1 : 0))
+                        .ToArray())
+                    .ToArray());
+            }, "\r\n\r\n", sample: sample).ToDictionary(kvp => kvp.Item1, kvp => kvp.Item2);
+
+            var dim = (int)Math.Sqrt(content.Keys.Count);
+
+            var grid = new OrientedPiece[dim, dim];
+
+            var cubPoses = content.Keys.SelectMany(k => ToOrientedPieces(k, content[k])).ToList();
+
+            return ResolvePuzzleRecursive((0, 0), grid, cubPoses);
+        }
+
+        private int[][] RotateGrid(int[][] cube)
         {
             var rotated = new int[cube.Length][];
             for (int i = 0; i < cube.Length; i++)
@@ -164,61 +149,39 @@ namespace AventOfCode
             return rotated;
         }
 
-        private int[][] Flip(int[][] cube, int flipIndex)
+        private IEnumerable<OrientedPiece> ToOrientedPieces(int id, int[][] cubeDatas)
         {
-            switch (flipIndex)
+            for (int iFlip = 0; iFlip < 2; iFlip++)
             {
-                case 1:
-                    return cube.Reverse().ToArray();
-                case 2:
-                    return cube.Select(_ => _.Reverse().ToArray()).ToArray();
-                case 3:
-                    return cube.Reverse().Select(_ => _.Reverse().ToArray()).ToArray();
-                default:
-                    return cube.ToArray();
-            }
-        }
-
-        private List<Cube> ToCubeList(int id, int[][] originalDatas)
-        {
-            var cubes = new List<Cube>();
-
-            for (int iFlip = 0; iFlip < 4; iFlip++)
-            {
-                var currentDatas = Flip(originalDatas, iFlip);
+                var currentDatas = iFlip == 0
+                    ? cubeDatas
+                    : cubeDatas.Reverse().ToArray();
                 for (int iRotate = 0; iRotate < 4; iRotate++)
                 {
-                    currentDatas = iRotate == 0 ? currentDatas : Rotate(currentDatas);
-                    cubes.Add(new Cube(id, currentDatas));
+                    currentDatas = iRotate == 0
+                        ? currentDatas
+                        : RotateGrid(currentDatas);
+                    yield return new OrientedPiece(id, currentDatas);
                 }
             }
-
-            for (int k = cubes.Count - 1; k >= 0; k--)
-            {
-                if (cubes.Any(c => cubes.IndexOf(c) < k && cubes[k].IsEqualTo(c)))
-                {
-                    cubes.RemoveAt(k);
-                }
-            }
-
-            return cubes;
         }
 
-        private Cube[,] Sequencial(int i, int j, Cube[,] localGrid, List<Cube> localCubes,
-            List<Cube> rightPossibilities, List<Cube> bottomPossibilities, int dim)
+        private OrientedPiece[,] ResolvePuzzleRecursive((int i, int j) currentPieceIndex, OrientedPiece[,] puzzleInProgress, List<OrientedPiece> remainingPieces)
         {
-            if (i == dim)
+            var (i, j) = currentPieceIndex;
+
+            if (i == puzzleInProgress.GetLength(0))
             {
-                return localGrid;
+                return puzzleInProgress;
             }
 
-            rightPossibilities.Clear();
-            bottomPossibilities.Clear();
+            var rightPossibilities = new List<OrientedPiece>();
+            var bottomPossibilities = new List<OrientedPiece>();
 
             if (i > 0)
             {
-                var topper = localGrid[i - 1, j];
-                bottomPossibilities.AddRange(localCubes.Where(lc => topper.MatchTop(lc)));
+                var topper = puzzleInProgress[i - 1, j];
+                bottomPossibilities.AddRange(remainingPieces.Where(lc => topper.MatchTop(lc)));
                 if (bottomPossibilities.Count == 0)
                 {
                     return null;
@@ -227,15 +190,15 @@ namespace AventOfCode
 
             if (j > 0)
             {
-                var lefter = localGrid[i, j - 1];
-                rightPossibilities.AddRange(localCubes.Where(lc => lefter.MatchLeft(lc)));
+                var lefter = puzzleInProgress[i, j - 1];
+                rightPossibilities.AddRange(remainingPieces.Where(lc => lefter.MatchLeft(lc)));
                 if (rightPossibilities.Count == 0)
                 {
                     return null;
                 }
             }
 
-            var possibilities = new List<Cube>();
+            var possibilities = new List<OrientedPiece>();
             if (rightPossibilities.Count > 0 && bottomPossibilities.Count > 0)
             {
                 var intersect = rightPossibilities.Intersect(bottomPossibilities);
@@ -255,32 +218,32 @@ namespace AventOfCode
             }
             else
             {
-                possibilities.AddRange(localCubes);
+                possibilities.AddRange(remainingPieces);
             }
 
             foreach (var poss in possibilities)
             {
-                var localCubesCopy = new List<Cube>(localCubes.Where(lcc => lcc.Id != poss.Id));
+                var localCubesCopy = new List<OrientedPiece>(remainingPieces.Where(lcc => lcc.Id != poss.Id));
 
-                var localGridCopy = new Cube[dim, dim];
-                for (int k = 0; k < localGrid.GetLength(0); k++)
+                var localGridCopy = new OrientedPiece[puzzleInProgress.GetLength(0), puzzleInProgress.GetLength(1)];
+                for (int k = 0; k < puzzleInProgress.GetLength(0); k++)
                 {
-                    for (int l = 0; l < localGrid.GetLength(1); l++)
+                    for (int l = 0; l < puzzleInProgress.GetLength(1); l++)
                     {
-                        localGridCopy[k, l] = localGrid[k, l];
+                        localGridCopy[k, l] = puzzleInProgress[k, l];
                     }
                 }
                 localGridCopy[i, j] = poss;
 
                 int newJ = j + 1;
                 int newI = i;
-                if (newJ == dim)
+                if (newJ == puzzleInProgress.GetLength(1))
                 {
                     newJ = 0;
                     newI += 1;
                 }
 
-                localGridCopy = Sequencial(newI, newJ, localGridCopy, localCubesCopy, rightPossibilities, bottomPossibilities, dim);
+                localGridCopy = ResolvePuzzleRecursive((newI, newJ), localGridCopy, localCubesCopy);
                 if (localGridCopy != null)
                 {
                     return localGridCopy;
@@ -290,17 +253,18 @@ namespace AventOfCode
             return null;
         }
 
-        private class Cube
+        private class OrientedPiece
         {
-            public string Top { get; }
-            public string Left { get; }
-            public string Right { get; }
-            public string Bottom { get; }
+            private readonly string _top;
+            private readonly string _left;
+            private readonly string _right;
+            private readonly string _bottom;
+
             public int Id { get; }
             public int[,] InsideContent { get; }
             public int[,] FullContent { get; }
 
-            public Cube(int id, int[][] content)
+            public OrientedPiece(int id, int[][] content)
             {
                 Id = id;
                 FullContent = new int[content.Length, content.Length];
@@ -338,28 +302,20 @@ namespace AventOfCode
                     }
                 }
 
-                Top = string.Join(string.Empty, top);
-                Bottom = string.Join(string.Empty, bottom);
-                Left = string.Join(string.Empty, left);
-                Right = string.Join(string.Empty, right);
+                _top = string.Join(string.Empty, top);
+                _bottom = string.Join(string.Empty, bottom);
+                _left = string.Join(string.Empty, left);
+                _right = string.Join(string.Empty, right);
             }
 
-            public bool MatchTop(Cube other)
+            public bool MatchTop(OrientedPiece other)
             {
-                return Bottom == other.Top;
+                return _bottom == other._top;
             }
 
-            public bool MatchLeft(Cube other)
+            public bool MatchLeft(OrientedPiece other)
             {
-                return Right == other.Left;
-            }
-
-            public bool IsEqualTo(Cube other)
-            {
-                return other.Top == Top
-                    && other.Bottom == Bottom
-                    && other.Left == Left
-                    && other.Right == Right;
+                return _right == other._left;
             }
         }
     }
