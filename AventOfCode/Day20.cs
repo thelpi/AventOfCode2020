@@ -172,19 +172,22 @@ namespace AventOfCode
         {
             var (i, j) = currentPieceIndex;
 
+            // condition to exit: puzzle is done (ie. next row is too high)
             if (i == puzzleInProgress.GetLength(0))
             {
                 return puzzleInProgress;
             }
 
-            var rightPossibilities = new List<OrientedPiece>();
-            var bottomPossibilities = new List<OrientedPiece>();
+            var rightPiecesAvailable = new List<OrientedPiece>();
+            var bottomPiecesAvailable = new List<OrientedPiece>();
 
             if (i > 0)
             {
-                var topper = puzzleInProgress[i - 1, j];
-                bottomPossibilities.AddRange(remainingPieces.Where(lc => topper.MatchTop(lc)));
-                if (bottomPossibilities.Count == 0)
+                // if we're not on the first row
+                // we'll need a piece with a top side equals to the previous row bottom side
+                var pieceOnTop = puzzleInProgress[i - 1, j];
+                bottomPiecesAvailable.AddRange(remainingPieces.Where(lc => pieceOnTop.MatchTop(lc)));
+                if (bottomPiecesAvailable.Count == 0)
                 {
                     return null;
                 }
@@ -192,63 +195,66 @@ namespace AventOfCode
 
             if (j > 0)
             {
-                var lefter = puzzleInProgress[i, j - 1];
-                rightPossibilities.AddRange(remainingPieces.Where(lc => lefter.MatchLeft(lc)));
-                if (rightPossibilities.Count == 0)
+                // if we're not on the left column
+                // we'll need a piece with a left side equals to the previous column right side
+                var pieceOnLeft = puzzleInProgress[i, j - 1];
+                rightPiecesAvailable.AddRange(remainingPieces.Where(lc => pieceOnLeft.MatchLeft(lc)));
+                if (rightPiecesAvailable.Count == 0)
                 {
                     return null;
                 }
             }
 
-            var possibilities = new List<OrientedPiece>();
-            if (rightPossibilities.Count > 0 && bottomPossibilities.Count > 0)
+            var piecesAvailable = new List<OrientedPiece>();
+            if (rightPiecesAvailable.Count > 0 && bottomPiecesAvailable.Count > 0)
             {
-                var intersect = rightPossibilities.Intersect(bottomPossibilities);
+                // there must be a least one piece that match both
+                // right and bottom with its left and top
+                var intersect = rightPiecesAvailable.Intersect(bottomPiecesAvailable);
                 if (!intersect.Any())
                 {
                     return null;
                 }
-                possibilities.AddRange(intersect);
+                piecesAvailable.AddRange(intersect);
             }
-            else if (rightPossibilities.Count > 0)
-            {
-                possibilities.AddRange(rightPossibilities);
-            }
-            else if (bottomPossibilities.Count > 0)
-            {
-                possibilities.AddRange(bottomPossibilities);
-            }
+            else if (rightPiecesAvailable.Count > 0)
+                piecesAvailable.AddRange(rightPiecesAvailable);
+            else if (bottomPiecesAvailable.Count > 0)
+                piecesAvailable.AddRange(bottomPiecesAvailable);
             else
-            {
-                possibilities.AddRange(remainingPieces);
-            }
+                piecesAvailable.AddRange(remainingPieces);
 
-            foreach (var poss in possibilities)
+            // each available piece is an hypothesis we have to test
+            foreach (var availablePiece in piecesAvailable)
             {
-                var localCubesCopy = new List<OrientedPiece>(remainingPieces.Where(lcc => lcc.Id != poss.Id));
-
-                var localGridCopy = new OrientedPiece[puzzleInProgress.GetLength(0), puzzleInProgress.GetLength(1)];
+                // creates a new puzzle, identical to the current one
+                var subPuzzle = new OrientedPiece[puzzleInProgress.GetLength(0), puzzleInProgress.GetLength(1)];
                 for (int k = 0; k < puzzleInProgress.GetLength(0); k++)
                 {
                     for (int l = 0; l < puzzleInProgress.GetLength(1); l++)
                     {
-                        localGridCopy[k, l] = puzzleInProgress[k, l];
+                        subPuzzle[k, l] = puzzleInProgress[k, l];
                     }
                 }
-                localGridCopy[i, j] = poss;
+                // and sets the available piece into the grid current point
+                subPuzzle[i, j] = availablePiece;
 
-                int newJ = j + 1;
-                int newI = i;
-                if (newJ == puzzleInProgress.GetLength(1))
+                // computes next point
+                (int newI, int newJ) newPoint = (i, j + 1);
+                if (newPoint.newJ == puzzleInProgress.GetLength(1))
                 {
-                    newJ = 0;
-                    newI += 1;
+                    newPoint = (newPoint.newI + 1, 0);
                 }
 
-                localGridCopy = ResolvePuzzleRecursive((newI, newJ), localGridCopy, localCubesCopy);
-                if (localGridCopy != null)
+                // try to solve by recursion with the current hypothesis
+                // also remove the hypothetical piece from remaining available pieces
+                subPuzzle = ResolvePuzzleRecursive(
+                    newPoint,
+                    subPuzzle,
+                    remainingPieces.Where(p => p.Id != availablePiece.Id).ToList());
+                if (subPuzzle != null)
                 {
-                    return localGridCopy;
+                    return subPuzzle;
                 }
             }
 
