@@ -354,13 +354,12 @@ namespace AventOfCodeUnitTests
 
             Assert.Equal(expected, result);
         }
-
-        // Part. 2 takes 4 hour to complete
+        
         [Theory]
         [InlineData(true, true, 67384529)]
         [InlineData(true, false, 27865934)]
-        //[InlineData(false, true, 149245887792)]
-        //[InlineData(false, false, 170836011000)]
+        [InlineData(false, true, 149245887792)]
+        [InlineData(false, false, 170836011000)]
         public void Day23Test(bool firstPart, bool sample, long expected)
         {
             var day = new Day23();

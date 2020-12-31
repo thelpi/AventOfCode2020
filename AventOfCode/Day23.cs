@@ -19,18 +19,15 @@ namespace AventOfCode
         {
             var content = GetContent(v => Convert.ToInt32(v), sample: sample);
 
-            var cupsArray = content.ToList();
-
-            var indexOfOne = LoopValues(ref cupsArray, PART_1_LOOP);
+            var cupLinks = Loop(content.ToList(), PART_1_LOOP);
 
             var values = new List<char>();
-            for (int k = indexOfOne + 1; k < cupsArray.Count; k++)
+
+            var currentCar = cupLinks[1];
+            while (currentCar != 1)
             {
-                values.Add(cupsArray[k].ToString().First());
-            }
-            for (int k = 0; k < indexOfOne; k++)
-            {
-                values.Add(cupsArray[k].ToString().First());
+                values.Add(currentCar.ToString().First());
+                currentCar = cupLinks[currentCar];
             }
 
             return Convert.ToInt64(new string(values.ToArray()));
@@ -46,162 +43,56 @@ namespace AventOfCode
                 content.Add(i);
             }
 
-            var cupsArray = content.ToList();
+            var cupLinks = Loop(content.ToList(), PART_2_LOOP);
 
-            var indexOfOne = LoopValues(ref cupsArray, PART_2_LOOP);
-
-            var i1 = indexOfOne + 1;
-            var i2 = indexOfOne + 2;
-            if (indexOfOne == cupsArray.Count - 2)
-            {
-                i2 = 0;
-            }
-            else if (indexOfOne == cupsArray.Count - 1)
-            {
-                i1 = 0;
-                i2 = 1;
-            }
-
-            return cupsArray[i1] * (long)cupsArray[i2];
+            return cupLinks[1] * (long)cupLinks[cupLinks[1]];
         }
 
-        private int LoopValues(ref List<int> cupsArray, int loop)
+        private Dictionary<int, int> Loop(List<int> cupsArray, int loop)
         {
-            var originalLength = cupsArray.Count;
-            var removed = new int[3];
-            
-            var maxi1 = cupsArray.Max();
-            var maxi2 = cupsArray.Where(k => k != maxi1).Max();
-            var maxi3 = cupsArray.Where(k => k != maxi1 && k != maxi2).Max();
-            var maxi4 = cupsArray.Where(k => k != maxi1 && k != maxi2 && k != maxi3).Max();
-            var maxs = new[] { maxi1, maxi2, maxi3, maxi4 };
+            var maxCup = cupsArray.Max();
 
-            var i1 = originalLength - 1;
-            var i2 = originalLength - 2;
-            var i3 = originalLength - 3;
+            var cupsLink = new Dictionary<int, int>();
+            for (int i = 0; i < cupsArray.Count; i++)
+            {
+                cupsLink.Add(cupsArray[i], cupsArray[i + 1 == cupsArray.Count ? 0 : i + 1]);
+            }
 
-            int currentI = 0;
-
+            var currentCup = cupsArray.First();
             for (int i = 0; i < loop; i++)
             {
-                var currentCup = cupsArray[currentI];
-                var minusOne = currentCup - 1;
+                var pickedCup1 = cupsLink[currentCup];
+                var pickedCup2 = cupsLink[pickedCup1];
+                var pickedCup3 = cupsLink[pickedCup2];
 
-                removed[2] = cupsArray[currentI == i1 ? 2 : (currentI == i2 ? 1 : (currentI == i3 ? 0 : currentI + 3))];
-                removed[1] = cupsArray[currentI == i1 ? 1 : (currentI == i2 ? 0 : currentI + 2)];
-                removed[0] = cupsArray[currentI == i1 ? 0 : currentI + 1];
+                // the cup that follows "current cup" is now the one
+                // that followed the third pick
+                cupsLink[currentCup] = cupsLink[pickedCup3];
 
-                if (currentI == i1)
+                // destination cup is greater than zero
+                // and not one of the picks
+                var destinationCup = currentCup - 1;
+                while (destinationCup == 0
+                    || pickedCup1 == destinationCup
+                    || pickedCup2 == destinationCup
+                    || pickedCup3 == destinationCup)
                 {
-                    cupsArray.RemoveAt(0);
-                    cupsArray.RemoveAt(0);
-                    cupsArray.RemoveAt(0);
-                }
-                else
-                {
-                    cupsArray.RemoveAt(currentI + 1);
-                    if (currentI == i2)
+                    destinationCup--;
+                    if (destinationCup < 1)
                     {
-                        cupsArray.RemoveAt(0);
-                        cupsArray.RemoveAt(0);
-                    }
-                    else
-                    {
-                        cupsArray.RemoveAt(currentI + 1);
-                        if (currentI == i3)
-                        {
-                            cupsArray.RemoveAt(0);
-                        }
-                        else
-                        {
-                            cupsArray.RemoveAt(currentI + 1);
-                        }
+                        destinationCup = maxCup;
                     }
                 }
 
-                bool contains = true;
-                while (contains)
-                {
-                    bool localContains = false;
-                    int m = 0;
-                    while (m < 3 && !localContains)
-                    {
-                        if (removed[m] == minusOne)
-                        {
-                            localContains = true;
-                            minusOne--;
-                        }
-                        m++;
-                    }
-                    if (!localContains)
-                    {
-                        contains = false;
-                    }
-                }
+                // the 3 picks should now follow the destination cup
+                var tmpCup = cupsLink[destinationCup];
+                cupsLink[destinationCup] = pickedCup1;
+                cupsLink[pickedCup3] = tmpCup;
 
-                if (minusOne == 0)
-                {
-                    var localMax = 0;
-
-                    bool containsMax = true;
-                    while (containsMax)
-                    {
-                        bool localContainsMax = false;
-                        int m = 0;
-                        while (m < 3 && !localContainsMax)
-                        {
-                            if (removed[m] == maxs[localMax])
-                            {
-                                localContainsMax = true;
-                                localMax++;
-                            }
-                            m++;
-                        }
-                        if (!localContainsMax)
-                        {
-                            containsMax = false;
-                        }
-                    }
-
-                    minusOne = maxs[localMax];
-                }
-
-                int indexOfMinus = cupsArray.IndexOf(minusOne);
-
-                if (indexOfMinus == i1)
-                {
-                    cupsArray.Insert(0, removed[2]);
-                    cupsArray.Insert(0, removed[1]);
-                    cupsArray.Insert(0, removed[0]);
-                }
-                else
-                {
-                    cupsArray.Insert(indexOfMinus + 1, removed[2]);
-                    cupsArray.Insert(indexOfMinus + 1, removed[1]);
-                    cupsArray.Insert(indexOfMinus + 1, removed[0]);
-                }
-
-                currentI = cupsArray.IndexOf(currentCup);
-                if (currentI == i1)
-                {
-                    currentI = -1;
-                }
-                currentI++;
+                currentCup = cupsLink[currentCup];
             }
 
-            return cupsArray.IndexOf(1);
-        }
-
-        private bool Contains(int[] values, int value)
-        {
-            for (int k = 0; k < values.Length; k++)
-            {
-                if (values[k] == value)
-                {
-                    return true;
-                }
-            }
-            return false;
+            return cupsLink;
         }
     }
 }
