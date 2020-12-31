@@ -27,7 +27,7 @@ namespace AventOfCode
         {
             GetPlayerDecks(sample, out List<int> p1, out List<int> p2);
 
-            var p1Win = RecursiveRound(p1, p2, new List<List<int>>(), new List<List<int>>());
+            var p1Win = RecursiveRound(p1, p2, new List<string>(), new List<string>());
 
             return ComputeScore(p1Win ? p1 : p2);
         }
@@ -52,22 +52,24 @@ namespace AventOfCode
         }
 
         private bool RecursiveRound(List<int> p1Deck, List<int> p2Deck,
-            List<List<int>> p1DecksHistory, List<List<int>> p2DecksHistory)
+            List<string> p1DecksHistory, List<string> p2DecksHistory)
         {
             while (p1Deck.Count > 0 && p2Deck.Count > 0)
             {
+                var p1DeckString = ToString(p1Deck);
+                var p2DeckString = ToString(p2Deck);
                 for (int k = 0; k < p1DecksHistory.Count; k++)
                 {
-                    if (p1DecksHistory[k].SequenceEqual(p1Deck)
-                        && p2DecksHistory[k].SequenceEqual(p2Deck))
+                    if (p1DecksHistory[k] == p1DeckString
+                        && p2DecksHistory[k] == p2DeckString)
                     {
                         // Hard break
                         return true;
                     }
                 }
 
-                p1DecksHistory.Add(new List<int>(p1Deck));
-                p2DecksHistory.Add(new List<int>(p2Deck));
+                p1DecksHistory.Add(p1DeckString);
+                p2DecksHistory.Add(p2DeckString);
 
                 Round(p1Deck, p2Deck, true);
             }
@@ -85,8 +87,8 @@ namespace AventOfCode
                     ? RecursiveRound(
                         p1Deck.Skip(1).Take(p1Card).ToList(),
                         p2Deck.Skip(1).Take(p2Card).ToList(),
-                        new List<List<int>>(),
-                        new List<List<int>>())
+                        new List<string>(),
+                        new List<string>())
                     : p1Card > p2Card;
             p1Deck.RemoveAt(0);
             p2Deck.RemoveAt(0);
@@ -100,6 +102,11 @@ namespace AventOfCode
                 p2Deck.Add(p2Card);
                 p2Deck.Add(p1Card);
             }
+        }
+
+        private string ToString(List<int> deck)
+        {
+            return string.Join(",", deck);
         }
     }
 }
