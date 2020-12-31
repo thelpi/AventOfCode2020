@@ -9,6 +9,13 @@ namespace AventOfCode
     /// </summary>
     public sealed class Day20 : DayBase
     {
+        private static readonly List<(int k, int l)> MONSTER = new List<(int, int)>
+        {
+            (0, 18),
+            (1, 0), (1, 5), (1, 6), (1, 11), (1, 12), (1, 17), (1, 18), (1, 19),
+            (2, 1), (2, 4), (2, 7), (2, 10), (2, 13), (2, 16),
+        };
+
         public Day20() : base(20) { }
 
         public override long GetFirstPartResult(bool sample)
@@ -25,8 +32,10 @@ namespace AventOfCode
         {
             var puzzle = CommonTrunk(sample);
 
-            var pixelSizeNoBorder = puzzle[0, 0].InsideContent.GetLength(0);
-            var image = new int[puzzle.GetLength(0) * pixelSizeNoBorder, puzzle.GetLength(1) * pixelSizeNoBorder];
+            // removes borders for each piece of the puzzle
+            // and assembles the inner content of each piece into an image
+            var pieceSize = puzzle[0, 0].InsideContent.GetLength(0);
+            var puzzleImage = new int[puzzle.GetLength(0) * pieceSize, puzzle.GetLength(1) * pieceSize];
             for (int i = 0; i < puzzle.GetLength(0); i++)
             {
                 for (int j = 0; j < puzzle.GetLength(1); j++)
@@ -35,75 +44,68 @@ namespace AventOfCode
                     {
                         for (int l = 0; l < puzzle[i, j].InsideContent.GetLength(1); l++)
                         {
-                            image[(i * pixelSizeNoBorder) + k, (j * pixelSizeNoBorder) + l] = puzzle[i, j].InsideContent[k, l];
+                            puzzleImage[(i * pieceSize) + k, (j * pieceSize) + l] = puzzle[i, j].InsideContent[k, l];
                         }
                     }
                 }
             }
 
-            var img2D = new int[puzzle.GetLength(0) * pixelSizeNoBorder][];
-            for (int i = 0; i < image.GetLength(0); i++)
+            // transforms the puzzle image into an array of arrays
+            // it's easier to apply flip and rotation that way (cf. next step)
+            var imgArOfAr = new int[puzzle.GetLength(0) * pieceSize][];
+            for (int i = 0; i < puzzleImage.GetLength(0); i++)
             {
-                img2D[i] = new int[puzzle.GetLength(1) * pixelSizeNoBorder];
-                for (int j = 0; j < image.GetLength(1); j++)
+                imgArOfAr[i] = new int[puzzle.GetLength(1) * pieceSize];
+                for (int j = 0; j < puzzleImage.GetLength(1); j++)
                 {
-                    img2D[i][j] = image[i, j];
+                    imgArOfAr[i][j] = puzzleImage[i, j];
                 }
             }
 
-            var imgVersions = ToOrientedPieces(1, img2D).Select(_ => _.FullContent).ToList();
-
-            int resultCount = 0;
-            foreach (var imgVersion in imgVersions)
+            // loops on every possible orientation and flip of the final image
+            var resultCount = 0;
+            foreach (var puzzleContent in ToOrientedPieces(1, imgArOfAr).Select(_ => _.FullContent))
             {
-                // xxxxxxxxxxxxxxxxxx#x
-                // #xxxx##xxxx##xxxx###
-                // x#xx#xx#xx#xx#xx#xxx
-                int countUsedAsMonster = 0;
-                for (int i = 0; i < imgVersion.GetLength(0); i++)
+                var monsterCount = 0;
+                for (var i = 0; i < puzzleContent.GetLength(0); i++)
                 {
-                    for (int j = 0; j < imgVersion.GetLength(1); j++)
+                    for (var j = 0; j < puzzleContent.GetLength(1); j++)
                     {
-                        if (imgVersion[i, j] == 0)
+                        // for each "pixel" of the image
+                        // tries to establish if the monster can be drawn
+                        // by converting coordinates into a relative position (0, 0)
+                        var matchingMonster = true;
+                        foreach (var (k, l) in MONSTER)
                         {
-                            if (j > 17 && i < imgVersion.GetLength(0) - 2 && j < imgVersion.GetLength(1) - 1) // monster head
+                            var relativeI = i + k;
+                            var relativej = j + l;
+                            if (relativeI < 0
+                                || relativej < 0
+                                || relativeI >= puzzleContent.GetLength(0)
+                                || relativej >= puzzleContent.GetLength(1)
+                                || puzzleContent[relativeI, relativej] != 0)
                             {
-                                if (imgVersion[i + 1, j - 18] == 0
-                                    && imgVersion[i + 1, j - 13] == 0
-                                    && imgVersion[i + 1, j - 12] == 0
-                                    && imgVersion[i + 1, j - 7] == 0
-                                    && imgVersion[i + 1, j - 6] == 0
-                                    && imgVersion[i + 1, j - 1] == 0
-                                    && imgVersion[i + 1, j - 0] == 0
-                                    && imgVersion[i + 1, j + 1] == 0) // monster body 1
-                                {
-                                    if (imgVersion[i + 2, j - 17] == 0
-                                        && imgVersion[i + 2, j - 14] == 0
-                                        && imgVersion[i + 2, j - 11] == 0
-                                        && imgVersion[i + 2, j - 8] == 0
-                                        && imgVersion[i + 2, j - 5] == 0
-                                        && imgVersion[i + 2, j - 2] == 0) // monster body 2
-                                    {
-                                        countUsedAsMonster += 15;
-                                    }
-                                }
+                                matchingMonster = false;
+                                break;
                             }
+                        }
+                        if (matchingMonster)
+                        {
+                            monsterCount++;
                         }
                     }
                 }
-                if (countUsedAsMonster > 0)
+                if (monsterCount > 0)
                 {
-                    for (int i = 0; i < imgVersion.GetLength(0); i++)
-                    {
-                        for (int j = 0; j < imgVersion.GetLength(1); j++)
-                        {
-                            if (imgVersion[i, j] == 0)
-                            {
-                                resultCount++;
-                            }
-                        }
-                    }
-                    resultCount -= countUsedAsMonster;
+                    // number total of piece
+                    // minus pieces with "1" value
+                    // minus monster pieces
+                    resultCount += (
+                        puzzleContent.Cast<int>().Count()
+                        - puzzleContent.Cast<int>().Sum()
+                    ) - (monsterCount * MONSTER.Count);
+                    // note: there's only one solution
+                    break;
                 }
             }
 
