@@ -114,7 +114,7 @@ namespace AventOfCode
 
         private OrientedPiece[,] CommonTrunk(bool sample)
         {
-            var content = GetContent(v =>
+            var piecesInfos = GetContent(v =>
             {
                 var rows = v.Split("\r\n");
                 return (Convert.ToInt32(rows[0].Replace(":", "").Replace("Tile ", "")), rows.Skip(1)
@@ -123,15 +123,14 @@ namespace AventOfCode
                             Convert.ToInt32(__ == '.' ? 1 : 0))
                         .ToArray())
                     .ToArray());
-            }, "\r\n\r\n", sample: sample).ToDictionary(kvp => kvp.Item1, kvp => kvp.Item2);
+            }, "\r\n\r\n", sample: sample);
 
-            var dim = (int)Math.Sqrt(content.Keys.Count);
+            var puzzleSize = (int)Math.Sqrt(piecesInfos.Count);
 
-            var grid = new OrientedPiece[dim, dim];
-
-            var cubPoses = content.Keys.SelectMany(k => ToOrientedPieces(k, content[k])).ToList();
-
-            return ResolvePuzzleRecursive((0, 0), grid, cubPoses);
+            return ResolvePuzzleRecursive(
+                (0, 0),
+                new OrientedPiece[puzzleSize, puzzleSize],
+                piecesInfos.SelectMany(k => ToOrientedPieces(k.Item1, k.Item2)).ToList());
         }
 
         private int[][] RotateGrid(int[][] cube)
@@ -178,51 +177,37 @@ namespace AventOfCode
                 return puzzleInProgress;
             }
 
-            var rightPiecesAvailable = new List<OrientedPiece>();
-            var bottomPiecesAvailable = new List<OrientedPiece>();
-
-            if (i > 0)
+            var piecesAvailable = new List<OrientedPiece>();
+            if (i > 0 && j > 0)
             {
-                // if we're not on the first row
+                // not first row, not first column:
+                // we'll need a piece with
+                // - a top side equals to the previous row bottom side
+                // - a left side equals to the previous column right side
+                var pieceOnTop = puzzleInProgress[i - 1, j];
+                var pieceOnLeft = puzzleInProgress[i, j - 1];
+                piecesAvailable.AddRange(remainingPieces.Where(p => pieceOnTop.MatchTop(p) && pieceOnLeft.MatchLeft(p)));
+            }
+            else if (i > 0)
+            {
+                // first column, not first row:
                 // we'll need a piece with a top side equals to the previous row bottom side
                 var pieceOnTop = puzzleInProgress[i - 1, j];
-                bottomPiecesAvailable.AddRange(remainingPieces.Where(lc => pieceOnTop.MatchTop(lc)));
-                if (bottomPiecesAvailable.Count == 0)
-                {
-                    return null;
-                }
+                piecesAvailable.AddRange(remainingPieces.Where(p => pieceOnTop.MatchTop(p)));
             }
-
-            if (j > 0)
+            else if (j > 0)
             {
-                // if we're not on the left column
+                // first row, not first column:
                 // we'll need a piece with a left side equals to the previous column right side
                 var pieceOnLeft = puzzleInProgress[i, j - 1];
-                rightPiecesAvailable.AddRange(remainingPieces.Where(lc => pieceOnLeft.MatchLeft(lc)));
-                if (rightPiecesAvailable.Count == 0)
-                {
-                    return null;
-                }
+                piecesAvailable.AddRange(remainingPieces.Where(p => pieceOnLeft.MatchLeft(p)));
             }
-
-            var piecesAvailable = new List<OrientedPiece>();
-            if (rightPiecesAvailable.Count > 0 && bottomPiecesAvailable.Count > 0)
-            {
-                // there must be a least one piece that match both
-                // right and bottom with its left and top
-                var intersect = rightPiecesAvailable.Intersect(bottomPiecesAvailable);
-                if (!intersect.Any())
-                {
-                    return null;
-                }
-                piecesAvailable.AddRange(intersect);
-            }
-            else if (rightPiecesAvailable.Count > 0)
-                piecesAvailable.AddRange(rightPiecesAvailable);
-            else if (bottomPiecesAvailable.Count > 0)
-                piecesAvailable.AddRange(bottomPiecesAvailable);
             else
+            {
+                // first row and first column:
+                // all pieces available
                 piecesAvailable.AddRange(remainingPieces);
+            }
 
             // each available piece is an hypothesis we have to test
             foreach (var availablePiece in piecesAvailable)
@@ -258,6 +243,7 @@ namespace AventOfCode
                 }
             }
 
+            // no hypothesis, or all wrong
             return null;
         }
 
