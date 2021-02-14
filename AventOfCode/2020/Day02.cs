@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Linq;
 
-namespace AventOfCode
+namespace AventOfCode._2020
 {
     /// <summary>
     /// Day 2: Password Philosophy
     /// </summary>
     public sealed class Day02 : DayBase
     {
-        public Day02() : base(2) { }
+        public Day02() : base(2020, 2) { }
 
         public override long GetFirstPartResult(bool sample)
         {

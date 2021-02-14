@@ -14,10 +14,12 @@ namespace AventOfCode
         private const string DATAS_EXTENSION = "txt";
 
         public int DayNumber { get; }
+        public int Year { get; }
 
-        protected DayBase(int dayNumber)
+        protected DayBase(int year, int dayNumber)
         {
             DayNumber = dayNumber;
+            Year = year;
         }
 
         protected List<T> GetContent<T>(Func<string, T> converter,
@@ -31,7 +33,7 @@ namespace AventOfCode
             var assemblyName = Assembly.GetExecutingAssembly().Location;
 
             var path = Path.Combine(Path.GetDirectoryName(assemblyName),
-                $"{DATAS_FOLDER}\\{subFolder}{dayFileName}{daySubPart}.{DATAS_EXTENSION}");
+                $"{DATAS_FOLDER}\\{Year}\\{subFolder}{dayFileName}{daySubPart}.{DATAS_EXTENSION}");
 
             using (var rd = new StreamReader(path))
             {

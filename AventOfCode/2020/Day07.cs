@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AventOfCode
+namespace AventOfCode._2020
 {
     /// <summary>
     /// Day 7: Handy Haversacks
@@ -11,7 +11,7 @@ namespace AventOfCode
     {
         private const string MY_BAG = "shiny gold";
 
-        public Day07() : base(7) { }
+        public Day07() : base(2020, 7) { }
 
         public override long GetFirstPartResult(bool sample)
         {

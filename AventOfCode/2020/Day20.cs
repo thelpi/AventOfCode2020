@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AventOfCode
+namespace AventOfCode._2020
 {
     /// <summary>
     /// Day 20: Jurassic Jigsaw
@@ -16,7 +16,7 @@ namespace AventOfCode
             (2, 1), (2, 4), (2, 7), (2, 10), (2, 13), (2, 16),
         };
 
-        public Day20() : base(20) { }
+        public Day20() : base(2020, 20) { }
 
         public override long GetFirstPartResult(bool sample)
         {

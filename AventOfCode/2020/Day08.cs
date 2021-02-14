@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace AventOfCode
+namespace AventOfCode._2020
 {
     /// <summary>
     /// Day 8: Handheld Halting
@@ -12,7 +12,7 @@ namespace AventOfCode
         private const string JMP = "jmp";
         private const string NOP = "nop";
 
-        public Day08() : base(8) { }
+        public Day08() : base(2020, 8) { }
 
         public override long GetFirstPartResult(bool sample)
         {

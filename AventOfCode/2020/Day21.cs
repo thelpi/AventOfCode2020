@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AventOfCode
+namespace AventOfCode._2020
 {
     /// <summary>
     /// Day 21: Allergen Assessment
@@ -11,7 +11,7 @@ namespace AventOfCode
     {
         public string Part2CanonicalResult { get; private set; }
 
-        public Day21() : base(21) { }
+        public Day21() : base(2020, 21) { }
 
         public override long GetFirstPartResult(bool sample)
         {

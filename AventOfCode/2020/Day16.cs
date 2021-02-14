@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AventOfCode
+namespace AventOfCode._2020
 {
     /// <summary>
     /// Day 16: Ticket Translation
@@ -11,7 +11,7 @@ namespace AventOfCode
     {
         private const string EXPECTED_FIELDS_PATTERN = "departure";
 
-        public Day16() : base(16) { }
+        public Day16() : base(2020, 16) { }
 
         public override long GetFirstPartResult(bool sample)
         {

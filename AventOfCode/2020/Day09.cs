@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AventOfCode
+namespace AventOfCode._2020
 {
     /// <summary>
     /// Day 9: Encoding Error
@@ -12,7 +12,7 @@ namespace AventOfCode
         private const int SAMPLE_SUM_SIZE = 5;
         private const int FULL_SUM_SIZE = 25;
 
-        public Day09() : base(9) { }
+        public Day09() : base(2020, 9) { }
 
         public override long GetFirstPartResult(bool sample)
         {

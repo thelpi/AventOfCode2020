@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace AventOfCode
+namespace AventOfCode._2020
 {
     /// <summary>
     /// Day 5: Binary Boarding
@@ -15,7 +15,7 @@ namespace AventOfCode
         private const char LEFT = 'L';
         private const char RIGHT = 'R';
 
-        public Day05() : base(5) { }
+        public Day05() : base(2020, 5) { }
 
         public override long GetFirstPartResult(bool sample)
         {

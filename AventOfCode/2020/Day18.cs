@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Linq;
 
-namespace AventOfCode
+namespace AventOfCode._2020
 {
     /// <summary>
     /// Day 18: Operation Order
     /// </summary>
     public sealed class Day18 : DayBase
     {
-        public Day18() : base(18) { }
+        public Day18() : base(2020, 18) { }
 
         public override long GetFirstPartResult(bool sample)
         {

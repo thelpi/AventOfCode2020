@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Linq;
 
-namespace AventOfCode
+namespace AventOfCode._2020
 {
     /// <summary>
     /// Day 15: Rambunctious Recitation
     /// </summary>
     public sealed class Day15 : DayBase
     {
-        private long QUOTES_COUNT_PART_1 = 2020;
-        private long QUOTES_COUNT_PART_2 = 30000000;
+        private const long QUOTES_COUNT_PART_1 = 2020;
+        private const long QUOTES_COUNT_PART_2 = 30000000;
 
-        public Day15() : base(15) { }
+        public Day15() : base(2020, 15) { }
 
         public override long GetFirstPartResult(bool sample)
         {

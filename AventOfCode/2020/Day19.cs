@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AventOfCode
+namespace AventOfCode._2020
 {
     /// <summary>
     /// Day 19: Monster Messages
@@ -11,7 +11,7 @@ namespace AventOfCode
     {
         private const int START_RULE_ID = 0;
 
-        public Day19() : base(19) { }
+        public Day19() : base(2020, 19) { }
 
         public override long GetFirstPartResult(bool sample)
         {

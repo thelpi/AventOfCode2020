@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AventOfCode
+namespace AventOfCode._2020
 {
     /// <summary>
     /// Day 14: Docking Data
@@ -15,7 +15,7 @@ namespace AventOfCode
         private const char ONE = '1';
         private const char X = 'X';
 
-        public Day14() : base(14) { }
+        public Day14() : base(2020, 14) { }
 
         public override long GetFirstPartResult(bool sample)
         {

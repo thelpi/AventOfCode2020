@@ -1,9 +1,9 @@
-using AventOfCode;
+using AventOfCode._2020;
 using Xunit;
 
 namespace AventOfCodeUnitTests
 {
-    public class DaysTests
+    public class Days2020Tests
     {
         [Theory]
         [InlineData(true, true, 514579)]

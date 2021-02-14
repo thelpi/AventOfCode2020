@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AventOfCode
+namespace AventOfCode._2020
 {
     /// <summary>
     /// Day 17: Conway Cubes
@@ -14,7 +14,7 @@ namespace AventOfCode
         private const char ONE_VALUE = '#';
         private static readonly int GRID_CENTER = GRID_LENGTH / 2;
 
-        public Day17() : base(17) { }
+        public Day17() : base(2020, 17) { }
 
         public override long GetFirstPartResult(bool sample)
         {

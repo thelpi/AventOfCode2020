@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace AventOfCode
+namespace AventOfCode._2020
 {
     /// <summary>
     /// Day 11: Seating System
@@ -20,7 +20,7 @@ namespace AventOfCode
         private bool _extended;
         private int _emptyOccupedSwitch;
 
-        public Day11() : base(11) { }
+        public Day11() : base(2020, 11) { }
 
         public override long GetFirstPartResult(bool sample)
         {

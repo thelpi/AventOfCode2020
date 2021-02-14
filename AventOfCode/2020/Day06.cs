@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AventOfCode
+namespace AventOfCode._2020
 {
     /// <summary>
     /// Day 6: Custom Customs
     /// </summary>
     public sealed class Day06 : DayBase
     {
-        public Day06() : base(6) { }
+        public Day06() : base(2020, 6) { }
 
         public override long GetFirstPartResult(bool sample)
         {

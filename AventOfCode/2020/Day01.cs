@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AventOfCode
+namespace AventOfCode._2020
 {
     /// <summary>
     /// Day 1: Report Repair
@@ -11,7 +11,7 @@ namespace AventOfCode
     {
         private const int SUM_EXPECT = 2020;
 
-        public Day01() : base(1) { }
+        public Day01() : base(2020, 1) { }
 
         public override long GetFirstPartResult(bool sample)
         {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace AventOfCode
+namespace AventOfCode._2020
 {
     /// <summary>
     /// Day 12: Rain Risk
@@ -22,7 +22,7 @@ namespace AventOfCode
         private static readonly (int, int) INIT_MOVE_PART2 = (0, COORDINATES.Length - 1);
         private static readonly int INIT_MOVE_TYPE_PART1 = COORDINATES.IndexOf(EAST);
 
-        public Day12() : base(12) { }
+        public Day12() : base(2020, 12) { }
 
         public override long GetFirstPartResult(bool sample)
         {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AventOfCode
+namespace AventOfCode._2020
 {
     /// <summary>
     /// Day 25: Combo Breaker
@@ -10,7 +10,7 @@ namespace AventOfCode
         private const long DEFAULT_SUBJECT = 7;
         private const long MODULO = 20201227;
 
-        public Day25() : base(25) { }
+        public Day25() : base(2020, 25) { }
 
         public override long GetFirstPartResult(bool sample)
         {

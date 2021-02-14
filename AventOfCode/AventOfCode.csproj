@@ -8,6 +8,10 @@
     <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <DocumentationFile></DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <Reference Include="LpiLib">
       <HintPath>..\..\LpiLib\LpiLib\bin\x64\Release\netcoreapp2.0\LpiLib.dll</HintPath>
@@ -15,168 +19,173 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Datas\20.txt">
+    <None Update="Datas\2020\20.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\24.txt">
+    <None Update="Datas\2020\24.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\23.txt">
+    <None Update="Datas\2020\23.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\22.txt">
+    <None Update="Datas\2020\22.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\21.txt">
+    <None Update="Datas\2020\21.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\19_2.txt">
+    <None Update="Datas\2020\19_2.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\19_1.txt">
+    <None Update="Datas\2020\19_1.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\18.txt">
+    <None Update="Datas\2020\18.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\17.txt">
+    <None Update="Datas\2020\17.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\16.txt">
+    <None Update="Datas\2020\16.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\15.txt">
+    <None Update="Datas\2020\15.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\14.txt">
+    <None Update="Datas\2020\14.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\10.txt">
+    <None Update="Datas\2020\10.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\08.txt">
+    <None Update="Datas\2020\08.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\06.txt">
+    <None Update="Datas\2020\06.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\05.txt">
+    <None Update="Datas\2020\05.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\09.txt">
+    <None Update="Datas\2020\09.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\07.txt">
+    <None Update="Datas\2020\07.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\04.txt">
+    <None Update="Datas\2020\04.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\13.txt">
+    <None Update="Datas\2020\13.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\12.txt">
+    <None Update="Datas\2020\12.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\11.txt">
+    <None Update="Datas\2020\11.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\03.txt">
+    <None Update="Datas\2020\03.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\02.txt">
+    <None Update="Datas\2020\02.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\01.txt">
+    <None Update="Datas\2020\01.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\25.txt">
+    <None Update="Datas\2020\25.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\20.txt">
+    <None Update="Datas\2020\Samples\20.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\24.txt">
+    <None Update="Datas\2020\Samples\24.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\23.txt">
+    <None Update="Datas\2020\Samples\23.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\22.txt">
+    <None Update="Datas\2020\Samples\22.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\21.txt">
+    <None Update="Datas\2020\Samples\21.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\19_2.txt">
+    <None Update="Datas\2020\Samples\19_2.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\19_1.txt">
+    <None Update="Datas\2020\Samples\19_1.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\08.txt">
+    <None Update="Datas\2020\Samples\08.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\09.txt">
+    <None Update="Datas\2020\Samples\09.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\10.txt">
+    <None Update="Datas\2020\Samples\10.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\11.txt">
+    <None Update="Datas\2020\Samples\11.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\12.txt">
+    <None Update="Datas\2020\Samples\12.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\07.txt">
+    <None Update="Datas\2020\Samples\07.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\06.txt">
+    <None Update="Datas\2020\Samples\06.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\05.txt">
+    <None Update="Datas\2020\Samples\05.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\04.txt">
+    <None Update="Datas\2020\Samples\04.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\03.txt">
+    <None Update="Datas\2020\Samples\03.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\02.txt">
+    <None Update="Datas\2020\Samples\02.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\01.txt">
+    <None Update="Datas\2020\Samples\01.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\18_2.txt">
+    <None Update="Datas\2020\Samples\18_2.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\18_1.txt">
+    <None Update="Datas\2020\Samples\18_1.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\14_1.txt">
+    <None Update="Datas\2020\Samples\14_1.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\16.txt">
+    <None Update="Datas\2020\Samples\16.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\17.txt">
+    <None Update="Datas\2020\Samples\17.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\15.txt">
+    <None Update="Datas\2020\Samples\15.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\14_2.txt">
+    <None Update="Datas\2020\Samples\14_2.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\13.txt">
+    <None Update="Datas\2020\Samples\13.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Datas\Samples\25.txt">
+    <None Update="Datas\2020\Samples\25.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Datas\2019\Samples\" />
+    <Folder Include="2019\" />
   </ItemGroup>
 
 </Project>

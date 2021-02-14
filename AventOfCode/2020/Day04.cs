@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AventOfCode
+namespace AventOfCode._2020
 {
     /// <summary>
     /// Day 4: Passport Processing
@@ -51,7 +51,7 @@ namespace AventOfCode
             "amb", "blu", "brn", "gry", "grn", "hzl", "oth"
         };
 
-        public Day04() : base(4) { }
+        public Day04() : base(2020, 4) { }
 
         public override long GetFirstPartResult(bool sample)
         {

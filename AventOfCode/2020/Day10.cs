@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using LpiLib;
 
-namespace AventOfCode
+namespace AventOfCode._2020
 {
     /// <summary>
     /// Day 10: Adapter Array
     /// </summary>
     public sealed class Day10 : DayBase
     {
-        public Day10() : base(10) { }
+        public Day10() : base(2020, 10) { }
 
         public override long GetFirstPartResult(bool sample)
         {

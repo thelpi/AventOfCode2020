@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AventOfCode
+namespace AventOfCode._2020
 {
     /// <summary>
     /// Day 23: Crab Cups
@@ -13,7 +13,7 @@ namespace AventOfCode
         private const int PART_1_LOOP = 100;
         private const int PART_2_LOOP = 10000000;
 
-        public Day23() : base(23) { }
+        public Day23() : base(2020, 23) { }
 
         public override long GetFirstPartResult(bool sample)
         {

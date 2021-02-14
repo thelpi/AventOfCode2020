@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AventOfCode
+namespace AventOfCode._2020
 {
     /// <summary>
     /// Day 22: Crab Combat
     /// </summary>
     public sealed class Day22 : DayBase
     {
-        public Day22() : base(22) { }
+        public Day22() : base(2020, 22) { }
 
         public override long GetFirstPartResult(bool sample)
         {

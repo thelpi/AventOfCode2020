@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AventOfCode
+namespace AventOfCode._2020
 {
     /// <summary>
     /// Day 24: Lobby Layout
@@ -13,7 +13,7 @@ namespace AventOfCode
         private const int GRID_SIZE = 500;
         private const int DAYS_COUNT = 100;
 
-        public Day24() : base(24) { }
+        public Day24() : base(2020, 24) { }
 
         public override long GetFirstPartResult(bool sample)
         {
