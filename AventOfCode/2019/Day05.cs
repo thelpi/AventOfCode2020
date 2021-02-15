@@ -14,18 +14,22 @@ namespace AventOfCode._2019
 
         public override long GetFirstPartResult(bool sample)
         {
-            var values = GetContent(v => Convert.ToInt32(v), separator: ",", sample: sample);
-
-            return LoopAndGetOutput(values, 1);
+            return LoopAndGetOutput(1, sample, 1);
         }
 
         public override long GetSecondPartResult(bool sample)
         {
-            throw new Exception();
+            return LoopAndGetOutput(2, sample, sample ? 8 : 5);
         }
 
-        private static long LoopAndGetOutput(List<int> values, int input)
+        private long LoopAndGetOutput(int part, bool sample, int input)
         {
+            var values = GetContent(
+                v => Convert.ToInt32(v),
+                separator: ",",
+                sample: sample,
+                part: sample ? part : default(int?));
+
             var i = 0;
             var stop = false;
             do
@@ -65,6 +69,48 @@ namespace AventOfCode._2019
                         case 4:
                             input = values[v1];
                             i += 2;
+                            break;
+                        case 5:
+                            if (values[v1] != 0)
+                            {
+                                i = values[v2];
+                            }
+                            else
+                            {
+                                i += 3;
+                            }
+                            break;
+                        case 6:
+                            if (values[v1] == 0)
+                            {
+                                i = values[v2];
+                            }
+                            else
+                            {
+                                i += 3;
+                            }
+                            break;
+                        case 7:
+                            if (values[v1] < values[v2])
+                            {
+                                values[v3] = 1;
+                            }
+                            else
+                            {
+                                values[v3] = 0;
+                            }
+                            i += 4;
+                            break;
+                        case 8:
+                            if (values[v1] == values[v2])
+                            {
+                                values[v3] = 1;
+                            }
+                            else
+                            {
+                                values[v3] = 0;
+                            }
+                            i += 4;
                             break;
                         default:
                             throw new InvalidOperationException();
