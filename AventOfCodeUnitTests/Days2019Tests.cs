@@ -83,8 +83,8 @@ namespace AventOfCodeUnitTests
         [Theory]
         [InlineData(true, true, 42)]
         [InlineData(true, false, 162439)]
-        //[InlineData(false, true, 0)]
-        //[InlineData(false, false, 0)]
+        [InlineData(false, true, 4)]
+        [InlineData(false, false, 367)]
         public void Day06Test(bool firstPart, bool sample, long expected)
         {
             var day = new Day06();
