@@ -14,22 +14,28 @@ namespace AventOfCode._2019
 
         public override long GetFirstPartResult(bool sample)
         {
-            return LoopAndGetOutput(1, sample, 1);
+            var values = GetContent(
+                v => Convert.ToInt32(v),
+                separator: ",",
+                sample: sample,
+                part: sample ? 1 : default(int?));
+
+            return LoopAndGetOutput(values, 1);
         }
 
         public override long GetSecondPartResult(bool sample)
-        {
-            return LoopAndGetOutput(2, sample, sample ? 8 : 5);
-        }
-
-        private long LoopAndGetOutput(int part, bool sample, int input)
         {
             var values = GetContent(
                 v => Convert.ToInt32(v),
                 separator: ",",
                 sample: sample,
-                part: sample ? part : default(int?));
+                part: sample ? 2 : default(int?));
 
+            return LoopAndGetOutput(values, sample ? 8 : 5);
+        }
+
+        public static int LoopAndGetOutput(List<int> values, int input)
+        {
             var i = 0;
             var stop = false;
             do
