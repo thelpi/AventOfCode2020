@@ -132,5 +132,21 @@ namespace AventOfCodeUnitTests
 
             Assert.Equal(expected, result);
         }
+
+        [Theory]
+        [InlineData(true, true, 15)]
+        [InlineData(true, false, 550)]
+        [InlineData(false, true, 1134)]
+        [InlineData(false, false, 1134)]
+        public void Day09Test(bool firstPart, bool sample, long expected)
+        {
+            var day = new Day09();
+
+            var result = firstPart
+                ? day.GetFirstPartResult(sample)
+                : day.GetSecondPartResult(sample);
+
+            Assert.Equal(expected, result);
+        }
     }
 }
