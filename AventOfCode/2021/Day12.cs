@@ -52,9 +52,49 @@ namespace AventOfCode._2021
 
         public override long GetSecondPartResult(bool sample)
         {
-            var values = GetContent(v => v.ToCharArray().Select(_ => Convert.ToInt32(_.ToString())).ToList(), sample: sample);
+            var segments = GetContent(v => v.Split('-'), sample: sample);
 
-            throw new NotImplementedException();
+            var paths = new List<List<string>>();
+            foreach (var segment in segments.Where(x => x.Contains(Start)))
+            {
+                var nextLoc = segment.Single(x => x != Start);
+                var currentPath = new List<string> { Start, nextLoc };
+                string tinyTwice = null;
+                RecursiveTwo(segments, paths, ref currentPath, nextLoc, ref tinyTwice);
+            }
+
+            return paths.Count;
+        }
+
+        private void RecursiveTwo(
+            List<string[]> segments,
+            List<List<string>> paths,
+            ref List<string> currentPath,
+            string loc,
+            ref string tinyTwice)
+        {
+            foreach (var segment in segments.Where(x => x.Contains(loc)))
+            {
+                var nextLoc = segment.Single(x => x != loc);
+                var basicConditions = !currentPath.Contains(nextLoc) || nextLoc.ToUpper() == nextLoc;
+                if (basicConditions || (tinyTwice == null && nextLoc != Start && nextLoc != End))
+                {
+                    if (!basicConditions)
+                        tinyTwice = nextLoc;
+                    currentPath.Add(nextLoc);
+                    if (nextLoc == End)
+                    {
+                        paths.Add(currentPath);
+                        currentPath = currentPath.Take(currentPath.Count - 1).ToList();
+                    }
+                    else
+                        RecursiveTwo(segments, paths, ref currentPath, nextLoc, ref tinyTwice);
+                }
+            }
+            var removed = currentPath.Last();
+            if (tinyTwice == removed)
+                tinyTwice = null;
+            currentPath = currentPath.Take(currentPath.Count - 1).ToList();
         }
     }
 }

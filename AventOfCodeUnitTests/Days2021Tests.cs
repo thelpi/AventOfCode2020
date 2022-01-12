@@ -185,7 +185,7 @@ namespace AventOfCodeUnitTests
         [InlineData(true, true, 19)]
         [InlineData(true, false, 4885)]
         [InlineData(false, true, 103)]
-        //[InlineData(false, false, 279)]
+        [InlineData(false, false, 117095)]
         public void Day12Test(bool firstPart, bool sample, long expected)
         {
             var day = new Day12();
