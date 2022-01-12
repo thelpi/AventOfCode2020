@@ -196,5 +196,22 @@ namespace AventOfCodeUnitTests
 
             Assert.Equal(expected, result);
         }
+
+        [Theory]
+        [InlineData(true, true, 17, null)]
+        [InlineData(true, false, 790, null)]
+        [InlineData(false, true, 0, "1\t1\t1\t1\t1\t\r\n1\t0\t0\t0\t1\t\r\n1\t0\t0\t0\t1\t\r\n1\t0\t0\t0\t1\t\r\n1\t1\t1\t1\t1\t\r\n")]
+        [InlineData(false, false, 0, "1\t1\t1\t1\t1\t1\t\r\n1\t0\t0\t1\t0\t0\t\r\n1\t0\t0\t1\t0\t0\t\r\n0\t1\t1\t0\t0\t0\t\r\n0\t0\t0\t0\t0\t0\t\r\n0\t1\t1\t1\t1\t0\t\r\n1\t0\t0\t0\t0\t1\t\r\n1\t0\t0\t1\t0\t1\t\r\n0\t1\t0\t1\t1\t1\t\r\n0\t0\t0\t0\t0\t0\t\r\n1\t1\t1\t1\t1\t1\t\r\n0\t0\t1\t0\t0\t0\t\r\n0\t0\t1\t0\t0\t0\t\r\n1\t1\t1\t1\t1\t1\t\r\n0\t0\t0\t0\t0\t0\t\r\n1\t0\t0\t0\t1\t1\t\r\n1\t0\t0\t1\t0\t1\t\r\n1\t0\t1\t0\t0\t1\t\r\n1\t1\t0\t0\t0\t1\t\r\n0\t0\t0\t0\t0\t0\t\r\n1\t1\t1\t1\t1\t1\t\r\n1\t0\t1\t0\t0\t1\t\r\n1\t0\t1\t0\t0\t1\t\r\n0\t1\t0\t1\t1\t0\t\r\n0\t0\t0\t0\t0\t0\t\r\n1\t1\t1\t1\t1\t1\t\r\n1\t0\t1\t0\t0\t0\t\r\n1\t0\t1\t0\t0\t0\t\r\n1\t0\t0\t0\t0\t0\t\r\n0\t0\t0\t0\t0\t0\t\r\n0\t0\t0\t0\t1\t0\t\r\n0\t0\t0\t0\t0\t1\t\r\n1\t0\t0\t0\t0\t1\t\r\n1\t1\t1\t1\t1\t0\t\r\n0\t0\t0\t0\t0\t0\t\r\n0\t1\t1\t1\t1\t0\t\r\n1\t0\t0\t0\t0\t1\t\r\n1\t0\t0\t0\t0\t1\t\r\n0\t1\t0\t0\t1\t0\t\r\n")]
+        public void Day13Test(bool firstPart, bool sample, long expected, string expectedFinalForm)
+        {
+            var day = new Day13();
+
+            var result = firstPart
+                ? day.GetFirstPartResult(sample)
+                : day.GetSecondPartResult(sample);
+
+            Assert.Equal(expectedFinalForm, day.FinalForm);
+            Assert.Equal(expected, result);
+        }
     }
 }
