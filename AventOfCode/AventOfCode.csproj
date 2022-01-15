@@ -13,6 +13,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MySql.Data" Version="8.0.27" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="LpiLib">
       <HintPath>..\..\LpiLib\LpiLib\bin\x64\Release\netcoreapp2.0\LpiLib.dll</HintPath>
     </Reference>
